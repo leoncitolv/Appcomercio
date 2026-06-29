@@ -1,0 +1,38 @@
+{
+  "name": "dealwatch-ios-app",
+  "version": "1.0.0",
+  "description": "PWA estilo iOS para monitorear ofertas en Amazon, Mercado Libre y PlayStation.",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "check": "node scripts/check-prices.js",
+    "seed": "node scripts/seed-admin.js"
+  },
+  "keywords": [
+    "pwa",
+    "ofertas",
+    "precios",
+    "amazon",
+    "mercadolibre",
+    "playstation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.9.1",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.16",
+    "cookie-parser": "^1.4.7"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
