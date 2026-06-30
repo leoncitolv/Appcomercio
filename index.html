@@ -16,7 +16,7 @@
   <style>
     :root {
       --bg: #f5f5f7;
-      --card: rgba(255, 255, 255, 0.84);
+      --card: rgba(255, 255, 255, 0.86);
       --card-solid: #ffffff;
       --text: #1d1d1f;
       --muted: #6e6e73;
@@ -36,7 +36,7 @@
 
     [data-theme="dark"] {
       --bg: #000000;
-      --card: rgba(28, 28, 30, 0.86);
+      --card: rgba(28, 28, 30, 0.88);
       --card-solid: #1c1c1e;
       --text: #f5f5f7;
       --muted: #a1a1a6;
@@ -62,7 +62,7 @@
         var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding-bottom: calc(98px + var(--safe-bottom));
+      padding-bottom: calc(102px + var(--safe-bottom));
     }
 
     button,
@@ -73,7 +73,7 @@
     }
 
     .app {
-      width: min(100%, 540px);
+      width: min(100%, 560px);
       margin: 0 auto;
       padding: 18px 16px 0;
     }
@@ -98,6 +98,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      min-width: 0;
     }
 
     .logo {
@@ -111,18 +112,23 @@
       box-shadow: 0 12px 25px rgba(0, 122, 255, 0.32);
       font-size: 22px;
       font-weight: 900;
+      flex: 0 0 auto;
     }
 
     .brand h1 {
       margin: 0;
       font-size: 1.18rem;
       letter-spacing: -0.03em;
+      white-space: nowrap;
     }
 
     .brand p {
       margin: 2px 0 0;
       font-size: 0.78rem;
       color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .top-actions {
@@ -154,7 +160,8 @@
       background: rgba(52, 199, 89, 0.16);
       color: var(--green);
       font-size: 0.72rem;
-      font-weight: 900;
+      font-weight: 950;
+      white-space: nowrap;
     }
 
     .admin-pill.active {
@@ -192,7 +199,7 @@
       padding: 7px 11px;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.20);
-      font-weight: 700;
+      font-weight: 800;
       font-size: 0.76rem;
       position: relative;
       z-index: 1;
@@ -229,7 +236,7 @@
       border: 0;
       border-radius: 999px;
       padding: 13px 16px;
-      font-weight: 800;
+      font-weight: 850;
       font-size: 0.9rem;
       cursor: pointer;
       transition: transform 0.15s ease, opacity 0.15s ease;
@@ -288,7 +295,7 @@
     .section-header span {
       font-size: 0.82rem;
       color: var(--muted);
-      font-weight: 700;
+      font-weight: 750;
       text-align: right;
     }
 
@@ -319,7 +326,166 @@
       margin-top: 4px;
       color: var(--muted);
       font-size: 0.76rem;
+      font-weight: 750;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .action-card {
+      min-height: 120px;
+      border-radius: var(--radius-xl);
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 18px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      cursor: pointer;
+    }
+
+    .action-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    .blue { background: var(--primary); }
+    .green { background: var(--green); }
+    .orange { background: var(--orange); }
+    .purple { background: var(--purple); }
+    .red { background: var(--red); }
+
+    .action-card strong {
+      display: block;
+      font-size: 0.98rem;
+      margin-bottom: 5px;
+      letter-spacing: -0.03em;
+    }
+
+    .action-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.35;
       font-weight: 700;
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.24s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .filters-card,
+    .setting-card,
+    .admin-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
+      margin-bottom: 14px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .filters-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-weight: 950;
+      padding-left: 3px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: rgba(120, 120, 128, 0.10);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 13px 14px;
+      outline: none;
+      font-size: 0.94rem;
+      font-weight: 700;
+    }
+
+    .field textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: rgba(0, 122, 255, 0.55);
+      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.10);
+    }
+
+    .two-cols {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .three-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .filter-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 16px;
+      padding: 13px 14px;
+      background: rgba(120, 120, 128, 0.10);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.86rem;
+      font-weight: 850;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .filter-toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
     }
 
     .product-list {
@@ -365,13 +531,20 @@
     .product-title {
       margin: 3px 0 2px;
       font-size: 0.99rem;
-      font-weight: 900;
+      font-weight: 950;
       letter-spacing: -0.03em;
       line-height: 1.15;
     }
 
     .store {
       font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 850;
+    }
+
+    .category-line {
+      margin-top: 3px;
+      font-size: 0.72rem;
       color: var(--muted);
       font-weight: 800;
     }
@@ -381,7 +554,7 @@
       border-radius: 999px;
       padding: 6px 9px;
       font-size: 0.68rem;
-      font-weight: 900;
+      font-weight: 950;
     }
 
     .badge.offer {
@@ -392,11 +565,6 @@
     .badge.watch {
       background: rgba(255, 149, 0, 0.15);
       color: var(--orange);
-    }
-
-    .badge.lock {
-      background: rgba(142, 142, 147, 0.15);
-      color: var(--gray);
     }
 
     .price-row {
@@ -416,7 +584,14 @@
     .target {
       font-size: 0.76rem;
       color: var(--muted);
-      font-weight: 800;
+      font-weight: 850;
+    }
+
+    .savings {
+      margin-top: 5px;
+      font-size: 0.76rem;
+      color: var(--green);
+      font-weight: 900;
     }
 
     .progress {
@@ -434,6 +609,14 @@
       background: var(--primary);
     }
 
+    .product-notes {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.35;
+      font-weight: 650;
+    }
+
     .product-actions {
       display: flex;
       gap: 8px;
@@ -446,8 +629,12 @@
       border-radius: 999px;
       padding: 8px 10px;
       font-size: 0.73rem;
-      font-weight: 900;
+      font-weight: 950;
       cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .mini-blue {
@@ -460,88 +647,9 @@
       color: var(--red);
     }
 
-    .quick-actions {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .action-card {
-      min-height: 120px;
-      border-radius: var(--radius-xl);
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 18px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      cursor: pointer;
-    }
-
-    .action-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 15px;
-      display: grid;
-      place-items: center;
-      color: white;
-      font-size: 22px;
-      margin-bottom: 12px;
-    }
-
-    .blue {
-      background: var(--primary);
-    }
-
-    .green {
-      background: var(--green);
-    }
-
-    .orange {
-      background: var(--orange);
-    }
-
-    .purple {
-      background: var(--purple);
-    }
-
-    .red {
-      background: var(--red);
-    }
-
-    .action-card strong {
-      display: block;
-      font-size: 0.98rem;
-      margin-bottom: 5px;
-      letter-spacing: -0.03em;
-    }
-
-    .action-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.78rem;
-      line-height: 1.35;
-      font-weight: 700;
-    }
-
-    .screen {
-      display: none;
-      animation: fadeIn 0.24s ease;
-    }
-
-    .screen.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .mini-gray {
+      background: rgba(142, 142, 147, 0.14);
+      color: var(--text);
     }
 
     .empty-card {
@@ -551,6 +659,7 @@
       background: var(--card);
       border: 1px dashed var(--border);
       color: var(--muted);
+      font-weight: 650;
     }
 
     .empty-card .big {
@@ -563,18 +672,6 @@
       color: var(--text);
       font-size: 1rem;
       margin-bottom: 6px;
-    }
-
-    .setting-card,
-    .admin-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 18px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
-      margin-bottom: 12px;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
     }
 
     .setting-row {
@@ -637,43 +734,6 @@
       margin-top: 16px;
     }
 
-    .field {
-      display: grid;
-      gap: 7px;
-    }
-
-    .field label {
-      font-size: 0.78rem;
-      color: var(--muted);
-      font-weight: 900;
-      padding-left: 3px;
-    }
-
-    .field input,
-    .field select {
-      width: 100%;
-      border: 1px solid var(--border);
-      background: rgba(120, 120, 128, 0.10);
-      color: var(--text);
-      border-radius: 16px;
-      padding: 13px 14px;
-      outline: none;
-      font-size: 0.94rem;
-      font-weight: 700;
-    }
-
-    .field input:focus,
-    .field select:focus {
-      border-color: rgba(0, 122, 255, 0.55);
-      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.10);
-    }
-
-    .two-cols {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
     .form-actions {
       display: flex;
       gap: 10px;
@@ -729,7 +789,7 @@
       left: 50%;
       bottom: calc(12px + var(--safe-bottom));
       transform: translateX(-50%);
-      width: min(calc(100% - 24px), 520px);
+      width: min(calc(100% - 24px), 540px);
       z-index: 30;
       background: rgba(255, 255, 255, 0.78);
       border: 1px solid rgba(0, 0, 0, 0.08);
@@ -781,6 +841,22 @@
         padding-top: 10px;
       }
     }
+
+    @media (max-width: 420px) {
+      .two-cols,
+      .three-cols {
+        grid-template-columns: 1fr;
+      }
+
+      .product-card {
+        grid-template-columns: 72px 1fr;
+      }
+
+      .product-img {
+        width: 72px;
+        height: 72px;
+      }
+    }
   </style>
 </head>
 
@@ -792,7 +868,7 @@
           <div class="logo">D</div>
           <div>
             <h1>DealWatch MX</h1>
-            <p>Appcomercio · Ofertas favoritas</p>
+            <p>Appcomercio · Favoritos y ofertas</p>
           </div>
         </div>
 
@@ -806,16 +882,16 @@
     <!-- INICIO -->
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>🔥 Fase 2 · Modo administrador</small>
-        <h2>Controla tus productos desde la app.</h2>
+        <small>🛒 Fase 3 · Favoritos completos</small>
+        <h2>Organiza tus productos favoritos.</h2>
         <p>
-          Ahora puedes entrar como administrador, agregar productos, guardar precios
-          y ver alertas visuales desde localStorage.
+          Busca, filtra, edita y administra productos por tienda, categoría,
+          precio actual y precio objetivo.
         </p>
 
         <div class="hero-actions">
           <button class="btn btn-light" onclick="goToScreen('favorites')">Ver favoritos</button>
-          <button class="btn btn-ghost" onclick="goToScreen('admin')">Entrar admin</button>
+          <button class="btn btn-ghost" onclick="goToScreen('admin')">Agregar producto</button>
         </div>
       </div>
 
@@ -846,32 +922,32 @@
       <section class="section">
         <div class="section-header">
           <h3>Accesos rápidos</h3>
-          <span>App local</span>
+          <span>Fase 3</span>
         </div>
 
         <div class="quick-actions">
           <article class="action-card" onclick="goToScreen('favorites')">
             <div class="action-icon blue">🛒</div>
             <strong>Favoritos</strong>
-            <p>Consulta productos guardados y precios objetivo.</p>
+            <p>Consulta, busca y filtra tus productos favoritos.</p>
           </article>
 
           <article class="action-card" onclick="goToScreen('alerts')">
             <div class="action-icon green">🔔</div>
             <strong>Alertas</strong>
-            <p>Detecta visualmente precios iguales o menores a la meta.</p>
+            <p>Ve productos que ya alcanzaron su precio objetivo.</p>
           </article>
 
           <article class="action-card" onclick="goToScreen('admin')">
-            <div class="action-icon orange">🔐</div>
-            <strong>Administrador</strong>
-            <p>Agrega productos desde un panel protegido con clave local.</p>
+            <div class="action-icon orange">✏️</div>
+            <strong>Administrar</strong>
+            <p>Agrega, edita o elimina productos guardados.</p>
           </article>
 
           <article class="action-card" onclick="goToScreen('settings')">
             <div class="action-icon purple">⚙️</div>
             <strong>Ajustes</strong>
-            <p>Modo oscuro e instalación como PWA.</p>
+            <p>Modo oscuro, PWA y estado administrador.</p>
           </article>
         </div>
       </section>
@@ -883,6 +959,45 @@
         <div class="section-header">
           <h3>Favoritos</h3>
           <span id="favoritesCount">0 productos</span>
+        </div>
+
+        <div class="filters-card">
+          <div class="filters-grid">
+            <div class="field">
+              <label for="searchInput">Buscar producto</label>
+              <input
+                type="search"
+                id="searchInput"
+                placeholder="Ej. control, audífonos, celular..."
+              />
+            </div>
+
+            <div class="three-cols">
+              <div class="field">
+                <label for="storeFilter">Tienda</label>
+                <select id="storeFilter">
+                  <option value="">Todas</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="categoryFilter">Categoría</label>
+                <select id="categoryFilter">
+                  <option value="">Todas</option>
+                </select>
+              </div>
+            </div>
+
+            <label class="filter-toggle">
+              <input type="checkbox" id="onlyOffersFilter" />
+              Mostrar solo ofertas activas
+            </label>
+
+            <div class="form-actions">
+              <button class="btn btn-soft" type="button" onclick="clearFilters()">Limpiar filtros</button>
+              <button class="btn btn-primary" type="button" onclick="goToScreen('admin')">Agregar producto</button>
+            </div>
+          </div>
         </div>
 
         <div class="product-list" id="favoritesList"></div>
@@ -901,7 +1016,7 @@
 
         <div class="notice">
           Una alerta se activa cuando el precio actual es menor o igual al precio objetivo.
-          En esta fase todavía es visual y local; más adelante se puede automatizar con backend, cron o GitHub Actions.
+          En esta fase sigue siendo local; el monitoreo automático real llegará después con backend o cron.
         </div>
       </section>
     </section>
@@ -917,11 +1032,11 @@
         <div class="admin-card" id="loginCard">
           <strong>Entrar al modo administrador</strong>
           <span>
-            Ingresa la clave local para poder agregar y administrar productos.
+            Ingresa la clave local para agregar, editar y eliminar productos.
           </span>
 
           <div class="warning">
-            Clave inicial de prueba: <b>admin123</b>.  
+            Clave inicial de prueba: <b>admin123</b>.
             Esta clave no es seguridad real porque la app está en HTML público.
           </div>
 
@@ -945,12 +1060,14 @@
 
         <div id="adminPanel" style="display:none;">
           <div class="admin-card">
-            <strong>Agregar producto favorito</strong>
-            <span>
-              Los productos se guardan en este navegador usando localStorage.
+            <strong id="productFormTitle">Agregar producto favorito</strong>
+            <span id="productFormSubtitle">
+              Guarda productos con tienda, categoría, link, precio actual y precio objetivo.
             </span>
 
             <form class="form-grid" id="productForm">
+              <input type="hidden" id="editingProductId" />
+
               <div class="field">
                 <label for="productName">Nombre del producto</label>
                 <input
@@ -968,10 +1085,27 @@
                     <option value="Amazon México">Amazon México</option>
                     <option value="Mercado Libre">Mercado Libre</option>
                     <option value="PlayStation Store">PlayStation Store</option>
+                    <option value="Walmart">Walmart</option>
+                    <option value="Liverpool">Liverpool</option>
                     <option value="Otra tienda">Otra tienda</option>
                   </select>
                 </div>
 
+                <div class="field">
+                  <label for="productCategory">Categoría</label>
+                  <select id="productCategory" required>
+                    <option value="Videojuegos">Videojuegos</option>
+                    <option value="Tecnología">Tecnología</option>
+                    <option value="Celulares">Celulares</option>
+                    <option value="Audio">Audio</option>
+                    <option value="Hogar">Hogar</option>
+                    <option value="Ropa y calzado">Ropa y calzado</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="two-cols">
                 <div class="field">
                   <label for="productIcon">Icono</label>
                   <select id="productIcon" required>
@@ -982,6 +1116,17 @@
                     <option value="💻">💻 Tecnología</option>
                     <option value="👟">👟 Ropa / tenis</option>
                     <option value="🏠">🏠 Hogar</option>
+                    <option value="📺">📺 Pantallas</option>
+                    <option value="⌚">⌚ Wearables</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="productPriority">Prioridad</label>
+                  <select id="productPriority" required>
+                    <option value="Alta">Alta</option>
+                    <option value="Media" selected>Media</option>
+                    <option value="Baja">Baja</option>
                   </select>
                 </div>
               </div>
@@ -1021,9 +1166,24 @@
                 />
               </div>
 
+              <div class="field">
+                <label for="productNotes">Notas</label>
+                <textarea
+                  id="productNotes"
+                  placeholder="Ej. Esperar Hot Sale, Buen Fin, descuento con tarjeta..."
+                ></textarea>
+              </div>
+
               <div class="form-actions">
-                <button class="btn btn-primary" type="submit">Guardar producto</button>
-                <button class="btn btn-soft" type="button" onclick="resetProductForm()">Limpiar</button>
+                <button class="btn btn-primary" id="saveProductButton" type="submit">
+                  Guardar producto
+                </button>
+                <button class="btn btn-soft" type="button" onclick="resetProductForm()">
+                  Limpiar
+                </button>
+                <button class="btn btn-danger" id="cancelEditButton" type="button" onclick="cancelEdit()" style="display:none;">
+                  Cancelar edición
+                </button>
               </div>
             </form>
           </div>
@@ -1031,7 +1191,7 @@
           <div class="admin-card">
             <strong>Productos guardados</strong>
             <span>
-              Desde aquí puedes revisar y eliminar productos de prueba.
+              Puedes editar, abrir el link o eliminar productos.
             </span>
 
             <div class="product-list" id="adminProductList" style="margin-top:14px;"></div>
@@ -1104,10 +1264,10 @@
         <div class="setting-card">
           <div class="setting-row">
             <div>
-              <strong>GitHub Pages</strong>
-              <span>Esta versión sigue siendo 100% HTML, CSS y JavaScript.</span>
+              <strong>Datos locales</strong>
+              <span>Los productos se guardan en el navegador con localStorage.</span>
             </div>
-            <div style="font-size: 24px;">🌐</div>
+            <div style="font-size: 24px;">💾</div>
           </div>
         </div>
       </section>
@@ -1144,7 +1304,8 @@
   <script>
     const ADMIN_PASSWORD = "admin123";
 
-    const PRODUCTS_KEY = "dealwatch_products_v2";
+    const PRODUCTS_KEY = "dealwatch_products_v3";
+    const OLD_PRODUCTS_KEY = "dealwatch_products_v2";
     const ADMIN_KEY = "dealwatch_admin_active";
     const THEME_KEY = "dealwatch_theme";
 
@@ -1152,36 +1313,56 @@
     const themeButton = document.getElementById("themeButton");
     const themeSwitch = document.getElementById("themeSwitch");
 
+    function generateId() {
+      if (window.crypto && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+
+      return "dw_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+    }
+
     const defaultProducts = [
       {
-        id: crypto.randomUUID(),
+        id: generateId(),
         name: "EA Sports FC 26",
         store: "PlayStation Store",
+        category: "Videojuegos",
         icon: "🎮",
+        priority: "Alta",
         currentPrice: 699,
         targetPrice: 799,
         url: "",
-        createdAt: new Date().toISOString()
+        notes: "Oferta detectada. Buen candidato para compra.",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       },
       {
-        id: crypto.randomUUID(),
+        id: generateId(),
         name: "Audífonos Bluetooth Pro",
         store: "Amazon México",
+        category: "Audio",
         icon: "🎧",
+        priority: "Media",
         currentPrice: 1299,
         targetPrice: 999,
         url: "",
-        createdAt: new Date().toISOString()
+        notes: "Esperar promoción o descuento bancario.",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       },
       {
-        id: crypto.randomUUID(),
+        id: generateId(),
         name: "Smartphone gama media",
         store: "Mercado Libre",
+        category: "Celulares",
         icon: "📱",
+        priority: "Media",
         currentPrice: 4899,
         targetPrice: 4500,
         url: "",
-        createdAt: new Date().toISOString()
+        notes: "Revisar reputación del vendedor antes de comprar.",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
     ];
 
@@ -1218,30 +1399,64 @@
       });
     }
 
+    function migrateProduct(product) {
+      return {
+        id: product.id || generateId(),
+        name: product.name || "Producto sin nombre",
+        store: product.store || "Otra tienda",
+        category: product.category || "Otro",
+        icon: product.icon || "🛒",
+        priority: product.priority || "Media",
+        currentPrice: Number(product.currentPrice || 0),
+        targetPrice: Number(product.targetPrice || 0),
+        url: normalizeUrl(product.url || ""),
+        notes: product.notes || "",
+        createdAt: product.createdAt || new Date().toISOString(),
+        updatedAt: product.updatedAt || new Date().toISOString()
+      };
+    }
+
     function getProducts() {
       const saved = localStorage.getItem(PRODUCTS_KEY);
 
-      if (!saved) {
-        localStorage.setItem(PRODUCTS_KEY, JSON.stringify(defaultProducts));
-        return defaultProducts;
-      }
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
 
-      try {
-        const parsed = JSON.parse(saved);
+          if (!Array.isArray(parsed)) {
+            throw new Error("Productos inválidos");
+          }
 
-        if (!Array.isArray(parsed)) {
-          throw new Error("Productos inválidos");
+          return parsed.map(migrateProduct);
+        } catch (error) {
+          localStorage.setItem(PRODUCTS_KEY, JSON.stringify(defaultProducts));
+          return defaultProducts;
         }
-
-        return parsed;
-      } catch (error) {
-        localStorage.setItem(PRODUCTS_KEY, JSON.stringify(defaultProducts));
-        return defaultProducts;
       }
+
+      const oldSaved = localStorage.getItem(OLD_PRODUCTS_KEY);
+
+      if (oldSaved) {
+        try {
+          const oldParsed = JSON.parse(oldSaved);
+
+          if (Array.isArray(oldParsed)) {
+            const migrated = oldParsed.map(migrateProduct);
+            localStorage.setItem(PRODUCTS_KEY, JSON.stringify(migrated));
+            return migrated;
+          }
+        } catch (error) {
+          console.log("No se pudo migrar Fase 2:", error);
+        }
+      }
+
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(defaultProducts));
+      return defaultProducts;
     }
 
     function saveProducts(products) {
-      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+      const cleanProducts = products.map(migrateProduct);
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(cleanProducts));
       renderApp();
     }
 
@@ -1263,6 +1478,23 @@
 
       const percent = Math.round((target / current) * 100);
       return Math.max(12, Math.min(percent, 92));
+    }
+
+    function getSavingsText(product) {
+      const current = Number(product.currentPrice || 0);
+      const target = Number(product.targetPrice || 0);
+
+      if (current <= 0 || target <= 0) {
+        return "";
+      }
+
+      if (current <= target) {
+        const saved = target - current;
+        return `Está ${formatMoney(saved)} abajo de tu meta.`;
+      }
+
+      const missing = current - target;
+      return `Faltan ${formatMoney(missing)} para llegar a tu meta.`;
     }
 
     function isAdminActive() {
@@ -1317,19 +1549,85 @@
       setTheme(nextTheme);
     }
 
+    function getFilteredProducts(products) {
+      const searchInput = document.getElementById("searchInput");
+      const storeFilter = document.getElementById("storeFilter");
+      const categoryFilter = document.getElementById("categoryFilter");
+      const onlyOffersFilter = document.getElementById("onlyOffersFilter");
+
+      const search = String(searchInput.value || "").trim().toLowerCase();
+      const store = storeFilter.value;
+      const category = categoryFilter.value;
+      const onlyOffers = onlyOffersFilter.checked;
+
+      return products.filter(product => {
+        const text = [
+          product.name,
+          product.store,
+          product.category,
+          product.priority,
+          product.notes
+        ].join(" ").toLowerCase();
+
+        const matchesSearch = !search || text.includes(search);
+        const matchesStore = !store || product.store === store;
+        const matchesCategory = !category || product.category === category;
+        const matchesOffer = !onlyOffers || productHasOffer(product);
+
+        return matchesSearch && matchesStore && matchesCategory && matchesOffer;
+      });
+    }
+
+    function updateFilterOptions(products) {
+      const storeFilter = document.getElementById("storeFilter");
+      const categoryFilter = document.getElementById("categoryFilter");
+
+      const currentStore = storeFilter.value;
+      const currentCategory = categoryFilter.value;
+
+      const stores = [...new Set(products.map(product => product.store).filter(Boolean))].sort();
+      const categories = [...new Set(products.map(product => product.category).filter(Boolean))].sort();
+
+      storeFilter.innerHTML = `<option value="">Todas</option>` +
+        stores.map(store => `<option value="${escapeHTML(store)}">${escapeHTML(store)}</option>`).join("");
+
+      categoryFilter.innerHTML = `<option value="">Todas</option>` +
+        categories.map(category => `<option value="${escapeHTML(category)}">${escapeHTML(category)}</option>`).join("");
+
+      storeFilter.value = stores.includes(currentStore) ? currentStore : "";
+      categoryFilter.value = categories.includes(currentCategory) ? currentCategory : "";
+    }
+
+    function clearFilters() {
+      document.getElementById("searchInput").value = "";
+      document.getElementById("storeFilter").value = "";
+      document.getElementById("categoryFilter").value = "";
+      document.getElementById("onlyOffersFilter").checked = false;
+      renderApp();
+    }
+
     function createProductCard(product, options = {}) {
       const isOffer = productHasOffer(product);
       const badgeClass = isOffer ? "offer" : "watch";
       const badgeText = isOffer ? "OFERTA" : "Vigilando";
       const progress = getProgress(product);
       const safeUrl = normalizeUrl(product.url);
+      const savingsText = getSavingsText(product);
 
       const openButton = safeUrl
-        ? `<button class="mini-btn mini-blue" onclick="window.open('${escapeHTML(safeUrl)}', '_blank', 'noopener,noreferrer')">Abrir link</button>`
+        ? `<a class="mini-btn mini-blue" href="${escapeHTML(safeUrl)}" target="_blank" rel="noopener noreferrer">Abrir link</a>`
         : "";
 
-      const deleteButton = options.showDelete
+      const editButton = options.showAdminActions
+        ? `<button class="mini-btn mini-gray" onclick="startEditProduct('${escapeHTML(product.id)}')">Editar</button>`
+        : "";
+
+      const deleteButton = options.showAdminActions
         ? `<button class="mini-btn mini-red" onclick="deleteProduct('${escapeHTML(product.id)}')">Eliminar</button>`
+        : "";
+
+      const notes = product.notes
+        ? `<div class="product-notes">${escapeHTML(product.notes)}</div>`
         : "";
 
       return `
@@ -1341,6 +1639,9 @@
               <div>
                 <div class="store">${escapeHTML(product.store)}</div>
                 <div class="product-title">${escapeHTML(product.name)}</div>
+                <div class="category-line">
+                  ${escapeHTML(product.category)} · Prioridad ${escapeHTML(product.priority)}
+                </div>
               </div>
 
               <span class="badge ${badgeClass}">${badgeText}</span>
@@ -1351,12 +1652,17 @@
               <div class="target">Meta: ${formatMoney(product.targetPrice)}</div>
             </div>
 
+            <div class="savings">${escapeHTML(savingsText)}</div>
+
             <div class="progress">
               <span style="width:${progress}%;"></span>
             </div>
 
+            ${notes}
+
             <div class="product-actions">
               ${openButton}
+              ${editButton}
               ${deleteButton}
             </div>
           </div>
@@ -1380,7 +1686,11 @@
       const container = document.getElementById("favoritesList");
       const count = document.getElementById("favoritesCount");
 
-      count.textContent = `${products.length} producto${products.length === 1 ? "" : "s"}`;
+      updateFilterOptions(products);
+
+      const filteredProducts = getFilteredProducts(products);
+
+      count.textContent = `${filteredProducts.length} de ${products.length} producto${products.length === 1 ? "" : "s"}`;
 
       if (products.length === 0) {
         container.innerHTML = `
@@ -1393,7 +1703,18 @@
         return;
       }
 
-      container.innerHTML = products
+      if (filteredProducts.length === 0) {
+        container.innerHTML = `
+          <div class="empty-card">
+            <div class="big">🔍</div>
+            <strong>No encontré productos</strong>
+            Cambia la búsqueda o limpia los filtros.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredProducts
         .map(product => createProductCard(product))
         .join("");
     }
@@ -1451,7 +1772,7 @@
           `;
         } else {
           adminProductList.innerHTML = products
-            .map(product => createProductCard(product, { showDelete: true }))
+            .map(product => createProductCard(product, { showAdminActions: true }))
             .join("");
         }
       } else {
@@ -1477,9 +1798,58 @@
 
     function resetProductForm() {
       document.getElementById("productForm").reset();
+      document.getElementById("editingProductId").value = "";
+      document.getElementById("productFormTitle").textContent = "Agregar producto favorito";
+      document.getElementById("productFormSubtitle").textContent = "Guarda productos con tienda, categoría, link, precio actual y precio objetivo.";
+      document.getElementById("saveProductButton").textContent = "Guardar producto";
+      document.getElementById("cancelEditButton").style.display = "none";
+      document.getElementById("productPriority").value = "Media";
+    }
+
+    function cancelEdit() {
+      resetProductForm();
+    }
+
+    function startEditProduct(productId) {
+      if (!isAdminActive()) {
+        alert("Primero entra como administrador.");
+        return;
+      }
+
+      const products = getProducts();
+      const product = products.find(item => item.id === productId);
+
+      if (!product) {
+        alert("No encontré el producto.");
+        return;
+      }
+
+      document.getElementById("editingProductId").value = product.id;
+      document.getElementById("productName").value = product.name;
+      document.getElementById("productStore").value = product.store;
+      document.getElementById("productCategory").value = product.category;
+      document.getElementById("productIcon").value = product.icon;
+      document.getElementById("productPriority").value = product.priority;
+      document.getElementById("currentPrice").value = product.currentPrice;
+      document.getElementById("targetPrice").value = product.targetPrice;
+      document.getElementById("productUrl").value = product.url;
+      document.getElementById("productNotes").value = product.notes;
+
+      document.getElementById("productFormTitle").textContent = "Editar producto";
+      document.getElementById("productFormSubtitle").textContent = "Modifica los datos del producto y guarda los cambios.";
+      document.getElementById("saveProductButton").textContent = "Actualizar producto";
+      document.getElementById("cancelEditButton").style.display = "inline-flex";
+
+      goToScreen("admin");
     }
 
     function deleteProduct(productId) {
+      const confirmDelete = confirm("¿Seguro que quieres eliminar este producto?");
+
+      if (!confirmDelete) {
+        return;
+      }
+
       const products = getProducts();
       const filtered = products.filter(product => product.id !== productId);
       saveProducts(filtered);
@@ -1493,18 +1863,24 @@
       }
 
       saveProducts([]);
+      resetProductForm();
     }
 
     function loadDemoProducts() {
-      saveProducts(defaultProducts.map(product => ({
+      const demo = defaultProducts.map(product => ({
         ...product,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString()
-      })));
+        id: generateId(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }));
+
+      saveProducts(demo);
+      resetProductForm();
     }
 
     function logoutAdmin() {
       setAdminActive(false);
+      resetProductForm();
       goToScreen("home");
     }
 
@@ -1530,12 +1906,16 @@
         return;
       }
 
+      const editingId = document.getElementById("editingProductId").value;
       const name = document.getElementById("productName").value.trim();
       const store = document.getElementById("productStore").value;
+      const category = document.getElementById("productCategory").value;
       const icon = document.getElementById("productIcon").value;
+      const priority = document.getElementById("productPriority").value;
       const currentPrice = Number(document.getElementById("currentPrice").value);
       const targetPrice = Number(document.getElementById("targetPrice").value);
       const url = normalizeUrl(document.getElementById("productUrl").value);
+      const notes = document.getElementById("productNotes").value.trim();
 
       if (!name || currentPrice < 0 || targetPrice < 0) {
         alert("Revisa los datos del producto.");
@@ -1544,15 +1924,46 @@
 
       const products = getProducts();
 
+      if (editingId) {
+        const updatedProducts = products.map(product => {
+          if (product.id !== editingId) {
+            return product;
+          }
+
+          return {
+            ...product,
+            name,
+            store,
+            category,
+            icon,
+            priority,
+            currentPrice,
+            targetPrice,
+            url,
+            notes,
+            updatedAt: new Date().toISOString()
+          };
+        });
+
+        saveProducts(updatedProducts);
+        resetProductForm();
+        alert("Producto actualizado correctamente.");
+        return;
+      }
+
       const newProduct = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         name,
         store,
+        category,
         icon,
+        priority,
         currentPrice,
         targetPrice,
         url,
-        createdAt: new Date().toISOString()
+        notes,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
 
       products.unshift(newProduct);
@@ -1561,6 +1972,11 @@
 
       alert("Producto guardado correctamente.");
     });
+
+    document.getElementById("searchInput").addEventListener("input", renderApp);
+    document.getElementById("storeFilter").addEventListener("change", renderApp);
+    document.getElementById("categoryFilter").addEventListener("change", renderApp);
+    document.getElementById("onlyOffersFilter").addEventListener("change", renderApp);
 
     themeButton.addEventListener("click", toggleTheme);
 
