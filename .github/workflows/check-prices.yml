@@ -2,6 +2,12 @@ name: DealWatch MX - Revisar ofertas
 
 on:
   workflow_dispatch:
+    inputs:
+      telegram_test:
+        description: "Enviar mensaje de prueba a Telegram"
+        required: false
+        type: boolean
+        default: false
   schedule:
     # Cada 6 horas, minuto 17 UTC. Cambia este cron si quieres otro horario.
     - cron: "17 */6 * * *"
@@ -25,9 +31,12 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Revisar reglas de oferta
+      - name: Revisar reglas de oferta y notificar Telegram
         run: node scripts/check-prices.mjs
         env:
           SUPABASE_URL: "https://ltsrjxvisptbdhhkabhj.supabase.co"
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          DEALWATCH_MODE: "rules_only"
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.telegram_test || false }}
+          DEALWATCH_MODE: "rules_only_telegram"
