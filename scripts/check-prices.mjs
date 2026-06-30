@@ -1,12 +1,12 @@
 // DealWatch MX / Appcomercio
-// Fase 14: Amazon seguro + Mercado Libre producción estable + anti-spam.
+// Fase 16: Listas familiares/amigos + Amazon seguro + Mercado Libre estable + anti-spam.
 // Mercado Libre: obtiene precio real por API pública de items.
 // Amazon: NO hace scraping; detecta Amazon/ASIN y aplica reglas con precio manual guardado.
 // La integración de precio real Amazon queda lista para API oficial futura.
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const MODE = process.env.DEALWATCH_MODE || "amazon_safe_mercadolibre_antispam";
+const MODE = process.env.DEALWATCH_MODE || "lists_amazon_safe_mercadolibre_antispam";
 const ALERT_LOOKBACK_DAYS = Number(process.env.DEALWATCH_ALERT_LOOKBACK_DAYS || 7);
 const SIGNIFICANT_DROP_PERCENT = Number(process.env.DEALWATCH_SIGNIFICANT_DROP_PERCENT || 1);
 const LIVE_PRICES = String(process.env.DEALWATCH_LIVE_PRICES ?? "true").toLowerCase() === "true";
@@ -172,6 +172,7 @@ function buildTelegramOfferMessage(alertEvent) {
   const target = formatMoney(alertEvent.target_price);
   const discount = toNumber(alertEvent.discount_percent);
   const productUrl = alertEvent.raw?.productUrl || "";
+  const dealList = alertEvent.raw?.dealList || alertEvent.deal_list || "Lista general";
   const antiSpam = alertEvent.raw?.antiSpamReason
     ? `\n🛡️ Anti-spam: ${escapeTelegramHtml(alertEvent.raw.antiSpamReason)}`
     : "";
@@ -187,6 +188,7 @@ function buildTelegramOfferMessage(alertEvent) {
     "🔥 <b>DealWatch MX · Nueva oferta</b>",
     "",
     `<b>${title}</b>`,
+    `👥 Lista: <b>${escapeTelegramHtml(dealList)}</b>`,
     message,
     "",
     `💰 Ahora: <b>${escapeTelegramHtml(current)}</b>${previousLine}`,
@@ -603,7 +605,7 @@ async function main() {
     }
 
     const products = await rest(
-      "products?select=id,workspace_id,user_id,name,store,product_url,normal_price,current_price,target_price,min_discount_percent,alerts_enabled,updated_at&alerts_enabled=eq.true&order=updated_at.desc&limit=1000"
+      "products?select=id,workspace_id,user_id,name,store,category,deal_list,product_url,normal_price,current_price,target_price,min_discount_percent,alerts_enabled,updated_at&alerts_enabled=eq.true&order=updated_at.desc&limit=1000"
     );
 
     const alertSince = new Date(Date.now() - ALERT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString();
@@ -696,6 +698,7 @@ async function main() {
         product_id: product.id,
         product_name: product.name,
         store: product.store,
+        deal_list: product.deal_list || "Lista general",
         product_url: product.product_url,
         normal_price: toNumber(product.normal_price),
         current_price: toNumber(product.current_price),
@@ -707,6 +710,7 @@ async function main() {
         raw: {
           mode: MODE,
           checkedBy: "github_actions",
+          dealList: product.deal_list || "Lista general",
           livePrices: LIVE_PRICES,
           livePriceSource: liveUpdate?.source || "manual_rules",
           livePriceUpdated: Boolean(liveUpdate?.updated),
@@ -737,6 +741,7 @@ async function main() {
           event_type: "offer_detected",
           title: `Oferta detectada: ${product.name}`,
           message: `${product.store || "Tienda"}: ${analysis.reason}`,
+          deal_list: product.deal_list || "Lista general",
           current_price: toNumber(product.current_price),
           target_price: toNumber(product.target_price),
           discount_percent: analysis.discount,
@@ -744,7 +749,9 @@ async function main() {
           raw: {
             mode: MODE,
             checkedBy: "github_actions",
+          dealList: product.deal_list || "Lista general",
             productUrl: product.product_url || null,
+            dealList: product.deal_list || "Lista general",
             previousPrice: liveUpdate?.previousPrice || null,
             livePriceSource: liveUpdate?.source || "manual_rules",
             livePriceUpdated: Boolean(liveUpdate?.updated),
