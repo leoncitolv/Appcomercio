@@ -1,5 +1,5 @@
 // DealWatch MX / Appcomercio
-// Fase 13.1: monitoreo automático con Mercado Libre México + reglas + Telegram.
+// Fase 13.2: monitoreo automático Mercado Libre estable + diagnóstico + Telegram.
 // Lee productos desde Supabase, intenta obtener precio real para links de Mercado Libre,
 // actualiza current_price, guarda historial, evalúa alertas y manda Telegram.
 
@@ -193,7 +193,7 @@ async function sendTelegramTestMessage() {
   return sendTelegramMessage([
     "✅ <b>DealWatch MX · Telegram conectado</b>",
     "",
-    "Fase 13.1 lista: el robot puede revisar Mercado Libre y enviar alertas al grupo.",
+    "Fase 13.2 lista: el robot puede revisar links reales de Mercado Libre, incluidos /p/ con wid, y enviar alertas al grupo.",
     `Fecha de prueba: ${escapeTelegramHtml(new Date().toLocaleString("es-MX"))}`,
   ].join("\n"));
 }
@@ -205,14 +205,13 @@ function isMercadoLibreProduct(product) {
   return store.includes("mercado") || url.includes("mercadolibre") || url.includes("mercadolivre");
 }
 
-function extractMercadoLibreItemId(url) {
-  const text = decodeURIComponent(String(url || ""));
+function normalizeMercadoLibreId(value) {
+  const clean = String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
 
-  // URLs comunes:
-  // https://articulo.mercadolibre.com.mx/MLM-1234567890-nombre...
-  // https://www.mercadolibre.com.mx/.../p/MLM1234567890
-  // https://.../MLM1234567890
-  const match = text.match(/\b(ML[A-Z]{1,3})[-_ ]?(\d{5,})\b/i);
+  const match = clean.match(/^(ML[A-Z]{1,3})(\d{5,})$/i);
 
   if (!match) {
     return null;
@@ -221,16 +220,115 @@ function extractMercadoLibreItemId(url) {
   return `${match[1].toUpperCase()}${match[2]}`;
 }
 
+function addMercadoLibreCandidate(candidates, value, source, priority = 50) {
+  const normalized = normalizeMercadoLibreId(value);
+
+  if (!normalized) {
+    return;
+  }
+
+  if (candidates.some(candidate => candidate.itemId === normalized && candidate.source === source)) {
+    return;
+  }
+
+  candidates.push({
+    itemId: normalized,
+    source,
+    priority,
+  });
+}
+
+function firstMercadoLibreIdFromText(text) {
+  const match = String(text || "").match(/\b(ML[A-Z]{1,3})[-_ ]?(\d{5,})\b/i);
+  return match ? normalizeMercadoLibreId(`${match[1]}${match[2]}`) : null;
+}
+
+function extractMercadoLibreIds(url) {
+  const rawUrl = String(url || "").trim();
+  const decodedUrl = decodeURIComponent(rawUrl);
+  const candidates = [];
+
+  let parsedUrl = null;
+
+  try {
+    parsedUrl = new URL(rawUrl);
+  } catch {
+    parsedUrl = null;
+  }
+
+  if (parsedUrl) {
+    const params = parsedUrl.searchParams;
+
+    // En links actuales de Mercado Libre, wid suele ser el item real.
+    // Ejemplo: /p/MLM37117526?...&wid=MLM2071997505
+    for (const key of ["wid", "item_id", "item", "itemId", "id"]) {
+      const value = params.get(key);
+      if (value) addMercadoLibreCandidate(candidates, value, `query_${key}`, key === "wid" ? 1 : 2);
+    }
+
+    // pdp_filters puede venir codificado como item_id:MLM2071997505.
+    const pdpFilters = params.get("pdp_filters") || "";
+    const pdpItemMatch = decodeURIComponent(pdpFilters).match(/item_id\s*[:=]\s*(ML[A-Z]{1,3}[-_ ]?\d{5,})/i);
+    if (pdpItemMatch) addMercadoLibreCandidate(candidates, pdpItemMatch[1], "query_pdp_filters_item_id", 2);
+
+    // Algunos links esconden el item en cualquier parámetro.
+    for (const [key, value] of params.entries()) {
+      const found = firstMercadoLibreIdFromText(value);
+      if (found) addMercadoLibreCandidate(candidates, found, `query_${key}_embedded`, 10);
+    }
+  }
+
+  // Búsqueda directa en el texto decodificado para wid=MLM... o item_id=MLM...
+  const widMatch = decodedUrl.match(/[?&#]wid=(ML[A-Z]{1,3}[-_ ]?\d{5,})/i);
+  if (widMatch) addMercadoLibreCandidate(candidates, widMatch[1], "raw_wid", 1);
+
+  const rawItemIdMatch = decodedUrl.match(/item_id\s*(?:=|:|%3A)\s*(ML[A-Z]{1,3}[-_ ]?\d{5,})/i);
+  if (rawItemIdMatch) addMercadoLibreCandidate(candidates, rawItemIdMatch[1], "raw_item_id", 2);
+
+  // Links tipo articulo.mercadolibre.com.mx/MLM-1234567890-producto.
+  const articleMatch = decodedUrl.match(/(?:^|\/)(ML[A-Z]{1,3})[-_ ]?(\d{5,})(?:[\/?#\-_]|$)/i);
+  if (articleMatch && !decodedUrl.match(/\/p\/(ML[A-Z]{1,3})[-_ ]?\d{5,}/i)) {
+    addMercadoLibreCandidate(candidates, `${articleMatch[1]}${articleMatch[2]}`, "article_path", 3);
+  }
+
+  // Catálogo tipo /p/MLM37117526. Este NO siempre sirve como item real.
+  const catalogMatch = decodedUrl.match(/\/p\/(ML[A-Z]{1,3})[-_ ]?(\d{5,})/i);
+  const catalogId = catalogMatch ? normalizeMercadoLibreId(`${catalogMatch[1]}${catalogMatch[2]}`) : null;
+
+  // Si no hay wid/item_id, usamos fallback solo si el link no parece catálogo /p/.
+  if (!candidates.length && !catalogId) {
+    const fallback = firstMercadoLibreIdFromText(decodedUrl);
+    if (fallback) addMercadoLibreCandidate(candidates, fallback, "fallback_text", 20);
+  }
+
+  candidates.sort((a, b) => a.priority - b.priority);
+  const chosen = candidates[0] || null;
+
+  return {
+    itemId: chosen?.itemId || null,
+    source: chosen?.source || null,
+    catalogId,
+    candidates,
+    rawUrl,
+  };
+}
+
 async function fetchMercadoLibrePrice(product) {
   const productUrl = String(product.product_url || "").trim();
-  const itemId = extractMercadoLibreItemId(productUrl);
+  const extracted = extractMercadoLibreIds(productUrl);
+  const itemId = extracted.itemId;
 
   if (!itemId) {
     return {
       ok: false,
-      supported: false,
+      supported: Boolean(extracted.catalogId),
       source: "mercadolibre",
-      reason: "No se encontró ID de publicación Mercado Libre en el link.",
+      itemId: null,
+      catalogId: extracted.catalogId,
+      extractorSource: extracted.catalogId ? "catalog_only" : "invalid_link",
+      reason: extracted.catalogId
+        ? `El link parece de catálogo (${extracted.catalogId}) pero no trae wid/item_id de publicación real.`
+        : "No se encontró ID de publicación Mercado Libre en el link.",
     };
   }
 
@@ -264,6 +362,8 @@ async function fetchMercadoLibrePrice(product) {
       supported: true,
       source: "mercadolibre",
       itemId,
+      catalogId: extracted.catalogId,
+      extractorSource: extracted.source,
       reason: `Mercado Libre API ${res.status}: ${JSON.stringify(data)}`,
     };
   }
@@ -276,6 +376,8 @@ async function fetchMercadoLibrePrice(product) {
       supported: true,
       source: "mercadolibre",
       itemId,
+      catalogId: extracted.catalogId,
+      extractorSource: extracted.source,
       reason: "La API no regresó un precio válido.",
       raw: data,
     };
@@ -286,6 +388,8 @@ async function fetchMercadoLibrePrice(product) {
     supported: true,
     source: "mercadolibre",
     itemId,
+    catalogId: extracted.catalogId,
+    extractorSource: extracted.source,
     title: data.title || product.name,
     price,
     originalPrice: toNumber(data.original_price),
@@ -417,9 +521,12 @@ async function main() {
 
     const results = [];
     const alertEvents = [];
+    let mercadoLibreDetected = 0;
     let mercadoLibreChecked = 0;
     let mercadoLibreUpdated = 0;
     let mercadoLibreErrors = 0;
+    let mercadoLibreCatalogOnly = 0;
+    let mercadoLibreInvalidLinks = 0;
 
     for (const originalProduct of products || []) {
       let product = originalProduct;
@@ -429,10 +536,26 @@ async function main() {
         liveUpdate = await maybeUpdateLivePrice(originalProduct);
         product = liveUpdate.product;
 
-        if (liveUpdate.source === "mercadolibre") {
-          mercadoLibreChecked += 1;
-          if (liveUpdate.updated) mercadoLibreUpdated += 1;
-          if (liveUpdate.live && !liveUpdate.live.ok) mercadoLibreErrors += 1;
+        if (isMercadoLibreProduct(originalProduct)) {
+          mercadoLibreDetected += 1;
+
+          if (liveUpdate?.source === "mercadolibre" && liveUpdate?.live?.itemId) {
+            mercadoLibreChecked += 1;
+          }
+
+          if (liveUpdate?.updated) mercadoLibreUpdated += 1;
+
+          if (liveUpdate?.live?.extractorSource === "catalog_only") {
+            mercadoLibreCatalogOnly += 1;
+          }
+
+          if (liveUpdate?.live?.extractorSource === "invalid_link") {
+            mercadoLibreInvalidLinks += 1;
+          }
+
+          if (liveUpdate?.live && !liveUpdate.live.ok) {
+            mercadoLibreErrors += 1;
+          }
         }
       } catch (liveError) {
         mercadoLibreErrors += isMercadoLibreProduct(originalProduct) ? 1 : 0;
@@ -471,6 +594,9 @@ async function main() {
           livePriceUpdated: Boolean(liveUpdate?.updated),
           livePriceMessage: liveUpdate?.message || null,
           mercadoLibreItemId: liveUpdate?.live?.itemId || null,
+          mercadoLibreCatalogId: liveUpdate?.live?.catalogId || null,
+          mercadoLibreExtractorSource: liveUpdate?.live?.extractorSource || null,
+          mercadoLibreReason: liveUpdate?.live?.reason || null,
           mercadoLibreStatus: liveUpdate?.live?.status || null,
           mercadoLibreCurrency: liveUpdate?.live?.currencyId || null,
         },
@@ -496,6 +622,8 @@ async function main() {
             livePriceSource: liveUpdate?.source || "manual_rules",
             livePriceUpdated: Boolean(liveUpdate?.updated),
             mercadoLibreItemId: liveUpdate?.live?.itemId || null,
+            mercadoLibreCatalogId: liveUpdate?.live?.catalogId || null,
+            mercadoLibreExtractorSource: liveUpdate?.live?.extractorSource || null,
           },
         });
       }
@@ -531,7 +659,7 @@ async function main() {
       ? ` Telegram: ${telegramSent} enviado(s)${telegramErrors ? `, ${telegramErrors} error(es)` : ""}.`
       : " Telegram no configurado.";
     const mercadoLibreSummary = LIVE_PRICES
-      ? ` Mercado Libre: ${mercadoLibreChecked} revisado(s), ${mercadoLibreUpdated} actualizado(s)${mercadoLibreErrors ? `, ${mercadoLibreErrors} error(es)` : ""}.`
+      ? ` Mercado Libre: ${mercadoLibreDetected} detectado(s), ${mercadoLibreChecked} con item real, ${mercadoLibreUpdated} actualizado(s), ${mercadoLibreCatalogOnly} catálogo(s) sin wid/item_id, ${mercadoLibreInvalidLinks} link(s) inválido(s)${mercadoLibreErrors ? `, ${mercadoLibreErrors} error(es)` : ""}.`
       : " Precios reales desactivados.";
 
     await patch("monitor_runs", `id=eq.${runId}`, {
@@ -542,7 +670,7 @@ async function main() {
       finished_at: new Date().toISOString(),
     });
 
-    console.log(`DealWatch MX OK: ${results.length} productos revisados, ${alertEvents.length} alerta(s) nueva(s), ${mercadoLibreUpdated} precio(s) ML actualizado(s), ${telegramSent} Telegram.`);
+    console.log(`DealWatch MX OK: ${results.length} productos revisados, ${alertEvents.length} alerta(s) nueva(s), ${mercadoLibreUpdated} precio(s) ML actualizado(s), ${telegramSent} Telegram. ML: ${mercadoLibreDetected} detectado(s), ${mercadoLibreChecked} con item real, ${mercadoLibreCatalogOnly} catálogo(s), ${mercadoLibreInvalidLinks} inválido(s).`);
   } catch (error) {
     await patch("monitor_runs", `id=eq.${runId}`, {
       status: "error",
