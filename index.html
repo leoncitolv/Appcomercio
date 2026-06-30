@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 13.3 Mercado Libre producción</title>
+  <title>DealWatch MX | Fase 14 Amazon seguro</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -165,7 +165,7 @@
           <div class="logo">D</div>
           <div>
             <h1>DealWatch MX</h1>
-            <p>Appcomercio · Mercado Libre + Telegram</p>
+            <p>Appcomercio · ML + Amazon seguro</p>
           </div>
         </div>
         <div class="top-actions">
@@ -177,9 +177,9 @@
 
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>🛒 Fase 13.3 · Mercado Libre producción</small>
-        <h2>Tu app ya entiende links reales de Mercado Libre.</h2>
-        <p>El robot ahora detecta links de artículo y links de catálogo /p/ con wid o item_id, actualiza Supabase y avisa por Telegram.</p>
+        <small>🛒 Fase 14 · Amazon seguro</small>
+        <h2>Amazon entra en modo seguro.</h2>
+        <p>Mercado Libre mantiene precios reales; Amazon se agrega sin scraping: detecta ASIN y aplica reglas con precios manuales guardados.</p>
         <div class="hero-actions">
           <button class="btn btn-light" onclick="goToScreen('cloud')">Equipo y nube</button>
           <button class="btn btn-ghost" onclick="goToScreen('admin')">Administrar</button>
@@ -196,7 +196,7 @@
       </section>
 
       <section class="section">
-        <div class="section-header"><h3>Accesos rápidos</h3><span>Fase 13.3</span></div>
+        <div class="section-header"><h3>Accesos rápidos</h3><span>Fase 14</span></div>
         <div class="quick-actions">
           <article class="action-card" onclick="goToScreen('favorites')"><div class="action-icon blue">🛒</div><strong>Favoritos</strong><p>Busca, filtra y abre links de productos.</p></article>
           <article class="action-card" onclick="goToScreen('alerts')"><div class="action-icon green">🔔</div><strong>Alertas</strong><p>Detecta precio objetivo o descuento mínimo.</p></article>
@@ -415,14 +415,14 @@
 
 
         <div class="card" id="monitorCard">
-          <strong>Fase 13.3 · Mercado Libre producción</strong>
-          <span>GitHub Actions obtiene precios reales de Mercado Libre y aplica anti-spam: solo manda Telegram cuando hay oferta nueva o una bajada relevante del precio.</span>
+          <strong>Fase 14 · Amazon seguro</strong>
+          <span>GitHub Actions mantiene Mercado Libre con precio real y agrega Amazon en modo seguro: sin scraping, detectando ASIN y usando el precio manual guardado.</span>
           <div class="notice">
-            Para activarlo debes tener <b>SUPABASE_SERVICE_ROLE_KEY</b>, <b>TELEGRAM_BOT_TOKEN</b> y <b>TELEGRAM_CHAT_ID</b> en GitHub Actions. El anti-spam evita repetir Telegram por el mismo producto/precio durante 7 días y solo avisa nuevas bajadas relevantes.
+            Para activarlo debes tener <b>SUPABASE_SERVICE_ROLE_KEY</b>, <b>TELEGRAM_BOT_TOKEN</b> y <b>TELEGRAM_CHAT_ID</b> en GitHub Actions. Amazon queda en modo seguro: por ahora no extrae precio real automáticamente; usa precio manual y reglas de alerta.
           </div>
           <div class="form-actions" style="margin-top:16px;">
             <button class="btn btn-primary" type="button" onclick="refreshMonitorStatus(true)">Actualizar monitoreo</button>
-            <button class="btn btn-soft" type="button" onclick="openGitHubActionsPage()">Abrir GitHub Actions</button><button class="btn btn-soft" type="button" onclick="showMercadoLibreHelp()">Links Mercado Libre</button><button class="btn btn-soft" type="button" onclick="showTelegramHelp()">Configurar Telegram</button>
+            <button class="btn btn-soft" type="button" onclick="openGitHubActionsPage()">Abrir GitHub Actions</button><button class="btn btn-soft" type="button" onclick="showMercadoLibreHelp()">Links Mercado Libre</button><button class="btn btn-soft" type="button" onclick="showAmazonHelp()">Amazon seguro</button><button class="btn btn-soft" type="button" onclick="showTelegramHelp()">Configurar Telegram</button>
           </div>
           <div class="product-list" id="monitorStatusList" style="margin-top:14px;">
             <div class="empty-card"><div class="big">🤖</div><strong>Monitoreo pendiente</strong>Ejecuta el workflow con live_prices activado o espera la revisión programada.</div>
@@ -432,7 +432,7 @@
 
 
         <div class="card" id="mercadoLibreCard">
-          <strong>Fase 13.3 · Precios reales de Mercado Libre</strong>
+          <strong>Fase 13.3 + 14 · ML real y Amazon seguro</strong>
           <span>Para que el robot actualice precios automáticamente, pega el link completo del producto. Se aceptan links directos, links /p/ con wid o item_id, y se muestra diagnóstico del último monitoreo.</span>
           <div class="notice">
             Ejemplos válidos: <b>https://articulo.mercadolibre.com.mx/MLM-1234567890-producto</b> o links como <b>/p/MLM...</b> cuando incluyan <b>wid=MLM...</b> o <b>item_id=MLM...</b>. El panel mostrará si se actualizó precio, item ML y último error.
@@ -1285,7 +1285,7 @@
 
     function showMercadoLibreHelp() {
       alert(
-        "Fase 13.3 Mercado Libre producción:\n\n" +
+        "Mercado Libre automático:\n\n" +
         "1. En el producto guarda la tienda como Mercado Libre.\n" +
         "2. En Link del producto pega el link completo que te da Mercado Libre.\n" +
         "3. El robot busca primero wid=MLM..., después item_id=MLM... y después links tipo MLM-1234567890.\n" +
@@ -1294,6 +1294,19 @@
         "6. Si el precio cambió, se actualiza Supabase y se guarda historial.\n" +
         "7. Si cumple precio objetivo o descuento mínimo, se manda Telegram.\n\n" +
         "Ejemplo real compatible: mercadolibre.com.mx/.../p/MLM37117526?...&wid=MLM2071997505"
+      );
+    }
+
+    function showAmazonHelp() {
+      alert(
+        "Fase 14 Amazon seguro:\n\n" +
+        "1. Puedes guardar productos de Amazon México normalmente.\n" +
+        "2. El link recomendado debe contener ASIN, por ejemplo /dp/B0XXXXXXXX o /gp/product/B0XXXXXXXX.\n" +
+        "3. Por seguridad, esta fase NO hace scraping de Amazon.\n" +
+        "4. El robot detecta Amazon/ASIN y aplica las reglas usando el precio manual guardado.\n" +
+        "5. Si el precio manual cumple precio objetivo o descuento mínimo, se manda Telegram.\n" +
+        "6. Precio real automático de Amazon quedará para una integración oficial futura con API/afiliados.\n\n" +
+        "Recomendación: actualiza manualmente el precio actual de Amazon cuando veas una oferta y deja que el anti-spam controle Telegram."
       );
     }
 
@@ -1307,7 +1320,7 @@
         "5. Obtén el chat_id con getUpdates.\n" +
         "6. En GitHub Secrets agrega TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID.\n" +
         "7. En Actions ejecuta el workflow con telegram_test activado.\n\n" +
-        "Fase 13.3: para Mercado Libre también activa live_prices."
+        "Fase 14: Mercado Libre usa precio real; Amazon usa modo seguro con precio manual."
       );
     }
 
