@@ -1,11 +1,13 @@
 // DealWatch MX / Appcomercio
-// Fase 13.2: monitoreo automático Mercado Libre estable + diagnóstico + Telegram.
+// Fase 13.3: Mercado Libre producción estable + anti-spam + Telegram mejorado.
 // Lee productos desde Supabase, intenta obtener precio real para links de Mercado Libre,
 // actualiza current_price, guarda historial, evalúa alertas y manda Telegram.
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const MODE = process.env.DEALWATCH_MODE || "mercadolibre_auto_telegram";
+const MODE = process.env.DEALWATCH_MODE || "mercadolibre_production_antispam";
+const ALERT_LOOKBACK_DAYS = Number(process.env.DEALWATCH_ALERT_LOOKBACK_DAYS || 7);
+const SIGNIFICANT_DROP_PERCENT = Number(process.env.DEALWATCH_SIGNIFICANT_DROP_PERCENT || 1);
 const LIVE_PRICES = String(process.env.DEALWATCH_LIVE_PRICES ?? "true").toLowerCase() === "true";
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
@@ -162,25 +164,32 @@ function buildTelegramOfferMessage(alertEvent) {
   const title = escapeTelegramHtml(alertEvent.title || "Oferta detectada");
   const message = escapeTelegramHtml(alertEvent.message || "Regla de oferta cumplida.");
   const current = formatMoney(alertEvent.current_price);
+  const previous = toNumber(alertEvent.raw?.previousPrice);
+  const previousLine = previous > 0 && Math.abs(previous - toNumber(alertEvent.current_price)) >= 0.01
+    ? `\n📉 Antes: <b>${escapeTelegramHtml(formatMoney(previous))}</b>`
+    : "";
   const target = formatMoney(alertEvent.target_price);
   const discount = toNumber(alertEvent.discount_percent);
   const productUrl = alertEvent.raw?.productUrl || "";
+  const antiSpam = alertEvent.raw?.antiSpamReason
+    ? `\n🛡️ Anti-spam: ${escapeTelegramHtml(alertEvent.raw.antiSpamReason)}`
+    : "";
   const liveLine = alertEvent.raw?.livePriceSource
-    ? `\n🔎 Fuente: <b>${escapeTelegramHtml(alertEvent.raw.livePriceSource)}</b>`
+    ? `\n🔎 Fuente: <b>${escapeTelegramHtml(alertEvent.raw.livePriceSource)}</b>${alertEvent.raw?.mercadoLibreItemId ? ` · ${escapeTelegramHtml(alertEvent.raw.mercadoLibreItemId)}` : ""}`
     : "";
   const linkLine = productUrl && String(productUrl).startsWith("http")
     ? `\n\n🔗 <a href="${escapeTelegramHtml(productUrl)}">Abrir producto</a>`
     : "";
 
   return [
-    "🔥 <b>DealWatch MX · Oferta detectada</b>",
+    "🔥 <b>DealWatch MX · Nueva oferta</b>",
     "",
     `<b>${title}</b>`,
     message,
     "",
-    `💰 Precio actual: <b>${escapeTelegramHtml(current)}</b>`,
-    `🎯 Precio objetivo: <b>${escapeTelegramHtml(target)}</b>`,
-    `🏷️ Descuento: <b>${escapeTelegramHtml(discount)}%</b>${liveLine}`,
+    `💰 Ahora: <b>${escapeTelegramHtml(current)}</b>${previousLine}`,
+    `🎯 Meta: <b>${escapeTelegramHtml(target)}</b>`,
+    `🏷️ Descuento: <b>${escapeTelegramHtml(discount)}%</b>${liveLine}${antiSpam}`,
     linkLine,
   ].join("\n");
 }
@@ -193,7 +202,7 @@ async function sendTelegramTestMessage() {
   return sendTelegramMessage([
     "✅ <b>DealWatch MX · Telegram conectado</b>",
     "",
-    "Fase 13.2 lista: el robot puede revisar links reales de Mercado Libre, incluidos /p/ con wid, y enviar alertas al grupo.",
+    "Fase 13.3 lista: el robot revisa Mercado Libre, evita alertas repetidas y avisa solo ofertas nuevas o bajadas relevantes.",
     `Fecha de prueba: ${escapeTelegramHtml(new Date().toLocaleString("es-MX"))}`,
   ].join("\n"));
 }
@@ -487,6 +496,41 @@ async function maybeUpdateLivePrice(product) {
   };
 }
 
+function shouldCreateAlertEvent(product, analysis, liveUpdate, recentKeys, recentBestPriceByProduct) {
+  const currentPrice = toNumber(product.current_price);
+  const alertKey = `${product.id}:${currentPrice}`;
+
+  if (!analysis.isOffer) {
+    return { create: false, reason: "No cumple reglas de oferta." };
+  }
+
+  if (!product.workspace_id) {
+    return { create: false, reason: "Producto sin workspace." };
+  }
+
+  if (recentKeys.has(alertKey)) {
+    return { create: false, reason: `Ya se avisó este mismo precio en los últimos ${ALERT_LOOKBACK_DAYS} día(s).` };
+  }
+
+  const best = recentBestPriceByProduct.get(product.id);
+  if (!best || best.price <= 0) {
+    return { create: true, reason: "Primera oferta reciente para este producto." };
+  }
+
+  if (currentPrice < best.price) {
+    const drop = ((best.price - currentPrice) / best.price) * 100;
+    if (drop >= SIGNIFICANT_DROP_PERCENT) {
+      return { create: true, reason: `Nueva bajada relevante: ${drop.toFixed(2)}% abajo del último aviso.` };
+    }
+  }
+
+  if (liveUpdate?.updated && currentPrice < best.price) {
+    return { create: true, reason: "Precio bajó contra el último aviso." };
+  }
+
+  return { create: false, reason: `Oferta repetida o sin mejora relevante frente al último aviso (${formatMoney(best.price)}).` };
+}
+
 async function main() {
   const startedAt = new Date().toISOString();
   const runRows = await insert("monitor_runs", [{
@@ -512,12 +556,22 @@ async function main() {
       "products?select=id,workspace_id,user_id,name,store,product_url,normal_price,current_price,target_price,min_discount_percent,alerts_enabled,updated_at&alerts_enabled=eq.true&order=updated_at.desc&limit=1000"
     );
 
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const alertSince = new Date(Date.now() - ALERT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString();
     const recentAlerts = await rest(
-      `alert_events?select=product_id,current_price,event_type,created_at&event_type=eq.offer_detected&created_at=gte.${encodeURIComponent(since)}`
+      `alert_events?select=product_id,current_price,event_type,created_at,status&event_type=eq.offer_detected&created_at=gte.${encodeURIComponent(alertSince)}`
     ).catch(() => []);
 
-    const recentKeys = new Set((Array.isArray(recentAlerts) ? recentAlerts : []).map(a => `${a.product_id}:${Number(a.current_price || 0)}`));
+    const recentAlertRows = Array.isArray(recentAlerts) ? recentAlerts : [];
+    const recentKeys = new Set(recentAlertRows.map(a => `${a.product_id}:${Number(a.current_price || 0)}`));
+    const recentBestPriceByProduct = new Map();
+    for (const alert of recentAlertRows) {
+      const price = toNumber(alert.current_price);
+      if (price <= 0) continue;
+      const currentBest = recentBestPriceByProduct.get(alert.product_id);
+      if (!currentBest || price < currentBest.price) {
+        recentBestPriceByProduct.set(alert.product_id, { price, created_at: alert.created_at });
+      }
+    }
 
     const results = [];
     const alertEvents = [];
@@ -593,6 +647,10 @@ async function main() {
           livePriceSource: liveUpdate?.source || "manual_rules",
           livePriceUpdated: Boolean(liveUpdate?.updated),
           livePriceMessage: liveUpdate?.message || null,
+          previousPrice: liveUpdate?.previousPrice || null,
+          newPrice: liveUpdate?.newPrice || null,
+          antiSpamLookbackDays: ALERT_LOOKBACK_DAYS,
+          significantDropPercent: SIGNIFICANT_DROP_PERCENT,
           mercadoLibreItemId: liveUpdate?.live?.itemId || null,
           mercadoLibreCatalogId: liveUpdate?.live?.catalogId || null,
           mercadoLibreExtractorSource: liveUpdate?.live?.extractorSource || null,
@@ -603,8 +661,8 @@ async function main() {
         checked_at: new Date().toISOString(),
       });
 
-      const alertKey = `${product.id}:${toNumber(product.current_price)}`;
-      if (analysis.isOffer && product.workspace_id && !recentKeys.has(alertKey)) {
+      const alertDecision = shouldCreateAlertEvent(product, analysis, liveUpdate, recentKeys, recentBestPriceByProduct);
+      if (alertDecision.create) {
         alertEvents.push({
           workspace_id: product.workspace_id,
           product_id: product.id,
@@ -619,8 +677,13 @@ async function main() {
             mode: MODE,
             checkedBy: "github_actions",
             productUrl: product.product_url || null,
+            previousPrice: liveUpdate?.previousPrice || null,
             livePriceSource: liveUpdate?.source || "manual_rules",
             livePriceUpdated: Boolean(liveUpdate?.updated),
+            livePriceMessage: liveUpdate?.message || null,
+            antiSpamReason: alertDecision.reason,
+            antiSpamLookbackDays: ALERT_LOOKBACK_DAYS,
+            significantDropPercent: SIGNIFICANT_DROP_PERCENT,
             mercadoLibreItemId: liveUpdate?.live?.itemId || null,
             mercadoLibreCatalogId: liveUpdate?.live?.catalogId || null,
             mercadoLibreExtractorSource: liveUpdate?.live?.extractorSource || null,
@@ -659,7 +722,7 @@ async function main() {
       ? ` Telegram: ${telegramSent} enviado(s)${telegramErrors ? `, ${telegramErrors} error(es)` : ""}.`
       : " Telegram no configurado.";
     const mercadoLibreSummary = LIVE_PRICES
-      ? ` Mercado Libre: ${mercadoLibreDetected} detectado(s), ${mercadoLibreChecked} con item real, ${mercadoLibreUpdated} actualizado(s), ${mercadoLibreCatalogOnly} catálogo(s) sin wid/item_id, ${mercadoLibreInvalidLinks} link(s) inválido(s)${mercadoLibreErrors ? `, ${mercadoLibreErrors} error(es)` : ""}.`
+      ? ` Mercado Libre: ${mercadoLibreDetected} detectado(s), ${mercadoLibreChecked} con item real, ${mercadoLibreUpdated} actualizado(s), ${mercadoLibreCatalogOnly} catálogo(s) sin wid/item_id, ${mercadoLibreInvalidLinks} link(s) inválido(s)${mercadoLibreErrors ? `, ${mercadoLibreErrors} error(es)` : ""}. Anti-spam: ${ALERT_LOOKBACK_DAYS} día(s), bajada relevante ${SIGNIFICANT_DROP_PERCENT}%.`
       : " Precios reales desactivados.";
 
     await patch("monitor_runs", `id=eq.${runId}`, {
@@ -670,7 +733,7 @@ async function main() {
       finished_at: new Date().toISOString(),
     });
 
-    console.log(`DealWatch MX OK: ${results.length} productos revisados, ${alertEvents.length} alerta(s) nueva(s), ${mercadoLibreUpdated} precio(s) ML actualizado(s), ${telegramSent} Telegram. ML: ${mercadoLibreDetected} detectado(s), ${mercadoLibreChecked} con item real, ${mercadoLibreCatalogOnly} catálogo(s), ${mercadoLibreInvalidLinks} inválido(s).`);
+    console.log(`DealWatch MX OK: ${results.length} productos revisados, ${alertEvents.length} alerta(s) nueva(s), ${mercadoLibreUpdated} precio(s) ML actualizado(s), ${telegramSent} Telegram. ML: ${mercadoLibreDetected} detectado(s), ${mercadoLibreChecked} con item real, ${mercadoLibreCatalogOnly} catálogo(s), ${mercadoLibreInvalidLinks} inválido(s). Anti-spam: ${ALERT_LOOKBACK_DAYS}d / ${SIGNIFICANT_DROP_PERCENT}%.`);
   } catch (error) {
     await patch("monitor_runs", `id=eq.${runId}`, {
       status: "error",
