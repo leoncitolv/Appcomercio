@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 10 Multi-admin</title>
+  <title>DealWatch MX | Fase 10.1 Cuentas e invitaciones</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -177,9 +177,9 @@
 
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>👥 Fase 10 · Multi-admin y equipos</small>
+        <small>👥 Fase 10.1 · Cuentas e invitaciones</small>
         <h2>Tu app ya puede usar base de datos real.</h2>
-        <p>Crea un equipo, comparte productos con más administradores y usa Supabase como nube principal.</p>
+        <p>Crea cuentas, acepta invitaciones y comparte productos del equipo en Supabase.</p>
         <div class="hero-actions">
           <button class="btn btn-light" onclick="goToScreen('cloud')">Equipo y nube</button>
           <button class="btn btn-ghost" onclick="goToScreen('admin')">Administrar</button>
@@ -341,13 +341,14 @@
 
         <div class="card" id="authCard">
           <strong>Login real</strong>
-          <span>Usa el correo y contraseña que creaste en Authentication → Users de Supabase.</span>
+          <span>Usa tu correo y contraseña. Si el usuario invitado todavía no existe, puede crear su cuenta desde aquí.</span>
           <form class="form-grid" id="supabaseLoginForm">
             <div class="field"><label for="supabaseEmail">Correo</label><input type="email" id="supabaseEmail" placeholder="tu-correo@ejemplo.com" required /></div>
             <div class="field"><label for="supabasePassword">Contraseña</label><input type="password" id="supabasePassword" placeholder="Contraseña Supabase" required /></div>
             <div class="form-actions">
               <button class="btn btn-primary" type="submit">Iniciar sesión</button>
-              <button class="btn btn-soft" type="button" onclick="signUpSupabaseUser()">Crear usuario</button>
+              <button class="btn btn-soft" type="button" onclick="signUpSupabaseUser()">Crear cuenta</button>
+              <button class="btn btn-soft" type="button" onclick="resetSupabasePassword()">Olvidé mi contraseña</button>
             </div>
           </form>
         </div>
@@ -357,7 +358,9 @@
           <span id="sessionEmail">Usuario conectado</span>
           <div class="success">Cuando agregues o edites productos, se guardarán en Supabase y también como respaldo local.</div>
           <div class="form-actions" style="margin-top:16px;">
-            <button class="btn btn-primary" onclick="migrateLocalToSupabase()">Migrar locales a Supabase</button>
+            <button class="btn btn-primary" onclick="shareLocalProductsToWorkspace()">Compartir locales con equipo</button>
+            <button class="btn btn-soft" onclick="migrateLocalToSupabase()">Migrar locales a Supabase</button>
+            <button class="btn btn-soft" onclick="acceptPendingInvites(true)">Aceptar invitaciones</button>
             <button class="btn btn-soft" onclick="downloadSupabasePayload()">Exportar payload nube</button>
             <button class="btn btn-danger" onclick="signOutSupabaseUser()">Cerrar sesión</button>
           </div>
@@ -377,11 +380,12 @@
               <button class="btn btn-primary" type="button" onclick="createWorkspacePrompt()">Crear equipo</button>
               <button class="btn btn-soft" type="button" onclick="loadWorkspaces(true)">Actualizar equipos</button>
               <button class="btn btn-soft" type="button" onclick="acceptPendingInvites(true)">Aceptar invitaciones</button>
+              <button class="btn btn-soft" type="button" onclick="repairPersonalCloudProductsToWorkspace()">Reparar productos al equipo</button>
             </div>
           </div>
 
           <div class="notice">
-            Roles: <b>owner</b> y <b>admin</b> pueden agregar/editar productos. <b>viewer</b> solo consulta.
+            Roles: <b>owner</b> y <b>admin</b> pueden agregar/editar productos. <b>viewer</b> solo consulta. Si un admin nuevo no ve productos, entra con la cuenta owner y presiona <b>Compartir locales con equipo</b> o <b>Reparar productos al equipo</b>.
           </div>
 
           <div class="form-grid" style="margin-top:16px;">
@@ -909,10 +913,105 @@
       };
     }
     function fromRemoteProduct(row, histories=[]) { return migrateProduct({ id: row.id, workspace_id: row.workspace_id, name: row.name, store: row.store, category: row.category, icon: row.icon, priority: row.priority, product_url: row.product_url, normal_price: row.normal_price, current_price: row.current_price, target_price: row.target_price, min_discount_percent: row.min_discount_percent, alerts_enabled: row.alerts_enabled, notes: row.notes, created_at: row.created_at, updated_at: row.updated_at, priceHistory: histories.map(h=>({ id:h.id, date:h.created_at, price:h.new_price, previousPrice:h.previous_price, source:h.source, note:h.note, type:"supabase" })) }); }
-    async function initSupabase() { try { if(!window.supabase) { recordSyncEvent("supabase_cdn_missing", "No cargó librería Supabase", "error"); return; } supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); const { data } = await supabaseClient.auth.getSession(); currentSession = data.session; currentUser = data.session?.user || null; supabaseClient.auth.onAuthStateChange(async (_event, session) => { currentSession=session; currentUser=session?.user||null; if(currentUser) { await loadWorkspaces(false); await claimLegacyRemoteProductsToWorkspace(); await refreshRemoteProducts(false); } renderApp(); }); if(currentUser) { await loadWorkspaces(false); await claimLegacyRemoteProductsToWorkspace(); await refreshRemoteProducts(false); } recordSyncEvent("supabase_ready", currentUser ? "Sesión recuperada" : "Cliente listo sin sesión", currentUser ? "cloud" : "local"); } catch(e) { recordSyncEvent("supabase_error", e.message || "Error Supabase", "error"); } renderApp(); }
+    async function initSupabase() {
+      try {
+        if(!window.supabase) { recordSyncEvent("supabase_cdn_missing", "No cargó librería Supabase", "error"); return; }
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const { data } = await supabaseClient.auth.getSession();
+        currentSession = data.session;
+        currentUser = data.session?.user || null;
+
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+          currentSession=session;
+          currentUser=session?.user||null;
+          if(event === "PASSWORD_RECOVERY") {
+            await handlePasswordRecoveryEvent();
+          }
+          if(currentUser) {
+            await finishAuthBootstrap(false);
+          }
+          renderApp();
+        });
+
+        if(currentUser) {
+          await finishAuthBootstrap(false);
+        }
+        recordSyncEvent("supabase_ready", currentUser ? "Sesión recuperada" : "Cliente listo sin sesión", currentUser ? "cloud" : "local");
+      } catch(e) { recordSyncEvent("supabase_error", e.message || "Error Supabase", "error"); }
+      renderApp();
+    }
     async function testSupabaseConnection() { if(!supabaseClient) return alert("No está disponible el cliente Supabase. Revisa internet/CDN."); const { data, error } = await supabaseClient.auth.getSession(); if(error) return alert("Error de conexión: " + error.message); alert(currentUser ? "Conexión OK. Sesión: " + (currentUser.email || "activa") : "Conexión OK. Falta iniciar sesión."); }
-    async function signInSupabase(email,password) { const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password }); if(error) throw error; currentSession=data.session; currentUser=data.user; recordSyncEvent("login", "Sesión iniciada en Supabase", "cloud"); await loadWorkspaces(false); await claimLegacyRemoteProductsToWorkspace(); await refreshRemoteProducts(false); }
-    async function signUpSupabaseUser() { const email=document.getElementById("supabaseEmail").value.trim(); const password=document.getElementById("supabasePassword").value; if(!email||!password) return alert("Escribe correo y contraseña."); try { const { data, error } = await supabaseClient.auth.signUp({ email, password }); if(error) throw error; alert("Usuario creado. Si Supabase pide confirmación, revisa tu correo. Si lo creaste desde Authentication con Auto Confirm, ya puedes iniciar sesión."); } catch(e) { alert("No se pudo crear usuario: " + e.message); } }
+
+    function getAuthRedirectUrl() {
+      return location.origin + location.pathname;
+    }
+
+    async function finishAuthBootstrap(showAcceptedAlert=false) {
+      if(!currentUser) return;
+      await loadWorkspaces(false);
+      await acceptPendingInvites(showAcceptedAlert);
+      await loadWorkspaces(false);
+      await claimLegacyRemoteProductsToWorkspace();
+      await refreshRemoteProducts(false);
+      renderApp();
+    }
+
+    async function signInSupabase(email,password) {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+      currentSession=data.session;
+      currentUser=data.user;
+      recordSyncEvent("login", "Sesión iniciada en Supabase", "cloud");
+      await finishAuthBootstrap(false);
+    }
+
+    async function signUpSupabaseUser() {
+      const email=document.getElementById("supabaseEmail").value.trim().toLowerCase();
+      const password=document.getElementById("supabasePassword").value;
+      if(!email||!password) return alert("Escribe correo y contraseña para crear la cuenta.");
+      if(password.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
+      try {
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: getAuthRedirectUrl() }
+        });
+        if(error) throw error;
+        if(data.session && data.user) {
+          currentSession=data.session;
+          currentUser=data.user;
+          recordSyncEvent("signup_login", "Cuenta creada e iniciada", "cloud");
+          await finishAuthBootstrap(true);
+          alert("Cuenta creada. Si este correo tenía invitación pendiente, ya se intentó aceptar automáticamente.");
+          goToScreen("cloud");
+          return;
+        }
+        alert("Cuenta creada. Si Supabase pide confirmación, revisa el correo y después inicia sesión aquí.");
+      } catch(e) { alert("No se pudo crear usuario: " + e.message); }
+    }
+
+    async function resetSupabasePassword() {
+      if(!supabaseClient) return alert("Supabase no está listo.");
+      const email=document.getElementById("supabaseEmail").value.trim().toLowerCase();
+      if(!email || !email.includes("@")) return alert("Escribe primero el correo en el campo de login.");
+      try {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: getAuthRedirectUrl()
+        });
+        if(error) throw error;
+        alert("Te envié un enlace de recuperación. Revisa el correo y vuelve a abrir la app desde ese enlace.");
+      } catch(e) { alert("No se pudo enviar recuperación: " + e.message); }
+    }
+
+    async function handlePasswordRecoveryEvent() {
+      const newPassword = prompt("Escribe tu nueva contraseña para DealWatch MX:");
+      if(!newPassword) return;
+      if(newPassword.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
+      const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+      if(error) return alert("No se pudo cambiar contraseña: " + error.message);
+      alert("Contraseña actualizada. Ya puedes iniciar sesión normalmente.");
+    }
+
     async function signOutSupabaseUser() { if(!supabaseClient) return; await supabaseClient.auth.signOut(); currentSession=null; currentUser=null; currentWorkspaces=[]; currentWorkspace=null; currentMembers=[]; recordSyncEvent("logout", "Sesión cerrada", "local"); renderApp(); }
     async function refreshRemoteProducts(showAlert = true) { if(!supabaseClient || !currentUser || isLoadingRemote) { if(showAlert) alert("Primero inicia sesión en Supabase."); return; } isLoadingRemote=true; try { let productQuery = supabaseClient.from("products").select("*").order("created_at", { ascending:false });
       if(currentWorkspace?.id) productQuery = productQuery.eq("workspace_id", currentWorkspace.id);
@@ -967,14 +1066,66 @@
     }
     async function insertRemoteHistory(productId, entry) { if(!supabaseClient || !currentUser || !isUuid(productId)) return; const payload = { product_id: productId, workspace_id: currentWorkspace?.id || null, previous_price: entry.previousPrice, new_price: Number(entry.price || 0), source: entry.source || "manual", note: entry.note || null }; const { error } = await supabaseClient.from("price_history").insert(payload); if(error) throw error; }
     async function deleteRemoteProduct(id) { if(!supabaseClient || !currentUser || !isUuid(id)) return; const { error } = await supabaseClient.from("products").delete().eq("id", id); if(error) alert("No se pudo borrar en Supabase: " + error.message); else recordSyncEvent("remote_deleted", "Producto borrado en Supabase", "cloud"); }
-    async function migrateLocalToSupabase() { if(!currentUser) return alert("Primero inicia sesión en Supabase."); const products = getProducts(); if(!products.length) return alert("No hay productos locales para migrar."); if(!confirm(`Se subirán ${products.length} producto(s) locales a Supabase. ¿Continuar?`)) return; const migrated=[]; try { for(const p of products) { const inserted = await upsertRemoteProduct({...p, id: isUuid(p.id) ? p.id : ""}); for(const h of (p.priceHistory||[]).slice().reverse()) await insertRemoteHistory(inserted.id, h); migrated.push(inserted); } saveProducts(migrated, "migrated_to_supabase"); alert("Migración completada. Tus productos ya están en Supabase."); await refreshRemoteProducts(false); } catch(e) { alert("Error al migrar: " + e.message); recordSyncEvent("migration_error", e.message, "error"); } }
+    async function shareLocalProductsToWorkspace() {
+      if(!currentUser) return alert("Primero inicia sesión en Supabase.");
+      if(!currentWorkspace) return alert("Primero crea o selecciona un equipo.");
+      if(!canWriteWorkspace()) return alert("Tu rol actual no permite compartir productos al equipo.");
+      const products = getProducts();
+      if(!products.length) return alert("No hay productos locales para compartir.");
+      if(!confirm(`Se compartirán ${products.length} producto(s) locales con el equipo ${currentWorkspace.name}. ¿Continuar?`)) return;
+      const shared=[];
+      try {
+        for(const original of products) {
+          const productForTeam = migrateProduct({ ...original, workspaceId: currentWorkspace.id });
+          const saved = await upsertRemoteProduct(productForTeam);
+          const history = Array.isArray(original.priceHistory) ? original.priceHistory : [];
+          for(const h of history.slice().reverse()) {
+            try { await insertRemoteHistory(saved.id, h); } catch(_e) {}
+          }
+          shared.push(saved);
+        }
+        saveProducts(shared, "shared_to_workspace");
+        recordSyncEvent("workspace_shared", `${shared.length} producto(s) compartido(s) con equipo`, "cloud");
+        await refreshRemoteProducts(false);
+        alert("Productos compartidos con el equipo. Ahora los administradores activos deben verlos al actualizar desde nube.");
+      } catch(e) {
+        recordSyncEvent("workspace_share_error", e.message || "Error al compartir", "error");
+        alert("No se pudieron compartir productos: " + e.message);
+      }
+    }
+
+    async function repairPersonalCloudProductsToWorkspace() {
+      if(!currentUser) return alert("Primero inicia sesión en Supabase.");
+      if(!currentWorkspace) return alert("Primero crea o selecciona un equipo.");
+      if(!canWriteWorkspace()) return alert("Tu rol actual no permite reparar productos del equipo.");
+      try {
+        const { data: rows, error } = await supabaseClient
+          .from("products")
+          .select("id")
+          .is("workspace_id", null);
+        if(error) throw error;
+        if(!rows || !rows.length) return alert("No encontré productos personales sin equipo para reparar.");
+        for(const row of rows) {
+          await supabaseClient.from("products").update({ workspace_id: currentWorkspace.id }).eq("id", row.id);
+          await supabaseClient.from("price_history").update({ workspace_id: currentWorkspace.id }).eq("product_id", row.id);
+        }
+        recordSyncEvent("workspace_repaired", `${rows.length} producto(s) asignado(s) al equipo`, "cloud");
+        await refreshRemoteProducts(false);
+        alert("Productos reparados y asignados al equipo actual.");
+      } catch(e) {
+        recordSyncEvent("workspace_repair_error", e.message || "Error al reparar", "error");
+        alert("No se pudo reparar: " + e.message);
+      }
+    }
+
+    async function migrateLocalToSupabase() { if(!currentUser) return alert("Primero inicia sesión en Supabase."); const products = getProducts(); if(!products.length) return alert("No hay productos locales para migrar."); if(!confirm(`Se subirán ${products.length} producto(s) locales a Supabase. ¿Continuar?`)) return; const migrated=[]; try { for(const p of products) { const inserted = await upsertRemoteProduct({...p, workspaceId: currentWorkspace?.id || p.workspaceId || "", id: isUuid(p.id) ? p.id : ""}); for(const h of (p.priceHistory||[]).slice().reverse()) await insertRemoteHistory(inserted.id, h); migrated.push(inserted); } saveProducts(migrated, "migrated_to_supabase"); alert("Migración completada. Tus productos ya están en Supabase."); await refreshRemoteProducts(false); } catch(e) { alert("Error al migrar: " + e.message); recordSyncEvent("migration_error", e.message, "error"); } }
     function downloadSupabasePayload() { const data = { app:"DealWatch MX", type:"supabase-payload", exportedAt:new Date().toISOString(), user: currentUser?.email || null, workspace: currentWorkspace, products:getProducts() }; downloadJson(data, `dealwatch-supabase-payload-${new Date().toISOString().slice(0,10)}.json`); }
 
     function getSyncLog() { try { return JSON.parse(localStorage.getItem(SYNC_LOG_KEY) || "[]"); } catch { return []; } }
     function recordSyncEvent(action, message, mode = currentUser ? "cloud" : "local") { const log = getSyncLog(); log.unshift({ id:generateId(), action, message, mode, date:new Date().toISOString() }); localStorage.setItem(SYNC_LOG_KEY, JSON.stringify(log.slice(0,80))); }
 
     function downloadJson(data, fileName) { const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"}); const url = URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
-    function exportProductsJson() { downloadJson({ app:"DealWatch MX", project:"Appcomercio", type:"dealwatch-products-backup", version:"10-multi-admin", exportedAt:new Date().toISOString(), totalProducts:getProducts().length, products:getProducts() }, `dealwatch-mx-respaldo-${new Date().toISOString().slice(0,10)}.json`); }
+    function exportProductsJson() { downloadJson({ app:"DealWatch MX", project:"Appcomercio", type:"dealwatch-products-backup", version:"10.1-cuentas-invitaciones", exportedAt:new Date().toISOString(), totalProducts:getProducts().length, products:getProducts() }, `dealwatch-mx-respaldo-${new Date().toISOString().slice(0,10)}.json`); }
     function prepareImportJson(mode) { pendingImportMode=mode; const input=document.getElementById("importJsonInput"); input.value=""; input.click(); }
     function importProductsJson(event) { const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try { const parsed=JSON.parse(reader.result); const raw=Array.isArray(parsed) ? parsed : parsed.products; if(!Array.isArray(raw)) throw new Error("sin productos"); const clean=raw.map(migrateProduct); if(pendingImportMode==="replace") { if(!confirm("¿Reemplazar productos locales por el JSON?")) return; saveProducts(clean,"json_import_replace"); } else saveProducts([...clean.map(p=>({...p,id:generateId(),importedAt:new Date().toISOString()})), ...getProducts()],"json_import_merge"); alert("JSON importado correctamente."); } catch(e){ alert("JSON inválido para DealWatch MX."); } }; reader.readAsText(file); }
 

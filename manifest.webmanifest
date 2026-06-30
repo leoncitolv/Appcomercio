@@ -1,7 +1,7 @@
 {
   "name": "DealWatch MX",
   "short_name": "DealWatch",
-  "description": "DealWatch MX / Appcomercio: favoritos, alertas, historial, PWA y equipo multi-admin con Supabase.",
+  "description": "DealWatch MX / Appcomercio: favoritos, alertas, historial, PWA y equipo multi-admin, cuentas e invitaciones con Supabase.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
