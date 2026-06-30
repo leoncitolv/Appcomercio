@@ -1,31 +1,16 @@
 {
-  "name": "DealWatch MX - Appcomercio",
-  "short_name": "DealWatch MX",
-  "description": "App PWA estable para productos favoritos, historial, alertas locales, respaldo JSON y backend futuro.",
+  "name": "DealWatch MX",
+  "short_name": "DealWatch",
+  "description": "Appcomercio: favoritos, historial, alertas y Supabase.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0b1220",
+  "background_color": "#f5f5f7",
   "theme_color": "#007aff",
+  "orientation": "portrait-primary",
   "lang": "es-MX",
-  "categories": [
-    "shopping",
-    "productivity",
-    "utilities"
-  ],
   "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }

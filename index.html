@@ -7,1119 +7,156 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-
-  <title>DealWatch MX | Appcomercio</title>
-  <!-- Fase 8: versión estable HTML/PWA para GitHub Pages -->
-
+  <title>DealWatch MX | Fase 9 Supabase</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg: #f5f5f7;
-      --card: rgba(255, 255, 255, 0.86);
+      --card: rgba(255,255,255,.86);
       --card-solid: #ffffff;
       --text: #1d1d1f;
       --muted: #6e6e73;
-      --border: rgba(0, 0, 0, 0.08);
+      --border: rgba(0,0,0,.08);
       --primary: #007aff;
       --green: #34c759;
       --orange: #ff9500;
       --red: #ff3b30;
       --purple: #af52de;
       --gray: #8e8e93;
-      --shadow: 0 18px 45px rgba(0, 0, 0, 0.10);
+      --shadow: 0 18px 45px rgba(0,0,0,.10);
       --radius-xl: 28px;
       --radius-lg: 22px;
       --radius-md: 16px;
       --safe-bottom: env(safe-area-inset-bottom);
     }
-
     [data-theme="dark"] {
-      --bg: #000000;
-      --card: rgba(28, 28, 30, 0.88);
+      --bg: #000;
+      --card: rgba(28,28,30,.88);
       --card-solid: #1c1c1e;
       --text: #f5f5f7;
       --muted: #a1a1a6;
-      --border: rgba(255, 255, 255, 0.12);
-      --shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+      --border: rgba(255,255,255,.12);
+      --shadow: 0 18px 45px rgba(0,0,0,.45);
     }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(0, 122, 255, 0.18), transparent 32%),
-        radial-gradient(circle at top right, rgba(175, 82, 222, 0.16), transparent 30%),
-        var(--bg);
+      background: radial-gradient(circle at top left, rgba(0,122,255,.18), transparent 32%), radial-gradient(circle at top right, rgba(175,82,222,.16), transparent 30%), var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding-bottom: calc(102px + var(--safe-bottom));
-    }
-
-    button,
-    input,
-    select,
-    textarea {
-      font-family: inherit;
-    }
-
-    .app {
-      width: min(100%, 560px);
-      margin: 0 auto;
-      padding: 18px 16px 0;
-    }
-
-    .top-bar {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      padding: 14px 0 12px;
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-    }
-
-    .top-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .logo {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: linear-gradient(145deg, #007aff, #5ac8fa);
-      display: grid;
-      place-items: center;
-      color: white;
-      box-shadow: 0 12px 25px rgba(0, 122, 255, 0.32);
-      font-size: 22px;
-      font-weight: 900;
-      flex: 0 0 auto;
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-size: 1.18rem;
-      letter-spacing: -0.03em;
-      white-space: nowrap;
-    }
-
-    .brand p {
-      margin: 2px 0 0;
-      font-size: 0.78rem;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .top-mini-btn {
-      min-width: 82px;
-      height: 42px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: var(--card);
-      color: var(--text);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-      font-weight: 900;
-      cursor: pointer;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    .icon-btn {
-      width: 44px;
-      height: 44px;
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      background: var(--card);
-      color: var(--text);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      font-size: 18px;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    .admin-pill {
-      display: none;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(52, 199, 89, 0.16);
-      color: var(--green);
-      font-size: 0.72rem;
-      font-weight: 950;
-      white-space: nowrap;
-    }
-
-    .admin-pill.active {
-      display: inline-flex;
-    }
-
-    .hero {
-      margin-top: 14px;
-      padding: 26px 22px;
-      border-radius: var(--radius-xl);
-      background:
-        linear-gradient(145deg, rgba(0, 122, 255, 0.96), rgba(90, 200, 250, 0.88)),
-        #007aff;
-      color: white;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      width: 160px;
-      height: 160px;
-      right: -50px;
-      top: -40px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.18);
-    }
-
-    .hero small {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 11px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.20);
-      font-weight: 800;
-      font-size: 0.76rem;
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero h2 {
-      margin: 18px 0 8px;
-      font-size: 2.05rem;
-      line-height: 1.02;
-      letter-spacing: -0.06em;
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero p {
-      margin: 0;
-      font-size: 0.98rem;
-      line-height: 1.45;
-      opacity: 0.92;
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-      position: relative;
-      z-index: 1;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border: 0;
-      border-radius: 999px;
-      padding: 13px 16px;
-      font-weight: 850;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: transform 0.15s ease, opacity 0.15s ease;
-    }
-
-    .btn:active {
-      transform: scale(0.97);
-    }
-
-    .btn-light {
-      background: white;
-      color: #007aff;
-    }
-
-    .btn-ghost {
-      background: rgba(255, 255, 255, 0.18);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-      box-shadow: 0 10px 22px rgba(0, 122, 255, 0.25);
-    }
-
-    .btn-danger {
-      background: rgba(255, 59, 48, 0.14);
-      color: var(--red);
-    }
-
-    .btn-soft {
-      background: rgba(120, 120, 128, 0.14);
-      color: var(--text);
-    }
-
-    .section {
-      margin-top: 24px;
-    }
-
-    .section-header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      padding: 0 2px;
-      gap: 10px;
-    }
-
-    .section-header h3 {
-      margin: 0;
-      font-size: 1.22rem;
-      letter-spacing: -0.04em;
-    }
-
-    .section-header span {
-      font-size: 0.82rem;
-      color: var(--muted);
-      font-weight: 750;
-      text-align: right;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .stat-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 15px 12px;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
-    }
-
-    .stat-card strong {
-      display: block;
-      font-size: 1.35rem;
-      letter-spacing: -0.05em;
-    }
-
-    .stat-card span {
-      display: block;
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 0.76rem;
-      font-weight: 750;
-    }
-
-    .quick-actions {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .action-card {
-      min-height: 120px;
-      border-radius: var(--radius-xl);
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 18px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      cursor: pointer;
-    }
-
-    .action-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 15px;
-      display: grid;
-      place-items: center;
-      color: white;
-      font-size: 22px;
-      margin-bottom: 12px;
-    }
-
-    .blue { background: var(--primary); }
-    .green { background: var(--green); }
-    .orange { background: var(--orange); }
-    .purple { background: var(--purple); }
-    .red { background: var(--red); }
-
-    .action-card strong {
-      display: block;
-      font-size: 0.98rem;
-      margin-bottom: 5px;
-      letter-spacing: -0.03em;
-    }
-
-    .action-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.78rem;
-      line-height: 1.35;
-      font-weight: 700;
-    }
-
-    .screen {
-      display: none;
-      animation: fadeIn 0.24s ease;
-    }
-
-    .screen.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .filters-card,
-    .setting-card,
-    .admin-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 16px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
-      margin-bottom: 14px;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-    }
-
-    .filters-grid {
-      display: grid;
-      gap: 10px;
-    }
-
-    .field {
-      display: grid;
-      gap: 7px;
-    }
-
-    .field label {
-      font-size: 0.76rem;
-      color: var(--muted);
-      font-weight: 950;
-      padding-left: 3px;
-    }
-
-    .field input,
-    .field select,
-    .field textarea {
-      width: 100%;
-      border: 1px solid var(--border);
-      background: rgba(120, 120, 128, 0.10);
-      color: var(--text);
-      border-radius: 16px;
-      padding: 13px 14px;
-      outline: none;
-      font-size: 0.94rem;
-      font-weight: 700;
-    }
-
-    .field textarea {
-      min-height: 80px;
-      resize: vertical;
-    }
-
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      border-color: rgba(0, 122, 255, 0.55);
-      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.10);
-    }
-
-    .two-cols {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .three-cols {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .filter-toggle {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border-radius: 16px;
-      padding: 13px 14px;
-      background: rgba(120, 120, 128, 0.10);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 0.86rem;
-      font-weight: 850;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .filter-toggle input {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--primary);
-    }
-
-    .product-list {
-      display: grid;
-      gap: 14px;
-    }
-
-    .product-card {
-      display: grid;
-      grid-template-columns: 82px 1fr;
-      gap: 14px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 13px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-    }
-
-    .product-img {
-      width: 82px;
-      height: 82px;
-      border-radius: 22px;
-      display: grid;
-      place-items: center;
-      font-size: 32px;
-      background: linear-gradient(145deg, rgba(0, 122, 255, 0.16), rgba(175, 82, 222, 0.16));
-      border: 1px solid var(--border);
-    }
-
-    .product-info {
-      min-width: 0;
-    }
-
-    .product-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .product-title {
-      margin: 3px 0 2px;
-      font-size: 0.99rem;
-      font-weight: 950;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-    }
-
-    .store {
-      font-size: 0.75rem;
-      color: var(--muted);
-      font-weight: 850;
-    }
-
-    .category-line {
-      margin-top: 3px;
-      font-size: 0.72rem;
-      color: var(--muted);
-      font-weight: 800;
-    }
-
-    .badge {
-      white-space: nowrap;
-      border-radius: 999px;
-      padding: 6px 9px;
-      font-size: 0.68rem;
-      font-weight: 950;
-    }
-
-    .badge.offer {
-      background: rgba(52, 199, 89, 0.15);
-      color: var(--green);
-    }
-
-    .badge.watch {
-      background: rgba(255, 149, 0, 0.15);
-      color: var(--orange);
-    }
-
-    .price-row {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .price {
-      font-size: 1.25rem;
-      font-weight: 950;
-      letter-spacing: -0.05em;
-    }
-
-    .target {
-      font-size: 0.76rem;
-      color: var(--muted);
-      font-weight: 850;
-    }
-
-    .savings {
-      margin-top: 5px;
-      font-size: 0.76rem;
-      color: var(--green);
-      font-weight: 900;
-    }
-
-    .progress {
-      height: 7px;
-      background: rgba(120, 120, 128, 0.16);
-      border-radius: 999px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-
-    .progress span {
-      display: block;
-      height: 100%;
-      border-radius: inherit;
-      background: var(--primary);
-    }
-
-    .product-notes {
-      margin-top: 9px;
-      color: var(--muted);
-      font-size: 0.76rem;
-      line-height: 1.35;
-      font-weight: 650;
-    }
-
-    .product-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .mini-btn {
-      border: 0;
-      border-radius: 999px;
-      padding: 8px 10px;
-      font-size: 0.73rem;
-      font-weight: 950;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .mini-blue {
-      background: rgba(0, 122, 255, 0.12);
-      color: var(--primary);
-    }
-
-    .mini-red {
-      background: rgba(255, 59, 48, 0.12);
-      color: var(--red);
-    }
-
-    .mini-gray {
-      background: rgba(142, 142, 147, 0.14);
-      color: var(--text);
-    }
-
-    .empty-card {
-      padding: 28px 20px;
-      text-align: center;
-      border-radius: var(--radius-xl);
-      background: var(--card);
-      border: 1px dashed var(--border);
-      color: var(--muted);
-      font-weight: 650;
-    }
-
-    .empty-card .big {
-      font-size: 42px;
-      margin-bottom: 10px;
-    }
-
-    .empty-card strong {
-      display: block;
-      color: var(--text);
-      font-size: 1rem;
-      margin-bottom: 6px;
-    }
-
-    .setting-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-    }
-
-    .setting-card strong,
-    .admin-card strong {
-      display: block;
-      font-size: 0.98rem;
-    }
-
-    .setting-card span,
-    .admin-card span,
-    .help-text {
-      display: block;
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 0.80rem;
-      line-height: 1.4;
-      font-weight: 650;
-    }
-
-    .switch {
-      width: 54px;
-      height: 32px;
-      border-radius: 999px;
-      background: rgba(120, 120, 128, 0.22);
-      padding: 3px;
-      cursor: pointer;
-      flex: 0 0 auto;
-      transition: 0.2s ease;
-    }
-
-    .switch.active {
-      background: var(--green);
-    }
-
-    .switch span {
-      width: 26px;
-      height: 26px;
-      display: block;
-      border-radius: 50%;
-      background: white;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
-      transition: 0.2s ease;
-      margin: 0;
-    }
-
-    .switch.active span {
-      transform: translateX(22px);
-    }
-
-    .form-grid {
-      display: grid;
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    .form-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 4px;
-    }
-
-    .admin-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 8px 11px;
-      border-radius: 999px;
-      font-size: 0.74rem;
-      font-weight: 950;
-      margin-top: 10px;
-    }
-
-    .admin-status.on {
-      background: rgba(52, 199, 89, 0.15);
-      color: var(--green);
-    }
-
-    .admin-status.off {
-      background: rgba(142, 142, 147, 0.15);
-      color: var(--gray);
-    }
-
-    .notice {
-      padding: 14px 16px;
-      border-radius: var(--radius-lg);
-      background: rgba(0, 122, 255, 0.10);
-      color: var(--primary);
-      font-size: 0.84rem;
-      font-weight: 800;
-      line-height: 1.4;
-      margin-top: 14px;
-    }
-
-    .warning {
-      padding: 14px 16px;
-      border-radius: var(--radius-lg);
-      background: rgba(255, 149, 0, 0.12);
-      color: var(--orange);
-      font-size: 0.82rem;
-      font-weight: 800;
-      line-height: 1.4;
-      margin-top: 14px;
-    }
-
-
-    .history-list {
-      display: grid;
-      gap: 12px;
-    }
-
-    .history-item {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 14px;
-      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    .history-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-    }
-
-    .history-product {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      min-width: 0;
-    }
-
-    .history-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      background: rgba(0, 122, 255, 0.12);
-      border: 1px solid var(--border);
-      font-size: 22px;
-      flex: 0 0 auto;
-    }
-
-    .history-name {
-      font-size: 0.92rem;
-      font-weight: 950;
-      line-height: 1.15;
-    }
-
-    .history-store {
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: 0.72rem;
-      font-weight: 800;
-    }
-
-    .history-price {
-      text-align: right;
-      font-size: 1rem;
-      font-weight: 950;
-      white-space: nowrap;
-    }
-
-    .history-date,
-    .history-note {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 0.76rem;
-      line-height: 1.35;
-      font-weight: 700;
-    }
-
-    .history-note {
-      color: var(--text);
-      opacity: 0.86;
-    }
-
-    .history-change {
-      margin-top: 8px;
-      font-size: 0.78rem;
-      font-weight: 900;
-    }
-
-    .history-change.down {
-      color: var(--green);
-    }
-
-    .history-change.up {
-      color: var(--red);
-    }
-
-    .history-change.same {
-      color: var(--gray);
-    }
-
-
-
-    .alert-panel {
-      display: grid;
-      gap: 12px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 16px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
-      margin-bottom: 14px;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-    }
-
-    .alert-panel strong {
-      display: block;
-      font-size: 1rem;
-      letter-spacing: -0.03em;
-    }
-
-    .alert-panel span {
-      display: block;
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 0.80rem;
-      line-height: 1.4;
-      font-weight: 650;
-    }
-
-    .alert-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .alert-mini {
-      border-radius: 18px;
-      padding: 12px;
-      background: rgba(120, 120, 128, 0.10);
-      border: 1px solid var(--border);
-    }
-
-    .alert-mini b {
-      display: block;
-      font-size: 1.08rem;
-      letter-spacing: -0.04em;
-    }
-
-    .alert-mini small {
-      color: var(--muted);
-      font-size: 0.72rem;
-      font-weight: 800;
-    }
-
-    .alert-reason {
-      margin-top: 7px;
-      padding: 8px 10px;
-      border-radius: 14px;
-      background: rgba(52, 199, 89, 0.13);
-      color: var(--green);
-      font-size: 0.75rem;
-      font-weight: 900;
-      line-height: 1.35;
-    }
-
-    .alert-muted {
-      margin-top: 7px;
-      padding: 8px 10px;
-      border-radius: 14px;
-      background: rgba(142, 142, 147, 0.14);
-      color: var(--muted);
-      font-size: 0.75rem;
-      font-weight: 850;
-      line-height: 1.35;
-    }
-
-    .badge.muted {
-      background: rgba(142, 142, 147, 0.15);
-      color: var(--gray);
-    }
-
-    @media (max-width: 420px) {
-      .alert-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .pwa-status-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 16px;
-    }
-
-    .pwa-status-item {
-      border-radius: 18px;
-      padding: 13px;
-      background: rgba(120, 120, 128, 0.10);
-      border: 1px solid var(--border);
-    }
-
-    .pwa-status-item b {
-      display: block;
-      font-size: 0.76rem;
-      color: var(--muted);
-      margin-bottom: 5px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .pwa-status-item span {
-      display: block;
-      margin: 0;
-      color: var(--text);
-      font-size: 0.92rem;
-      font-weight: 900;
-      line-height: 1.25;
-    }
-
-    .device-steps {
-      display: grid;
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    .device-step {
-      border-radius: 18px;
-      padding: 14px;
-      background: rgba(0, 122, 255, 0.08);
-      border: 1px solid rgba(0, 122, 255, 0.18);
-    }
-
-    .device-step strong {
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    .device-step span {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.8rem;
-      font-weight: 700;
-      line-height: 1.45;
-    }
-
-    .bottom-nav {
-      position: fixed;
-      left: 50%;
-      bottom: calc(12px + var(--safe-bottom));
-      transform: translateX(-50%);
-      width: min(calc(100% - 24px), 540px);
-      z-index: 30;
-      background: rgba(255, 255, 255, 0.78);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 28px;
-      padding: 8px;
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 4px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
-      backdrop-filter: blur(26px);
-      -webkit-backdrop-filter: blur(26px);
-    }
-
-    [data-theme="dark"] .bottom-nav {
-      background: rgba(28, 28, 30, 0.78);
-      border-color: rgba(255, 255, 255, 0.12);
-    }
-
-    .nav-btn {
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      border-radius: 21px;
-      padding: 9px 2px;
-      font-weight: 900;
-      font-size: 0.58rem;
-      cursor: pointer;
-      display: grid;
-      gap: 3px;
-      place-items: center;
-    }
-
-    .nav-btn .nav-icon {
-      font-size: 18px;
-      line-height: 1;
-    }
-
-    .nav-btn.active {
-      background: rgba(0, 122, 255, 0.12);
-      color: var(--primary);
-    }
-
-    @media (min-width: 700px) {
-      body {
-        padding-top: 20px;
-      }
-
-      .app {
-        padding-top: 10px;
-      }
-    }
-
-    @media (max-width: 420px) {
-      .top-mini-btn {
-        display: none;
-      }
-
-      .two-cols,
-      .three-cols,
-      .pwa-status-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .product-card {
-        grid-template-columns: 72px 1fr;
-      }
-
-      .product-img {
-        width: 72px;
-        height: 72px;
-      }
-    }
+      padding-bottom: calc(104px + var(--safe-bottom));
+    }
+    button, input, select, textarea { font-family: inherit; }
+    .app { width: min(100%, 620px); margin: 0 auto; padding: 18px 16px 0; }
+    .top-bar { position: sticky; top: 0; z-index: 20; padding: 14px 0 12px; backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); }
+    .top-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .logo { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(145deg, #007aff, #5ac8fa); display: grid; place-items: center; color: white; box-shadow: 0 12px 25px rgba(0,122,255,.32); font-size: 22px; font-weight: 950; flex: 0 0 auto; }
+    .brand h1 { margin: 0; font-size: 1.18rem; letter-spacing: -.03em; white-space: nowrap; }
+    .brand p { margin: 2px 0 0; font-size: .78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .top-actions { display: flex; gap: 8px; align-items: center; }
+    .pill { padding: 8px 10px; border-radius: 999px; font-size: .72rem; font-weight: 950; white-space: nowrap; background: rgba(142,142,147,.14); color: var(--gray); }
+    .pill.on { background: rgba(52,199,89,.16); color: var(--green); }
+    .pill.warn { background: rgba(255,149,0,.16); color: var(--orange); }
+    .icon-btn { width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 50%; background: var(--card); color: var(--text); box-shadow: 0 8px 20px rgba(0,0,0,.08); display: grid; place-items: center; cursor: pointer; font-size: 18px; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+    .screen { display: none; animation: fadeIn .22s ease; }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px);} to {opacity: 1; transform: translateY(0);} }
+    .hero { margin-top: 14px; padding: 26px 22px; border-radius: var(--radius-xl); background: linear-gradient(145deg, rgba(0,122,255,.96), rgba(90,200,250,.88)), #007aff; color: white; box-shadow: var(--shadow); overflow: hidden; position: relative; }
+    .hero::after { content: ""; position: absolute; width: 170px; height: 170px; right: -54px; top: -44px; border-radius: 50%; background: rgba(255,255,255,.18); }
+    .hero small { display: inline-flex; padding: 7px 11px; border-radius: 999px; background: rgba(255,255,255,.20); font-weight: 850; font-size: .76rem; position: relative; z-index: 1; }
+    .hero h2 { margin: 18px 0 8px; font-size: 2.05rem; line-height: 1.02; letter-spacing: -.06em; position: relative; z-index: 1; }
+    .hero p { margin: 0; font-size: .98rem; line-height: 1.45; opacity: .92; position: relative; z-index: 1; }
+    .hero-actions { display: flex; gap: 10px; margin-top: 20px; position: relative; z-index: 1; flex-wrap: wrap; }
+    .section { margin-top: 24px; }
+    .section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 12px; padding: 0 2px; gap: 10px; }
+    .section-header h3 { margin: 0; font-size: 1.22rem; letter-spacing: -.04em; }
+    .section-header span { font-size: .82rem; color: var(--muted); font-weight: 750; text-align: right; }
+    .card, .filters-card, .setting-card, .admin-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 16px; box-shadow: 0 12px 32px rgba(0,0,0,.07); margin-bottom: 14px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .card strong, .setting-card strong, .admin-card strong { display: block; font-size: .98rem; }
+    .card span, .setting-card span, .admin-card span, .help-text { display: block; margin-top: 5px; color: var(--muted); font-size: .80rem; line-height: 1.4; font-weight: 650; }
+    .btn { border: 0; border-radius: 999px; padding: 13px 16px; font-weight: 850; font-size: .9rem; cursor: pointer; transition: transform .15s ease, opacity .15s ease; }
+    .btn:active { transform: scale(.97); }
+    .btn-light { background: white; color: #007aff; }
+    .btn-ghost { background: rgba(255,255,255,.18); color: white; border: 1px solid rgba(255,255,255,.25); }
+    .btn-primary { background: var(--primary); color: white; box-shadow: 0 10px 22px rgba(0,122,255,.25); }
+    .btn-danger { background: rgba(255,59,48,.14); color: var(--red); }
+    .btn-soft { background: rgba(120,120,128,.14); color: var(--text); }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 15px 12px; box-shadow: 0 10px 28px rgba(0,0,0,.06); }
+    .stat-card strong { display: block; font-size: 1.35rem; letter-spacing: -.05em; }
+    .stat-card span { display: block; margin-top: 4px; color: var(--muted); font-size: .76rem; font-weight: 750; }
+    .quick-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .action-card { min-height: 120px; border-radius: var(--radius-xl); background: var(--card); border: 1px solid var(--border); padding: 18px; box-shadow: 0 12px 32px rgba(0,0,0,.07); cursor: pointer; }
+    .action-icon { width: 44px; height: 44px; border-radius: 15px; display: grid; place-items: center; color: white; font-size: 22px; margin-bottom: 12px; }
+    .blue { background: var(--primary); } .green { background: var(--green); } .orange { background: var(--orange); } .purple { background: var(--purple); } .red { background: var(--red); }
+    .action-card strong { display: block; font-size: .98rem; margin-bottom: 5px; letter-spacing: -.03em; }
+    .action-card p { margin: 0; color: var(--muted); font-size: .78rem; line-height: 1.35; font-weight: 700; }
+    .field { display: grid; gap: 7px; }
+    .field label { font-size: .76rem; color: var(--muted); font-weight: 950; padding-left: 3px; }
+    .field input, .field select, .field textarea { width: 100%; border: 1px solid var(--border); background: rgba(120,120,128,.10); color: var(--text); border-radius: 16px; padding: 13px 14px; outline: none; font-size: .94rem; font-weight: 700; }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(0,122,255,.55); box-shadow: 0 0 0 4px rgba(0,122,255,.10); }
+    .two-cols { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .form-grid, .filters-grid { display: grid; gap: 12px; margin-top: 16px; }
+    .form-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+    .filter-toggle { display: flex; align-items: center; gap: 10px; border-radius: 16px; padding: 13px 14px; background: rgba(120,120,128,.10); border: 1px solid var(--border); color: var(--text); font-size: .86rem; font-weight: 850; cursor: pointer; user-select: none; }
+    .filter-toggle input { width: 18px; height: 18px; accent-color: var(--primary); }
+    .product-list { display: grid; gap: 14px; }
+    .product-card { display: grid; grid-template-columns: 82px 1fr; gap: 14px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 13px; box-shadow: 0 12px 32px rgba(0,0,0,.08); }
+    .product-img { width: 82px; height: 82px; border-radius: 22px; display: grid; place-items: center; font-size: 32px; background: linear-gradient(145deg, rgba(0,122,255,.16), rgba(175,82,222,.16)); border: 1px solid var(--border); }
+    .product-info { min-width: 0; }
+    .product-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+    .product-title { margin: 3px 0 2px; font-size: .99rem; font-weight: 950; letter-spacing: -.03em; line-height: 1.15; }
+    .store, .category-line { font-size: .75rem; color: var(--muted); font-weight: 850; }
+    .category-line { margin-top: 3px; font-size: .72rem; }
+    .badge { white-space: nowrap; border-radius: 999px; padding: 6px 9px; font-size: .68rem; font-weight: 950; }
+    .badge.offer { background: rgba(52,199,89,.15); color: var(--green); }
+    .badge.watch { background: rgba(255,149,0,.15); color: var(--orange); }
+    .badge.off { background: rgba(142,142,147,.15); color: var(--gray); }
+    .price-row { display: flex; align-items: baseline; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .price { font-size: 1.25rem; font-weight: 950; letter-spacing: -.05em; }
+    .target { font-size: .76rem; color: var(--muted); font-weight: 850; }
+    .savings { margin-top: 5px; font-size: .76rem; color: var(--green); font-weight: 900; }
+    .progress { height: 7px; background: rgba(120,120,128,.16); border-radius: 999px; overflow: hidden; margin-top: 10px; }
+    .progress span { display: block; height: 100%; border-radius: inherit; background: var(--primary); }
+    .product-notes { margin-top: 9px; color: var(--muted); font-size: .76rem; line-height: 1.35; font-weight: 650; }
+    .product-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .mini-btn { border: 0; border-radius: 999px; padding: 8px 10px; font-size: .73rem; font-weight: 950; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    .mini-blue { background: rgba(0,122,255,.12); color: var(--primary); }
+    .mini-red { background: rgba(255,59,48,.12); color: var(--red); }
+    .mini-gray { background: rgba(142,142,147,.14); color: var(--text); }
+    .mini-green { background: rgba(52,199,89,.14); color: var(--green); }
+    .empty-card { padding: 28px 20px; text-align: center; border-radius: var(--radius-xl); background: var(--card); border: 1px dashed var(--border); color: var(--muted); font-weight: 650; }
+    .empty-card .big { font-size: 42px; margin-bottom: 10px; }
+    .empty-card strong { display: block; color: var(--text); font-size: 1rem; margin-bottom: 6px; }
+    .notice, .warning, .success { padding: 14px 16px; border-radius: var(--radius-lg); font-size: .84rem; font-weight: 800; line-height: 1.4; margin-top: 14px; }
+    .notice { background: rgba(0,122,255,.10); color: var(--primary); }
+    .warning { background: rgba(255,149,0,.12); color: var(--orange); }
+    .success { background: rgba(52,199,89,.12); color: var(--green); }
+    .switch { width: 54px; height: 32px; border-radius: 999px; background: rgba(120,120,128,.22); padding: 3px; cursor: pointer; flex: 0 0 auto; transition: .2s ease; }
+    .switch.active { background: var(--green); }
+    .switch span { width: 26px; height: 26px; display: block; border-radius: 50%; background: white; box-shadow: 0 3px 8px rgba(0,0,0,.18); transition: .2s ease; margin: 0; }
+    .switch.active span { transform: translateX(22px); }
+    .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .history-item { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 18px; background: rgba(120,120,128,.08); }
+    .history-icon { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: rgba(0,122,255,.12); color: var(--primary); font-size: 20px; }
+    .history-title { font-weight: 950; font-size: .9rem; }
+    .history-meta { color: var(--muted); font-size: .76rem; font-weight: 700; margin-top: 3px; }
+    .history-price { font-weight: 950; font-size: .92rem; white-space: nowrap; }
+    .bottom-nav { position: fixed; left: 50%; bottom: calc(12px + var(--safe-bottom)); transform: translateX(-50%); width: min(calc(100% - 24px), 600px); z-index: 30; background: rgba(255,255,255,.78); border: 1px solid rgba(0,0,0,.08); border-radius: 28px; padding: 8px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; box-shadow: 0 16px 40px rgba(0,0,0,.16); backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px); }
+    [data-theme="dark"] .bottom-nav { background: rgba(28,28,30,.78); border-color: rgba(255,255,255,.12); }
+    .nav-btn { border: 0; background: transparent; color: var(--muted); border-radius: 21px; padding: 9px 2px; font-weight: 900; font-size: .58rem; cursor: pointer; display: grid; gap: 3px; place-items: center; }
+    .nav-btn .nav-icon { font-size: 18px; line-height: 1; }
+    .nav-btn.active { background: rgba(0,122,255,.12); color: var(--primary); }
+    .hidden { display: none !important; }
+    @media (max-width: 520px) { .two-cols { grid-template-columns: 1fr; } .product-card { grid-template-columns: 72px 1fr; } .product-img { width:72px; height:72px; } .brand p { max-width: 180px; } }
   </style>
 </head>
-
 <body>
   <main class="app">
     <header class="top-bar">
@@ -1128,2606 +165,512 @@
           <div class="logo">D</div>
           <div>
             <h1>DealWatch MX</h1>
-            <p>Appcomercio · Favoritos y ofertas</p>
+            <p>Appcomercio · Supabase Free</p>
           </div>
         </div>
-
         <div class="top-actions">
-          <div class="admin-pill" id="adminPill">ADMIN</div>
-          <button class="top-mini-btn" id="installTopButton" onclick="installPwa()">Instalar</button>
+          <div class="pill" id="cloudPill">Local</div>
           <button class="icon-btn" id="themeButton" aria-label="Cambiar tema">☀️</button>
         </div>
       </div>
     </header>
 
-    <!-- INICIO -->
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>✅ Fase 8 · Versión estable</small>
-        <h2>DealWatch MX listo para usar.</h2>
-        <p>
-          Esta versión deja cerrada una base estable: favoritos, admin, historial, alertas, respaldo JSON, PWA y preparación para backend futuro.
-        </p>
-
+        <small>☁️ Fase 9 · Supabase conectado</small>
+        <h2>Tu app ya puede usar base de datos real.</h2>
+        <p>Inicia sesión, migra tus productos locales y sincroniza favoritos, historial y alertas con Supabase.</p>
         <div class="hero-actions">
-          <button class="btn btn-light" onclick="goToScreen('favorites')">Probar favoritos</button>
-          <button class="btn btn-ghost" onclick="goToScreen('settings')">Checklist</button>
+          <button class="btn btn-light" onclick="goToScreen('cloud')">Conectar Supabase</button>
+          <button class="btn btn-ghost" onclick="goToScreen('admin')">Administrar</button>
         </div>
       </div>
 
       <section class="section">
-        <div class="section-header">
-          <h3>Resumen</h3>
-          <span id="summaryLabel">Cargando...</span>
-        </div>
-
+        <div class="section-header"><h3>Resumen</h3><span id="summaryLabel">Cargando...</span></div>
         <div class="stats-grid">
-          <div class="stat-card">
-            <strong id="statProducts">0</strong>
-            <span>Productos</span>
-          </div>
-
-          <div class="stat-card">
-            <strong id="statOffers">0</strong>
-            <span>Ofertas</span>
-          </div>
-
-          <div class="stat-card">
-            <strong id="statStores">0</strong>
-            <span>Tiendas</span>
-          </div>
+          <div class="stat-card"><strong id="statProducts">0</strong><span>Productos</span></div>
+          <div class="stat-card"><strong id="statOffers">0</strong><span>Ofertas</span></div>
+          <div class="stat-card"><strong id="statStores">0</strong><span>Tiendas</span></div>
         </div>
       </section>
 
       <section class="section">
-        <div class="section-header">
-          <h3>Accesos rápidos</h3>
-          <span>Fase 8</span>
-        </div>
-
+        <div class="section-header"><h3>Accesos rápidos</h3><span>Fase 9</span></div>
         <div class="quick-actions">
-          <article class="action-card" onclick="goToScreen('favorites')">
-            <div class="action-icon blue">🛒</div>
-            <strong>Favoritos</strong>
-            <p>Consulta, busca y filtra tus productos favoritos.</p>
-          </article>
-
-          <article class="action-card" onclick="goToScreen('alerts')">
-            <div class="action-icon green">🔔</div>
-            <strong>Alertas</strong>
-            <p>Ve productos que alcanzaron meta o descuento mínimo.</p>
-          </article>
-
-          <article class="action-card" onclick="goToScreen('history')">
-            <div class="action-icon orange">📈</div>
-            <strong>Historial</strong>
-            <p>Registra precios y dispara alertas locales.</p>
-          </article>
-
-          <article class="action-card" onclick="goToScreen('settings')">
-            <div class="action-icon purple">🧩</div>
-            <strong>Backend futuro</strong>
-            <p>Guarda configuración API y exporta payload para automatizar.</p>
-          </article>
-
-          <article class="action-card" onclick="goToScreen('settings')">
-            <div class="action-icon blue">⚙️</div>
-            <strong>Ajustes PWA</strong>
-            <p>Instalación, offline, caché y estado administrador.</p>
-          </article>
+          <article class="action-card" onclick="goToScreen('favorites')"><div class="action-icon blue">🛒</div><strong>Favoritos</strong><p>Busca, filtra y abre links de productos.</p></article>
+          <article class="action-card" onclick="goToScreen('alerts')"><div class="action-icon green">🔔</div><strong>Alertas</strong><p>Detecta precio objetivo o descuento mínimo.</p></article>
+          <article class="action-card" onclick="goToScreen('history')"><div class="action-icon orange">📈</div><strong>Historial</strong><p>Consulta cambios de precio guardados.</p></article>
+          <article class="action-card" onclick="goToScreen('cloud')"><div class="action-icon purple">☁️</div><strong>Supabase</strong><p>Login, migración y sincronización.</p></article>
         </div>
       </section>
     </section>
 
-    <!-- FAVORITOS -->
     <section class="screen" id="screen-favorites">
       <section class="section">
-        <div class="section-header">
-          <h3>Favoritos</h3>
-          <span id="favoritesCount">0 productos</span>
-        </div>
-
+        <div class="section-header"><h3>Favoritos</h3><span id="favoritesCount">0 productos</span></div>
         <div class="filters-card">
           <div class="filters-grid">
-            <div class="field">
-              <label for="searchInput">Buscar producto</label>
-              <input
-                type="search"
-                id="searchInput"
-                placeholder="Ej. control, audífonos, celular..."
-              />
+            <div class="field"><label for="searchInput">Buscar producto</label><input type="search" id="searchInput" placeholder="Ej. control, audífonos, celular..." /></div>
+            <div class="two-cols">
+              <div class="field"><label for="storeFilter">Tienda</label><select id="storeFilter"><option value="">Todas</option></select></div>
+              <div class="field"><label for="categoryFilter">Categoría</label><select id="categoryFilter"><option value="">Todas</option></select></div>
             </div>
-
-            <div class="three-cols">
-              <div class="field">
-                <label for="storeFilter">Tienda</label>
-                <select id="storeFilter">
-                  <option value="">Todas</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="categoryFilter">Categoría</label>
-                <select id="categoryFilter">
-                  <option value="">Todas</option>
-                </select>
-              </div>
-            </div>
-
-            <label class="filter-toggle">
-              <input type="checkbox" id="onlyOffersFilter" />
-              Mostrar solo ofertas activas
-            </label>
-
-            <div class="form-actions">
-              <button class="btn btn-soft" type="button" onclick="clearFilters()">Limpiar filtros</button>
-              <button class="btn btn-primary" type="button" onclick="goToScreen('admin')">Agregar producto</button>
-            </div>
+            <label class="filter-toggle"><input type="checkbox" id="onlyOffersFilter" /> Mostrar solo ofertas activas</label>
+            <div class="form-actions"><button class="btn btn-soft" onclick="clearFilters()">Limpiar filtros</button><button class="btn btn-primary" onclick="goToScreen('admin')">Agregar producto</button></div>
           </div>
         </div>
-
         <div class="product-list" id="favoritesList"></div>
       </section>
     </section>
 
-    <!-- ALERTAS -->
     <section class="screen" id="screen-alerts">
       <section class="section">
-        <div class="section-header">
-          <h3>Alertas</h3>
-          <span id="alertsCount">0 activas</span>
-        </div>
-
-        <div class="alert-panel">
-          <div>
-            <strong>Centro de alertas locales</strong>
-            <span>
-              Una alerta se activa si el precio actual llega al precio objetivo o si el descuento calculado cumple el porcentaje mínimo.
-            </span>
-          </div>
-
-          <div class="alert-grid">
-            <div class="alert-mini">
-              <b id="alertStatActive">0</b>
-              <small>activas</small>
-            </div>
-            <div class="alert-mini">
-              <b id="alertStatMuted">0</b>
-              <small>silenciadas</small>
-            </div>
-            <div class="alert-mini">
-              <b id="notificationStatusText">OFF</b>
-              <small>notificaciones</small>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button class="btn btn-primary" type="button" onclick="requestOfferNotifications()">
-              Activar notificaciones
-            </button>
-            <button class="btn btn-soft" type="button" onclick="testOfferNotification()">
-              Probar aviso
-            </button>
-            <button class="btn btn-soft" type="button" onclick="checkAndNotifyOffers(getProducts(), true)">
-              Revisar ahora
-            </button>
+        <div class="section-header"><h3>Alertas</h3><span id="alertsCount">0 activas</span></div>
+        <div class="card">
+          <strong>Centro de alertas</strong>
+          <span>Las alertas se revisan cuando abres la app, guardas un producto o registras un nuevo precio.</span>
+          <div class="form-actions" style="margin-top:16px;">
+            <button class="btn btn-primary" onclick="manualOfferCheck()">Revisar ofertas</button>
+            <button class="btn btn-soft" onclick="requestNotificationPermission()">Activar notificaciones</button>
+            <button class="btn btn-soft" onclick="sendTestNotification()">Probar notificación</button>
           </div>
         </div>
-
         <div class="product-list" id="alertsList"></div>
-
-        <div class="notice">
-          Estas notificaciones son locales: funcionan cuando la app está abierta o instalada y el navegador permite avisos. El monitoreo automático real se agregará después con backend, cron o GitHub Actions.
-        </div>
       </section>
     </section>
 
-
-
-    <!-- HISTORIAL -->
     <section class="screen" id="screen-history">
       <section class="section">
-        <div class="section-header">
-          <h3>Historial</h3>
-          <span id="historyCount">0 registros</span>
-        </div>
-
-        <div class="admin-card" id="historyAdminCard">
+        <div class="section-header"><h3>Historial</h3><span id="historyCount">0 registros</span></div>
+        <div class="card">
           <strong>Registrar precio manual</strong>
-          <span>
-            Selecciona un producto y captura el nuevo precio visto en la tienda.
-            La app actualizará el precio actual y guardará el movimiento en historial.
-          </span>
-
-          <form class="form-grid" id="historyForm">
-            <div class="field">
-              <label for="historyProductSelect">Producto</label>
-              <select id="historyProductSelect" required></select>
-            </div>
-
+          <span>Selecciona producto, escribe el nuevo precio y se guardará en historial local y en Supabase si estás conectado.</span>
+          <form class="form-grid" id="priceForm">
+            <div class="field"><label for="historyProductId">Producto</label><select id="historyProductId" required></select></div>
             <div class="two-cols">
-              <div class="field">
-                <label for="historyNewPrice">Nuevo precio</label>
-                <input type="number" id="historyNewPrice" min="0" step="1" placeholder="999" required />
-              </div>
-
-              <div class="field">
-                <label for="historySource">Fuente</label>
-                <select id="historySource">
-                  <option value="Revisión manual">Revisión manual</option>
-                  <option value="Amazon México">Amazon México</option>
-                  <option value="Mercado Libre">Mercado Libre</option>
-                  <option value="PlayStation Store">PlayStation Store</option>
-                  <option value="Otra tienda">Otra tienda</option>
-                </select>
-              </div>
+              <div class="field"><label for="historyNewPrice">Nuevo precio</label><input type="number" id="historyNewPrice" min="0" step="1" required /></div>
+              <div class="field"><label for="historySource">Fuente</label><input type="text" id="historySource" placeholder="Amazon, Mercado Libre..." /></div>
             </div>
-
-            <div class="field">
-              <label for="historyNote">Nota del cambio</label>
-              <input type="text" id="historyNote" placeholder="Ej. Bajó por promoción, cupón, Buen Fin..." />
-            </div>
-
-            <div class="form-actions">
-              <button class="btn btn-primary" type="submit">Guardar precio</button>
-              <button class="btn btn-soft" type="button" onclick="document.getElementById('historyForm').reset()">Limpiar</button>
-            </div>
+            <div class="field"><label for="historyNote">Nota</label><input type="text" id="historyNote" placeholder="Ej. bajó por cupón, promoción bancaria..." /></div>
+            <div class="form-actions"><button class="btn btn-primary" type="submit">Registrar precio</button></div>
           </form>
         </div>
-
         <div class="product-list" id="historyList"></div>
       </section>
     </section>
 
-    <!-- ADMIN -->
     <section class="screen" id="screen-admin">
       <section class="section">
-        <div class="section-header">
-          <h3>Administrador</h3>
-          <span id="adminHeaderStatus">Bloqueado</span>
-        </div>
-
+        <div class="section-header"><h3>Administrador</h3><span id="adminHeaderStatus">Bloqueado</span></div>
         <div class="admin-card" id="loginCard">
-          <strong>Entrar al modo administrador</strong>
-          <span>
-            Ingresa la clave local para agregar, editar, eliminar, importar y exportar productos.
-          </span>
-
-          <div class="warning">
-            Clave inicial de prueba: <b>admin123</b>.
-            Esta clave no es seguridad real porque la app está en HTML público.
-          </div>
-
-          <form class="form-grid" id="loginForm">
-            <div class="field">
-              <label for="adminPassword">Clave de administrador</label>
-              <input
-                type="password"
-                id="adminPassword"
-                placeholder="Escribe la clave"
-                autocomplete="current-password"
-                required
-              />
-            </div>
-
-            <div class="form-actions">
-              <button class="btn btn-primary" type="submit">Entrar</button>
-            </div>
-          </form>
+          <strong>Entrar al modo administrador local</strong>
+          <span>Sirve como respaldo offline. Con Supabase conectado, tu sesión también habilita administración.</span>
+          <div class="warning">Clave local de respaldo: <b>admin123</b>. No es seguridad real; el login real es Supabase.</div>
+          <form class="form-grid" id="loginForm"><div class="field"><label for="adminPassword">Clave local</label><input type="password" id="adminPassword" placeholder="admin123" required /></div><div class="form-actions"><button class="btn btn-primary" type="submit">Entrar</button></div></form>
         </div>
-
         <div id="adminPanel" style="display:none;">
           <div class="admin-card">
             <strong id="productFormTitle">Agregar producto favorito</strong>
-            <span id="productFormSubtitle">
-              Guarda productos con tienda, categoría, link, precio actual y precio objetivo.
-            </span>
-
+            <span id="productFormSubtitle">Si estás conectado a Supabase, se guarda en la nube y también queda copia local.</span>
             <form class="form-grid" id="productForm">
               <input type="hidden" id="editingProductId" />
-
-              <div class="field">
-                <label for="productName">Nombre del producto</label>
-                <input
-                  type="text"
-                  id="productName"
-                  placeholder="Ej. Control DualSense PS5"
-                  required
-                />
-              </div>
-
+              <div class="field"><label for="productName">Nombre del producto</label><input type="text" id="productName" placeholder="Ej. Control DualSense PS5" required /></div>
               <div class="two-cols">
-                <div class="field">
-                  <label for="productStore">Tienda</label>
-                  <select id="productStore" required>
-                    <option value="Amazon México">Amazon México</option>
-                    <option value="Mercado Libre">Mercado Libre</option>
-                    <option value="PlayStation Store">PlayStation Store</option>
-                    <option value="Walmart">Walmart</option>
-                    <option value="Liverpool">Liverpool</option>
-                    <option value="Otra tienda">Otra tienda</option>
-                  </select>
-                </div>
-
-                <div class="field">
-                  <label for="productCategory">Categoría</label>
-                  <select id="productCategory" required>
-                    <option value="Videojuegos">Videojuegos</option>
-                    <option value="Tecnología">Tecnología</option>
-                    <option value="Celulares">Celulares</option>
-                    <option value="Audio">Audio</option>
-                    <option value="Hogar">Hogar</option>
-                    <option value="Ropa y calzado">Ropa y calzado</option>
-                    <option value="Otro">Otro</option>
-                  </select>
-                </div>
+                <div class="field"><label for="productStore">Tienda</label><select id="productStore" required><option>Amazon México</option><option>Mercado Libre</option><option>PlayStation Store</option><option>Walmart</option><option>Liverpool</option><option>Otra tienda</option></select></div>
+                <div class="field"><label for="productCategory">Categoría</label><select id="productCategory" required><option>Videojuegos</option><option>Tecnología</option><option>Celulares</option><option>Audio</option><option>Hogar</option><option>Ropa y calzado</option><option>Otro</option></select></div>
               </div>
-
               <div class="two-cols">
-                <div class="field">
-                  <label for="productIcon">Icono</label>
-                  <select id="productIcon" required>
-                    <option value="🛒">🛒 General</option>
-                    <option value="🎮">🎮 Videojuego</option>
-                    <option value="🎧">🎧 Audio</option>
-                    <option value="📱">📱 Celular</option>
-                    <option value="💻">💻 Tecnología</option>
-                    <option value="👟">👟 Ropa / tenis</option>
-                    <option value="🏠">🏠 Hogar</option>
-                    <option value="📺">📺 Pantallas</option>
-                    <option value="⌚">⌚ Wearables</option>
-                  </select>
-                </div>
-
-                <div class="field">
-                  <label for="productPriority">Prioridad</label>
-                  <select id="productPriority" required>
-                    <option value="Alta">Alta</option>
-                    <option value="Media" selected>Media</option>
-                    <option value="Baja">Baja</option>
-                  </select>
-                </div>
+                <div class="field"><label for="productIcon">Icono</label><select id="productIcon" required><option value="🛒">🛒 General</option><option value="🎮">🎮 Videojuego</option><option value="🎧">🎧 Audio</option><option value="📱">📱 Celular</option><option value="💻">💻 Tecnología</option><option value="👟">👟 Ropa / tenis</option><option value="🏠">🏠 Hogar</option><option value="📺">📺 Pantallas</option><option value="⌚">⌚ Wearables</option></select></div>
+                <div class="field"><label for="productPriority">Prioridad</label><select id="productPriority" required><option>Alta</option><option selected>Media</option><option>Baja</option></select></div>
               </div>
-
               <div class="two-cols">
-                <div class="field">
-                  <label for="normalPrice">Precio normal</label>
-                  <input
-                    type="number"
-                    id="normalPrice"
-                    placeholder="1499"
-                    min="0"
-                    step="1"
-                  />
-                </div>
-
-                <div class="field">
-                  <label for="minDiscountPercent">Descuento mínimo %</label>
-                  <input
-                    type="number"
-                    id="minDiscountPercent"
-                    placeholder="25"
-                    min="0"
-                    max="100"
-                    step="1"
-                  />
-                </div>
+                <div class="field"><label for="normalPrice">Precio normal</label><input type="number" id="normalPrice" placeholder="1499" min="0" step="1" /></div>
+                <div class="field"><label for="currentPrice">Precio actual</label><input type="number" id="currentPrice" placeholder="999" min="0" step="1" required /></div>
               </div>
-
               <div class="two-cols">
-                <div class="field">
-                  <label for="currentPrice">Precio actual</label>
-                  <input
-                    type="number"
-                    id="currentPrice"
-                    placeholder="1299"
-                    min="0"
-                    step="1"
-                    required
-                  />
-                </div>
-
-                <div class="field">
-                  <label for="targetPrice">Precio objetivo</label>
-                  <input
-                    type="number"
-                    id="targetPrice"
-                    placeholder="999"
-                    min="0"
-                    step="1"
-                    required
-                  />
-                </div>
+                <div class="field"><label for="targetPrice">Precio objetivo</label><input type="number" id="targetPrice" placeholder="899" min="0" step="1" required /></div>
+                <div class="field"><label for="minDiscountPercent">Descuento mínimo %</label><input type="number" id="minDiscountPercent" placeholder="25" min="0" max="100" step="1" /></div>
               </div>
-
-              <div class="field">
-                <label for="productUrl">Link del producto</label>
-                <input
-                  type="url"
-                  id="productUrl"
-                  placeholder="https://..."
-                />
-              </div>
-
-              <div class="field">
-                <label for="productNotes">Notas</label>
-                <textarea
-                  id="productNotes"
-                  placeholder="Ej. Esperar Hot Sale, Buen Fin, descuento con tarjeta..."
-                ></textarea>
-              </div>
-
-              <label class="filter-toggle">
-                <input type="checkbox" id="productAlertEnabled" checked />
-                Activar alertas para este producto
-              </label>
-
+              <label class="filter-toggle"><input type="checkbox" id="productAlertEnabled" checked /> Activar alertas para este producto</label>
+              <div class="field"><label for="productUrl">Link específico del producto</label><input type="url" id="productUrl" placeholder="https://www.amazon.com.mx/dp/..." /></div>
+              <div class="field"><label for="productNotes">Notas</label><textarea id="productNotes" placeholder="Ej. revisar vendedor, esperar Buen Fin, cupón..."></textarea></div>
               <div class="form-actions">
-                <button class="btn btn-primary" id="saveProductButton" type="submit">
-                  Guardar producto
-                </button>
-                <button class="btn btn-soft" type="button" onclick="resetProductForm()">
-                  Limpiar
-                </button>
-                <button class="btn btn-danger" id="cancelEditButton" type="button" onclick="cancelEdit()" style="display:none;">
-                  Cancelar edición
-                </button>
+                <button class="btn btn-primary" id="saveProductButton" type="submit">Guardar producto</button>
+                <button class="btn btn-soft" type="button" onclick="resetProductForm()">Limpiar</button>
+                <button class="btn btn-danger" id="cancelEditButton" type="button" onclick="cancelEdit()" style="display:none;">Cancelar edición</button>
               </div>
             </form>
           </div>
-
           <div class="admin-card">
             <strong>Productos guardados</strong>
-            <span>
-              Puedes editar, abrir el link o eliminar productos.
-            </span>
-
+            <span>Editar, abrir link, silenciar alertas o eliminar productos.</span>
             <div class="product-list" id="adminProductList" style="margin-top:14px;"></div>
-
             <div class="form-actions" style="margin-top:16px;">
-              <button class="btn btn-soft" type="button" onclick="loadDemoProducts()">
-                Restaurar demo
-              </button>
-              <button class="btn btn-danger" type="button" onclick="clearAllProducts()">
-                Borrar todos
-              </button>
-              <button class="btn btn-danger" type="button" onclick="logoutAdmin()">
-                Salir admin
-              </button>
+              <button class="btn btn-soft" onclick="loadDemoProducts()">Restaurar demo local</button>
+              <button class="btn btn-danger" onclick="clearAllProducts()">Borrar locales</button>
+              <button class="btn btn-danger" onclick="logoutAdmin()">Salir admin</button>
             </div>
           </div>
-
           <div class="admin-card">
             <strong>Respaldo JSON</strong>
-            <span>
-              Exporta todos tus productos guardados a un archivo .json o importa un respaldo anterior.
-            </span>
-
-            <div class="warning">
-              Importar y reemplazar borrará los productos actuales y cargará los del archivo JSON.
-            </div>
-
+            <span>Exporta o importa tus productos. El JSON incluye historial y datos de alertas.</span>
             <div class="form-actions" style="margin-top:16px;">
-              <button class="btn btn-primary" type="button" onclick="exportProductsJson()">
-                Exportar JSON
-              </button>
-
-              <button class="btn btn-soft" type="button" onclick="prepareImportJson('merge')">
-                Importar y sumar
-              </button>
-
-              <button class="btn btn-danger" type="button" onclick="prepareImportJson('replace')">
-                Importar y reemplazar
-              </button>
+              <button class="btn btn-primary" onclick="exportProductsJson()">Exportar JSON</button>
+              <button class="btn btn-soft" onclick="prepareImportJson('merge')">Importar y sumar</button>
+              <button class="btn btn-danger" onclick="prepareImportJson('replace')">Importar y reemplazar</button>
             </div>
-
-            <input
-              type="file"
-              id="importJsonInput"
-              accept=".json,application/json"
-              style="display:none;"
-              onchange="importProductsJson(event)"
-            />
+            <input type="file" id="importJsonInput" accept=".json,application/json" style="display:none;" onchange="importProductsJson(event)" />
           </div>
         </div>
       </section>
     </section>
 
-    <!-- AJUSTES -->
-    <section class="screen" id="screen-settings">
+    <section class="screen" id="screen-cloud">
       <section class="section">
-        <div class="section-header">
-          <h3>Ajustes</h3>
-          <span>PWA</span>
-        </div>
-
-        <div class="setting-card">
-          <div class="setting-row">
-            <div>
-              <strong>Modo oscuro</strong>
-              <span>Cambia la apariencia visual tipo iPhone.</span>
-            </div>
-
-            <div class="switch" id="themeSwitch" onclick="toggleTheme()">
-              <span></span>
-            </div>
-          </div>
-        </div>
-
-        <div class="setting-card">
-          <div class="setting-row">
-            <div>
-              <strong>Modo administrador</strong>
-              <span id="adminSettingText">Actualmente bloqueado.</span>
-              <div class="admin-status off" id="adminStatusBadge">🔒 Admin OFF</div>
-            </div>
-
-            <div style="font-size: 24px;">🔐</div>
-          </div>
-
+        <div class="section-header"><h3>Supabase</h3><span id="supabaseHeaderStatus">Conectando...</span></div>
+        <div class="card">
+          <strong>Conexión de proyecto</strong>
+          <span>La URL y publishable key ya están integradas en este archivo. No uses secret key ni service_role en GitHub Pages.</span>
+          <div class="notice" id="supabaseConnectionBox">Revisando configuración...</div>
           <div class="form-actions" style="margin-top:16px;">
-            <button class="btn btn-primary" type="button" onclick="goToScreen('admin')">
-              Abrir administrador
-            </button>
+            <button class="btn btn-soft" onclick="testSupabaseConnection()">Probar conexión</button>
+            <button class="btn btn-soft" onclick="refreshRemoteProducts()">Actualizar desde nube</button>
           </div>
         </div>
 
-        <div class="setting-card">
-          <div class="setting-row">
-            <div>
-              <strong>Instalación PWA</strong>
-              <span>
-                Instala la app en Android, iPhone o computadora. También puedes limpiar caché si GitHub Pages muestra una versión anterior.
-              </span>
-            </div>
-            <div style="font-size: 24px;">📲</div>
-          </div>
-
-          <div class="pwa-status-grid">
-            <div class="pwa-status-item">
-              <b>Instalación</b>
-              <span id="pwaInstallStatus">Revisando...</span>
-            </div>
-            <div class="pwa-status-item">
-              <b>Modo</b>
-              <span id="pwaModeText">Navegador</span>
-            </div>
-            <div class="pwa-status-item">
-              <b>Conexión</b>
-              <span id="pwaNetworkStatus">Revisando...</span>
-            </div>
-            <div class="pwa-status-item">
-              <b>Service worker</b>
-              <span id="pwaSwStatus">Revisando...</span>
-            </div>
-          </div>
-
-          <div class="form-actions" style="margin-top:16px;">
-            <button class="btn btn-primary" id="pwaInstallButton" type="button" onclick="installPwa()">
-              Instalar app
-            </button>
-            <button class="btn btn-soft" type="button" onclick="copyAppLink()">
-              Copiar link
-            </button>
-            <button class="btn btn-danger" type="button" onclick="clearAppCacheAndReload()">
-              Limpiar caché
-            </button>
-          </div>
-
-          <div class="device-steps">
-            <div class="device-step">
-              <strong>Android / Chrome</strong>
-              <span>Abre la página → toca Instalar app o menú ⋮ → Agregar a pantalla principal.</span>
-            </div>
-            <div class="device-step">
-              <strong>iPhone / Safari</strong>
-              <span>Abre la página en Safari → Compartir → Agregar a pantalla de inicio.</span>
-            </div>
-            <div class="device-step">
-              <strong>PC / Chrome o Edge</strong>
-              <span>Busca el icono de instalación en la barra de dirección o usa el botón Instalar app.</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="setting-card">
-          <div class="setting-row">
-            <div>
-              <strong>Notificaciones de ofertas</strong>
-              <span>Permite avisos locales cuando un producto cumpla tu precio objetivo o descuento mínimo.</span>
-            </div>
-            <div style="font-size: 24px;">🔔</div>
-          </div>
-
-          <div class="form-actions" style="margin-top:16px;">
-            <button class="btn btn-primary" type="button" onclick="requestOfferNotifications()">
-              Activar notificaciones
-            </button>
-            <button class="btn btn-soft" type="button" onclick="testOfferNotification()">
-              Probar
-            </button>
-          </div>
-        </div>
-
-        <div class="setting-card" id="stableVersionCard">
-          <div class="setting-row">
-            <div>
-              <strong>Fase 8 · Versión estable</strong>
-              <span>
-                Usa este bloque para revisar que la app quedó limpia antes de avanzar al backend real. Idealmente prueba en incógnito y en celular.
-              </span>
-            </div>
-            <div style="font-size: 24px;">✅</div>
-          </div>
-
-          <div class="device-steps">
-            <div class="device-step">
-              <strong>1. GitHub Pages</strong>
-              <span>Debe estar en Settings → Pages → Deploy from a branch → main → /root.</span>
-            </div>
-            <div class="device-step">
-              <strong>2. Archivos raíz</strong>
-              <span>Conserva index.html, service-worker.js, manifest.webmanifest, icons/ y README. Evita mezclar src/, public/, package.json o .github/workflows.</span>
-            </div>
-            <div class="device-step">
-              <strong>3. Pruebas rápidas</strong>
-              <span>Admin, agregar producto, editar precio, historial, alertas, exportar JSON e importar JSON.</span>
-            </div>
-            <div class="device-step">
-              <strong>4. Caché</strong>
-              <span>Si ves una versión vieja, usa Limpiar caché o abre en incógnito.</span>
-            </div>
-          </div>
-
-          <div class="form-actions" style="margin-top:16px;">
-            <button class="btn btn-primary" type="button" onclick="runStableChecklist()">Ver checklist</button>
-            <button class="btn btn-soft" type="button" onclick="exportProductsJson()">Exportar respaldo</button>
-            <button class="btn btn-danger" type="button" onclick="clearAppCacheAndReload()">Limpiar caché</button>
-          </div>
-        </div>
-
-        <div class="setting-card" id="backendSettingsCard">
-          <div class="setting-row">
-            <div>
-              <strong>Fase 7 · Backend futuro</strong>
-              <span>
-                La app sigue trabajando localmente, pero aquí preparas la conexión para un backend real: API propia, Supabase, Firebase, GitHub Actions o cron.
-              </span>
-            </div>
-            <div style="font-size: 24px;">🧩</div>
-          </div>
-
-          <div class="pwa-status-grid">
-            <div class="pwa-status-item">
-              <b>Modo</b>
-              <span id="backendModeStatus">Local</span>
-            </div>
-            <div class="pwa-status-item">
-              <b>Endpoint</b>
-              <span id="backendUrlStatus">No configurado</span>
-            </div>
-            <div class="pwa-status-item">
-              <b>Productos listos</b>
-              <span id="backendReadyProducts">0</span>
-            </div>
-            <div class="pwa-status-item">
-              <b>Cola sync</b>
-              <span id="backendSyncQueue">0 cambios</span>
-            </div>
-          </div>
-
-          <form class="form-grid" id="backendConfigForm" style="margin-top:16px;">
-            <div class="two-cols">
-              <div class="field">
-                <label for="backendMode">Tipo de backend futuro</label>
-                <select id="backendMode">
-                  <option value="local">Solo local por ahora</option>
-                  <option value="api">API propia</option>
-                  <option value="supabase">Supabase</option>
-                  <option value="firebase">Firebase</option>
-                  <option value="github-actions">GitHub Actions / cron</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="backendPollMinutes">Frecuencia sugerida</label>
-                <select id="backendPollMinutes">
-                  <option value="60">Cada 1 hora</option>
-                  <option value="180">Cada 3 horas</option>
-                  <option value="360">Cada 6 horas</option>
-                  <option value="720">Cada 12 horas</option>
-                  <option value="1440">Cada 24 horas</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="backendUrl">URL base del backend futuro</label>
-              <input id="backendUrl" type="url" placeholder="https://tu-api.com o https://proyecto.supabase.co" />
-            </div>
-
-            <div class="field">
-              <label for="backendApiKey">API key / token futuro</label>
-              <input id="backendApiKey" type="password" placeholder="Opcional. No subas claves reales a GitHub." autocomplete="off" />
-            </div>
-
-            <div class="field">
-              <label for="backendNotes">Notas de integración</label>
-              <textarea id="backendNotes" placeholder="Ej. usar cron para revisar Amazon/Mercado Libre; enviar alertas por Telegram o email..."></textarea>
-            </div>
-
+        <div class="card" id="authCard">
+          <strong>Login real</strong>
+          <span>Usa el correo y contraseña que creaste en Authentication → Users de Supabase.</span>
+          <form class="form-grid" id="supabaseLoginForm">
+            <div class="field"><label for="supabaseEmail">Correo</label><input type="email" id="supabaseEmail" placeholder="tu-correo@ejemplo.com" required /></div>
+            <div class="field"><label for="supabasePassword">Contraseña</label><input type="password" id="supabasePassword" placeholder="Contraseña Supabase" required /></div>
             <div class="form-actions">
-              <button class="btn btn-primary" type="submit">Guardar configuración</button>
-              <button class="btn btn-soft" type="button" onclick="testBackendConnection()">Probar conexión</button>
-              <button class="btn btn-soft" type="button" onclick="exportBackendPayloadJson()">Exportar payload JSON</button>
-              <button class="btn btn-soft" type="button" onclick="copyBackendApiTemplate()">Copiar plantilla API</button>
-              <button class="btn btn-danger" type="button" onclick="clearBackendConfig()">Limpiar backend</button>
+              <button class="btn btn-primary" type="submit">Iniciar sesión</button>
+              <button class="btn btn-soft" type="button" onclick="signUpSupabaseUser()">Crear usuario</button>
             </div>
           </form>
+        </div>
 
-          <div class="notice">
-            En esta fase no se monitorean precios automáticamente todavía. Se deja lista la estructura de datos para que un backend futuro lea tus productos, revise precios y regrese alertas.
+        <div class="card hidden" id="sessionCard">
+          <strong>Sesión activa</strong>
+          <span id="sessionEmail">Usuario conectado</span>
+          <div class="success">Cuando agregues o edites productos, se guardarán en Supabase y también como respaldo local.</div>
+          <div class="form-actions" style="margin-top:16px;">
+            <button class="btn btn-primary" onclick="migrateLocalToSupabase()">Migrar locales a Supabase</button>
+            <button class="btn btn-soft" onclick="downloadSupabasePayload()">Exportar payload nube</button>
+            <button class="btn btn-danger" onclick="signOutSupabaseUser()">Cerrar sesión</button>
           </div>
         </div>
 
-        <div class="setting-card">
-          <div class="setting-row">
-            <div>
-              <strong>Datos locales</strong>
-              <span>Los productos se guardan en el navegador con localStorage. Puedes respaldarlos desde Admin → Respaldo JSON.</span>
-            </div>
-            <div style="font-size: 24px;">💾</div>
-          </div>
+        <div class="card">
+          <strong>Estado de sincronización</strong>
+          <span id="syncStatusText">Esperando acciones...</span>
+          <div class="product-list" id="syncLogList" style="margin-top:14px;"></div>
         </div>
+      </section>
+    </section>
+
+    <section class="screen" id="screen-settings">
+      <section class="section">
+        <div class="section-header"><h3>Ajustes</h3><span>PWA</span></div>
+        <div class="setting-card"><div class="setting-row"><div><strong>Modo oscuro</strong><span>Cambia la apariencia visual tipo iPhone.</span></div><div class="switch" id="themeSwitch" onclick="toggleTheme()"><span></span></div></div></div>
+        <div class="setting-card"><div class="setting-row"><div><strong>Instalación PWA</strong><span id="pwaStatusText">Revisando estado...</span></div><div style="font-size:24px;">📲</div></div><div class="form-actions" style="margin-top:16px;"><button class="btn btn-primary" onclick="installPwaApp()">Instalar app</button><button class="btn btn-soft" onclick="copyAppLink()">Copiar link</button><button class="btn btn-danger" onclick="clearAppCache()">Limpiar caché</button></div></div>
+        <div class="setting-card"><div class="setting-row"><div><strong>Datos</strong><span>Modo local + Supabase. Exporta JSON antes de hacer cambios grandes.</span></div><div style="font-size:24px;">💾</div></div><div class="form-actions" style="margin-top:16px;"><button class="btn btn-primary" onclick="exportProductsJson()">Exportar JSON</button><button class="btn btn-soft" onclick="goToScreen('cloud')">Ver Supabase</button></div></div>
       </section>
     </section>
   </main>
 
   <nav class="bottom-nav">
-    <button class="nav-btn active" data-screen="home" onclick="goToScreen('home')">
-      <span class="nav-icon">🏠</span>
-      Inicio
-    </button>
-
-    <button class="nav-btn" data-screen="favorites" onclick="goToScreen('favorites')">
-      <span class="nav-icon">🛒</span>
-      Favoritos
-    </button>
-
-    <button class="nav-btn" data-screen="alerts" onclick="goToScreen('alerts')">
-      <span class="nav-icon">🔔</span>
-      Alertas
-    </button>
-
-
-    <button class="nav-btn" data-screen="history" onclick="goToScreen('history')">
-      <span class="nav-icon">📈</span>
-      Historial
-    </button>
-
-    <button class="nav-btn" data-screen="admin" onclick="goToScreen('admin')">
-      <span class="nav-icon">🔐</span>
-      Admin
-    </button>
-
-    <button class="nav-btn" data-screen="settings" onclick="goToScreen('settings')">
-      <span class="nav-icon">⚙️</span>
-      Ajustes
-    </button>
+    <button class="nav-btn active" data-screen="home" onclick="goToScreen('home')"><span class="nav-icon">🏠</span>Inicio</button>
+    <button class="nav-btn" data-screen="favorites" onclick="goToScreen('favorites')"><span class="nav-icon">🛒</span>Favoritos</button>
+    <button class="nav-btn" data-screen="alerts" onclick="goToScreen('alerts')"><span class="nav-icon">🔔</span>Alertas</button>
+    <button class="nav-btn" data-screen="history" onclick="goToScreen('history')"><span class="nav-icon">📈</span>Historial</button>
+    <button class="nav-btn" data-screen="admin" onclick="goToScreen('admin')"><span class="nav-icon">🔐</span>Admin</button>
+    <button class="nav-btn" data-screen="cloud" onclick="goToScreen('cloud')"><span class="nav-icon">☁️</span>Nube</button>
   </nav>
 
   <script>
+    const SUPABASE_URL = "https://ltsrjxvisptbdhhkabhj.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_NLb1XKeqzT5H08iJBBOD4Q_HlrtyLgI";
     const ADMIN_PASSWORD = "admin123";
-
-    const PRODUCTS_KEY = "dealwatch_products_v5";
-    const OLD_PRODUCTS_KEY = "dealwatch_products_v4";
-    const LEGACY_PRODUCTS_KEY = "dealwatch_products_v3";
+    const PRODUCTS_KEY = "dealwatch_products_v9";
+    const OLD_PRODUCTS_KEYS = ["dealwatch_products_v5", "dealwatch_products_v4", "dealwatch_products_v3"];
     const ADMIN_KEY = "dealwatch_admin_active";
     const THEME_KEY = "dealwatch_theme";
-    const ALERT_LOG_KEY = "dealwatch_alert_log_v5";
-    const NOTIFICATION_PREF_KEY = "dealwatch_notifications_pref";
-    const PWA_INSTALLED_KEY = "dealwatch_pwa_installed_v6";
-    const BACKEND_CONFIG_KEY = "dealwatch_backend_config_v7";
-    const SYNC_LOG_KEY = "dealwatch_sync_log_v7";
+    const ALERT_LOG_KEY = "dealwatch_alert_log_v9";
+    const NOTIFICATION_PREF_KEY = "dealwatch_notifications_pref_v9";
+    const PWA_INSTALLED_KEY = "dealwatch_pwa_installed_v9";
+    const SYNC_LOG_KEY = "dealwatch_sync_log_v9";
 
     let deferredInstallPrompt = null;
-
     let pendingImportMode = "merge";
+    let supabaseClient = null;
+    let currentSession = null;
+    let currentUser = null;
+    let isLoadingRemote = false;
 
     const root = document.documentElement;
     const themeButton = document.getElementById("themeButton");
     const themeSwitch = document.getElementById("themeSwitch");
 
     function generateId() {
-      if (window.crypto && crypto.randomUUID) {
-        return crypto.randomUUID();
-      }
-
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
       return "dw_" + Date.now() + "_" + Math.random().toString(16).slice(2);
     }
 
+    function isUuid(value) {
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ""));
+    }
+
     const defaultProducts = [
-      {
-        id: generateId(),
-        name: "EA Sports FC 26",
-        store: "PlayStation Store",
-        category: "Videojuegos",
-        icon: "🎮",
-        priority: "Alta",
-        currentPrice: 699,
-        targetPrice: 799,
-        url: "",
-        notes: "Oferta detectada. Buen candidato para compra.",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: generateId(),
-        name: "Audífonos Bluetooth Pro",
-        store: "Amazon México",
-        category: "Audio",
-        icon: "🎧",
-        priority: "Media",
-        currentPrice: 1299,
-        targetPrice: 999,
-        url: "",
-        notes: "Esperar promoción o descuento bancario.",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: generateId(),
-        name: "Smartphone gama media",
-        store: "Mercado Libre",
-        category: "Celulares",
-        icon: "📱",
-        priority: "Media",
-        currentPrice: 4899,
-        targetPrice: 4500,
-        url: "",
-        notes: "Revisar reputación del vendedor antes de comprar.",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
+      { id: generateId(), name: "EA Sports FC 26", store: "PlayStation Store", category: "Videojuegos", icon: "🎮", priority: "Alta", normalPrice: 1299, currentPrice: 699, targetPrice: 799, minDiscountPercent: 30, alertEnabled: true, url: "", notes: "Oferta detectada. Buen candidato para compra.", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: generateId(), name: "Audífonos Bluetooth Pro", store: "Amazon México", category: "Audio", icon: "🎧", priority: "Media", normalPrice: 1799, currentPrice: 1299, targetPrice: 999, minDiscountPercent: 35, alertEnabled: true, url: "", notes: "Esperar promoción o descuento bancario.", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: generateId(), name: "Smartphone gama media", store: "Mercado Libre", category: "Celulares", icon: "📱", priority: "Media", normalPrice: 5499, currentPrice: 4899, targetPrice: 4500, minDiscountPercent: 15, alertEnabled: true, url: "", notes: "Revisar reputación del vendedor antes de comprar.", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
     ];
 
     function escapeHTML(value) {
-      return String(value || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+      return String(value || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
     }
-
-    function normalizeUrl(url) {
-      const cleanUrl = String(url || "").trim();
-
-      if (!cleanUrl) {
-        return "";
-      }
-
-      if (cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://")) {
-        return cleanUrl;
-      }
-
-      return "";
-    }
-
-    function formatMoney(value) {
-      const number = Number(value || 0);
-
-      return number.toLocaleString("es-MX", {
-        style: "currency",
-        currency: "MXN",
-        maximumFractionDigits: 0
-      });
-    }
-
-    function migrateHistoryItem(item, fallbackPrice = 0, fallbackDate = new Date().toISOString()) {
-      return {
-        id: item.id || generateId(),
-        date: item.date || fallbackDate,
-        price: Number(item.price ?? fallbackPrice ?? 0),
-        previousPrice: item.previousPrice === null || item.previousPrice === undefined
-          ? null
-          : Number(item.previousPrice),
-        source: item.source || "Registro manual",
-        type: item.type || "manual_update",
-        note: item.note || ""
-      };
-    }
+    function normalizeUrl(url) { const clean = String(url || "").trim(); if (!clean) return ""; return clean.startsWith("http://") || clean.startsWith("https://") ? clean : ""; }
+    function formatMoney(value) { return Number(value || 0).toLocaleString("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }); }
+    function formatDate(value) { try { return new Date(value).toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" }); } catch { return "Sin fecha"; } }
 
     function createPriceHistoryEntry(price, previousPrice = null, source = "Registro manual", note = "", type = "manual_update") {
-      return {
-        id: generateId(),
-        date: new Date().toISOString(),
-        price: Number(price || 0),
-        previousPrice: previousPrice === null || previousPrice === undefined ? null : Number(previousPrice),
-        source,
-        type,
-        note
-      };
+      return { id: generateId(), date: new Date().toISOString(), price: Number(price || 0), previousPrice: previousPrice === null || previousPrice === undefined ? null : Number(previousPrice), source, type, note };
     }
-
+    function migrateHistoryItem(item, fallbackPrice = 0, fallbackDate = new Date().toISOString()) {
+      return { id: item.id || generateId(), date: item.date || item.created_at || fallbackDate, price: Number(item.price ?? item.new_price ?? fallbackPrice ?? 0), previousPrice: item.previousPrice === null || item.previousPrice === undefined ? (item.previous_price === undefined ? null : Number(item.previous_price)) : Number(item.previousPrice), source: item.source || "Registro manual", type: item.type || "manual_update", note: item.note || "" };
+    }
     function migrateProduct(product) {
-      const createdAt = product.createdAt || new Date().toISOString();
-      const currentPrice = Number(product.currentPrice || 0);
+      const createdAt = product.createdAt || product.created_at || new Date().toISOString();
+      const currentPrice = Number(product.currentPrice ?? product.current_price ?? 0);
       const rawHistory = Array.isArray(product.priceHistory) ? product.priceHistory : [];
-      const priceHistory = rawHistory.length > 0
-        ? rawHistory.map(item => migrateHistoryItem(item, currentPrice, createdAt))
-        : [createPriceHistoryEntry(currentPrice, null, product.store || "Registro inicial", "Precio inicial del producto", "initial")];
-
+      const priceHistory = rawHistory.length ? rawHistory.map(item => migrateHistoryItem(item, currentPrice, createdAt)) : [createPriceHistoryEntry(currentPrice, null, product.store || "Registro inicial", "Precio inicial del producto", "initial")];
       return {
         id: product.id || generateId(),
         name: product.name || "Producto sin nombre",
         store: product.store || "Otra tienda",
         category: product.category || "Otro",
         icon: product.icon || "🛒",
-        priority: product.priority || "Media",
+        priority: ["Alta","Media","Baja"].includes(product.priority) ? product.priority : "Media",
+        normalPrice: Number(product.normalPrice ?? product.normal_price ?? 0),
         currentPrice,
-        normalPrice: Number(product.normalPrice || 0),
-        targetPrice: Number(product.targetPrice || 0),
-        minDiscountPercent: Number(product.minDiscountPercent || 0),
-        alertEnabled: product.alertEnabled !== false,
+        targetPrice: Number(product.targetPrice ?? product.target_price ?? 0),
+        minDiscountPercent: Number(product.minDiscountPercent ?? product.min_discount_percent ?? 0),
+        alertEnabled: product.alertEnabled !== undefined ? product.alertEnabled !== false : product.alerts_enabled !== false,
         lastAlertAt: product.lastAlertAt || "",
-        lastAlertPrice: product.lastAlertPrice === null || product.lastAlertPrice === undefined
-          ? null
-          : Number(product.lastAlertPrice),
-        url: normalizeUrl(product.url || ""),
+        lastAlertPrice: product.lastAlertPrice === null || product.lastAlertPrice === undefined ? null : Number(product.lastAlertPrice),
+        url: normalizeUrl(product.url || product.product_url || ""),
         notes: product.notes || "",
         priceHistory,
         createdAt,
-        updatedAt: product.updatedAt || new Date().toISOString(),
+        updatedAt: product.updatedAt || product.updated_at || new Date().toISOString(),
         importedAt: product.importedAt || ""
       };
     }
 
     function getProducts() {
       const saved = localStorage.getItem(PRODUCTS_KEY);
-
       if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-
-          if (!Array.isArray(parsed)) {
-            throw new Error("Productos inválidos");
-          }
-
-          return parsed.map(migrateProduct);
-        } catch (error) {
-          const fallback = defaultProducts.map(migrateProduct);
-          localStorage.setItem(PRODUCTS_KEY, JSON.stringify(fallback));
-          return fallback;
+        try { const parsed = JSON.parse(saved); if (!Array.isArray(parsed)) throw new Error("productos inválidos"); return parsed.map(migrateProduct); }
+        catch { const fallback = defaultProducts.map(migrateProduct); localStorage.setItem(PRODUCTS_KEY, JSON.stringify(fallback)); return fallback; }
+      }
+      for (const key of OLD_PRODUCTS_KEYS) {
+        const oldSaved = localStorage.getItem(key);
+        if (oldSaved) {
+          try { const oldParsed = JSON.parse(oldSaved); if (Array.isArray(oldParsed)) { const migrated = oldParsed.map(migrateProduct); localStorage.setItem(PRODUCTS_KEY, JSON.stringify(migrated)); return migrated; } } catch {}
         }
       }
-
-      const oldSaved = localStorage.getItem(OLD_PRODUCTS_KEY) || localStorage.getItem(LEGACY_PRODUCTS_KEY);
-
-      if (oldSaved) {
-        try {
-          const oldParsed = JSON.parse(oldSaved);
-
-          if (Array.isArray(oldParsed)) {
-            const migrated = oldParsed.map(migrateProduct);
-            localStorage.setItem(PRODUCTS_KEY, JSON.stringify(migrated));
-            return migrated;
-          }
-        } catch (error) {
-          console.log("No se pudo migrar versión anterior:", error);
-        }
-      }
-
-      const initialProducts = defaultProducts.map(migrateProduct);
-      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(initialProducts));
-      return initialProducts;
+      const initial = defaultProducts.map(migrateProduct);
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(initial));
+      return initial;
     }
-
-    function saveProducts(products, syncAction = "products_saved") {
-      const cleanProducts = products.map(migrateProduct);
-      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(cleanProducts));
-      recordSyncEvent(syncAction, `${cleanProducts.length} producto(s) guardado(s) localmente`);
+    function saveProducts(products, syncAction = "products_saved", shouldCheckAlerts = true) {
+      const clean = products.map(migrateProduct);
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(clean));
+      recordSyncEvent(syncAction, `${clean.length} producto(s) guardado(s)`);
       renderApp();
-      checkAndNotifyOffers(cleanProducts);
+      if (shouldCheckAlerts) checkAndNotifyOffers(clean);
     }
 
-    function getDiscountPercent(product) {
-      const normal = Number(product.normalPrice || 0);
-      const current = Number(product.currentPrice || 0);
-
-      if (normal <= 0 || current <= 0 || current >= normal) {
-        return 0;
-      }
-
-      return Math.round(((normal - current) / normal) * 100);
-    }
-
-    function productMeetsTarget(product) {
-      const current = Number(product.currentPrice || 0);
-      const target = Number(product.targetPrice || 0);
-      return current > 0 && target > 0 && current <= target;
-    }
-
-    function productMeetsDiscount(product) {
-      const minimum = Number(product.minDiscountPercent || 0);
-
-      if (minimum <= 0) {
-        return false;
-      }
-
-      return getDiscountPercent(product) >= minimum;
-    }
-
-    function productHasOffer(product) {
-      return productMeetsTarget(product) || productMeetsDiscount(product);
-    }
-
-    function productHasActiveAlert(product) {
-      return product.alertEnabled !== false && productHasOffer(product);
-    }
-
-    function getProgress(product) {
-      const current = Number(product.currentPrice || 0);
-      const target = Number(product.targetPrice || 0);
-
-      if (current <= 0 || target <= 0) {
-        return 15;
-      }
-
-      if (current <= target) {
-        return 100;
-      }
-
-      const percent = Math.round((target / current) * 100);
-      return Math.max(12, Math.min(percent, 92));
-    }
-
-    function getOfferReason(product) {
-      const reasons = [];
-      const discount = getDiscountPercent(product);
-      const minimum = Number(product.minDiscountPercent || 0);
-
-      if (productMeetsTarget(product)) {
-        reasons.push(`llegó a tu meta de ${formatMoney(product.targetPrice)}`);
-      }
-
-      if (productMeetsDiscount(product)) {
-        reasons.push(`cumple ${discount}% de descuento mínimo`);
-      }
-
-      if (reasons.length === 0) {
-        return "Aún no alcanza tus reglas de compra.";
-      }
-
-      return `Oferta activa: ${reasons.join(" y ")}.`;
-    }
-
-    function getSavingsText(product) {
-      const current = Number(product.currentPrice || 0);
-      const target = Number(product.targetPrice || 0);
-      const normal = Number(product.normalPrice || 0);
-      const discount = getDiscountPercent(product);
-
-      if (current <= 0) {
-        return "Agrega un precio actual para evaluar la oferta.";
-      }
-
-      if (productHasOffer(product)) {
-        return getOfferReason(product);
-      }
-
-      const parts = [];
-
-      if (target > 0) {
-        parts.push(`faltan ${formatMoney(current - target)} para tu meta`);
-      }
-
-      if (normal > 0) {
-        parts.push(`descuento actual: ${discount}%`);
-      }
-
-      return parts.length ? parts.join(" · ") : "Sin reglas suficientes para evaluar.";
-    }
-
-    function isAdminActive() {
-      return localStorage.getItem(ADMIN_KEY) === "true";
-    }
-
-    function setAdminActive(status) {
-      localStorage.setItem(ADMIN_KEY, status ? "true" : "false");
-      renderApp();
-    }
-
-    function goToScreen(screenName) {
-      const screens = document.querySelectorAll(".screen");
-      const navButtons = document.querySelectorAll(".nav-btn");
-
-      screens.forEach(screen => {
-        screen.classList.remove("active");
-      });
-
-      navButtons.forEach(button => {
-        button.classList.remove("active");
-      });
-
-      document.getElementById(`screen-${screenName}`).classList.add("active");
-      document.querySelector(`[data-screen="${screenName}"]`).classList.add("active");
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-
-      renderApp();
-    }
-
-    function setTheme(theme) {
-      if (theme === "dark") {
-        root.setAttribute("data-theme", "dark");
-        themeButton.textContent = "🌙";
-        themeSwitch.classList.add("active");
-      } else {
-        root.removeAttribute("data-theme");
-        themeButton.textContent = "☀️";
-        themeSwitch.classList.remove("active");
-      }
-
-      localStorage.setItem(THEME_KEY, theme);
-    }
-
-    function toggleTheme() {
-      const currentTheme = localStorage.getItem(THEME_KEY) || "light";
-      const nextTheme = currentTheme === "dark" ? "light" : "dark";
-      setTheme(nextTheme);
-    }
-
-
-    function isRunningStandalone() {
-      return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-    }
-
-    function getPwaInstallLabel() {
-      if (isRunningStandalone()) {
-        return "Instalada";
-      }
-
-      if (deferredInstallPrompt) {
-        return "Lista para instalar";
-      }
-
-      if (localStorage.getItem(PWA_INSTALLED_KEY) === "true") {
-        return "Instalada antes";
-      }
-
-      return "Instalación manual";
-    }
-
-    function renderPwaStatus() {
-      const installStatus = document.getElementById("pwaInstallStatus");
-      const modeText = document.getElementById("pwaModeText");
-      const networkStatus = document.getElementById("pwaNetworkStatus");
-      const swStatus = document.getElementById("pwaSwStatus");
-      const installButton = document.getElementById("pwaInstallButton");
-      const installTopButton = document.getElementById("installTopButton");
-
-      const installed = isRunningStandalone();
-      const label = getPwaInstallLabel();
-
-      if (installStatus) {
-        installStatus.textContent = label;
-      }
-
-      if (modeText) {
-        modeText.textContent = installed ? "App instalada" : "Navegador";
-      }
-
-      if (networkStatus) {
-        networkStatus.textContent = navigator.onLine ? "En línea" : "Offline";
-      }
-
-      if (swStatus) {
-        swStatus.textContent = "serviceWorker" in navigator ? "Compatible" : "No compatible";
-      }
-
-      if (installButton) {
-        installButton.textContent = installed ? "App instalada" : "Instalar app";
-        installButton.disabled = installed;
-        installButton.style.opacity = installed ? "0.65" : "1";
-      }
-
-      if (installTopButton) {
-        installTopButton.textContent = installed ? "Instalada" : "Instalar";
-        installTopButton.disabled = installed;
-        installTopButton.style.opacity = installed ? "0.65" : "1";
-      }
-    }
-
-    async function installPwa() {
-      if (isRunningStandalone()) {
-        alert("DealWatch MX ya está abierta como app instalada.");
-        renderPwaStatus();
-        return;
-      }
-
-      if (deferredInstallPrompt) {
-        deferredInstallPrompt.prompt();
-        const choice = await deferredInstallPrompt.userChoice;
-
-        if (choice.outcome === "accepted") {
-          localStorage.setItem(PWA_INSTALLED_KEY, "true");
-        }
-
-        deferredInstallPrompt = null;
-        renderPwaStatus();
-        return;
-      }
-
-      goToScreen("settings");
-      alert("Si no aparece el instalador automático: en Android usa menú ⋮ → Agregar a pantalla principal. En iPhone usa Safari → Compartir → Agregar a pantalla de inicio.");
-    }
-
-    async function copyAppLink() {
-      const appUrl = window.location.href.split("#")[0];
-
-      try {
-        await navigator.clipboard.writeText(appUrl);
-        alert("Link de la app copiado.");
-      } catch (error) {
-        prompt("Copia este link:", appUrl);
-      }
-    }
-
-    async function clearAppCacheAndReload() {
-      const confirmClear = confirm("Esto limpiará caché PWA y recargará la app para tomar la versión más nueva de GitHub Pages. ¿Continuar?");
-
-      if (!confirmClear) {
-        return;
-      }
-
-      if ("serviceWorker" in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(registrations.map(registration => registration.unregister()));
-      }
-
-      if ("caches" in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
-      }
-
-      window.location.reload();
-    }
-
-
-    function getBackendConfig() {
-      const fallback = {
-        mode: "local",
-        url: "",
-        apiKey: "",
-        pollMinutes: 60,
-        notes: "",
-        savedAt: ""
-      };
-
-      try {
-        const parsed = JSON.parse(localStorage.getItem(BACKEND_CONFIG_KEY) || "{}");
-        return {
-          ...fallback,
-          ...parsed,
-          url: normalizeUrl(parsed.url || ""),
-          pollMinutes: Number(parsed.pollMinutes || fallback.pollMinutes)
-        };
-      } catch (error) {
-        return fallback;
-      }
-    }
-
-    function getSafeBackendConfig() {
-      const config = getBackendConfig();
-
-      return {
-        mode: config.mode,
-        url: config.url,
-        hasApiKey: Boolean(config.apiKey),
-        pollMinutes: config.pollMinutes,
-        notes: config.notes,
-        savedAt: config.savedAt
-      };
-    }
-
-    function saveBackendConfig(config) {
-      localStorage.setItem(BACKEND_CONFIG_KEY, JSON.stringify({
-        mode: config.mode || "local",
-        url: normalizeUrl(config.url || ""),
-        apiKey: config.apiKey || "",
-        pollMinutes: Number(config.pollMinutes || 60),
-        notes: config.notes || "",
-        savedAt: new Date().toISOString()
-      }));
-
-      recordSyncEvent("backend_config_saved", "Configuración de backend futuro actualizada");
-      renderApp();
-    }
-
-    function clearBackendConfig() {
-      const confirmClear = confirm("¿Seguro que quieres borrar la configuración de backend futuro? No se borrarán tus productos.");
-
-      if (!confirmClear) {
-        return;
-      }
-
-      localStorage.removeItem(BACKEND_CONFIG_KEY);
-      recordSyncEvent("backend_config_cleared", "Configuración de backend futuro eliminada");
-      renderApp();
-      alert("Configuración de backend limpiada.");
-    }
-
-    function getSyncLog() {
-      try {
-        const parsed = JSON.parse(localStorage.getItem(SYNC_LOG_KEY) || "[]");
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (error) {
-        return [];
-      }
-    }
-
-    function saveSyncLog(log) {
-      localStorage.setItem(SYNC_LOG_KEY, JSON.stringify(log.slice(0, 80)));
-    }
-
-    function recordSyncEvent(action, detail = "") {
-      const log = getSyncLog();
-
-      log.unshift({
-        id: generateId(),
-        date: new Date().toISOString(),
-        action,
-        detail
-      });
-
-      saveSyncLog(log);
-    }
-
-    function getBackendModeLabel(mode) {
-      const labels = {
-        local: "Solo local",
-        api: "API propia",
-        supabase: "Supabase",
-        firebase: "Firebase",
-        "github-actions": "GitHub Actions"
-      };
-
-      return labels[mode] || "Solo local";
-    }
-
-    function renderBackendStatus(products = getProducts()) {
-      const config = getBackendConfig();
-      const readyProducts = products.filter(product => normalizeUrl(product.url)).length;
-      const syncLog = getSyncLog();
-
-      const modeStatus = document.getElementById("backendModeStatus");
-      const urlStatus = document.getElementById("backendUrlStatus");
-      const readyStatus = document.getElementById("backendReadyProducts");
-      const queueStatus = document.getElementById("backendSyncQueue");
-      const form = document.getElementById("backendConfigForm");
-
-      if (modeStatus) {
-        modeStatus.textContent = getBackendModeLabel(config.mode);
-      }
-
-      if (urlStatus) {
-        urlStatus.textContent = config.url ? "Configurado" : "No configurado";
-      }
-
-      if (readyStatus) {
-        readyStatus.textContent = `${readyProducts} de ${products.length}`;
-      }
-
-      if (queueStatus) {
-        queueStatus.textContent = `${syncLog.length} cambio${syncLog.length === 1 ? "" : "s"}`;
-      }
-
-      if (form && !form.contains(document.activeElement)) {
-        document.getElementById("backendMode").value = config.mode;
-        document.getElementById("backendPollMinutes").value = String(config.pollMinutes || 60);
-        document.getElementById("backendUrl").value = config.url;
-        document.getElementById("backendApiKey").value = config.apiKey;
-        document.getElementById("backendNotes").value = config.notes;
-      }
-    }
-
-    async function testBackendConnection() {
-      const config = getBackendConfig();
-
-      if (config.mode === "local" || !config.url) {
-        alert("Modo local activo. Todavía no hay backend real configurado, pero la app puede seguir usando localStorage y exportar payload JSON.");
-        return;
-      }
-
-      const healthUrl = `${config.url.replace(/\/$/, "")}/health`;
-
-      try {
-        const response = await fetch(healthUrl, {
-          method: "GET",
-          headers: config.apiKey ? { "Authorization": `Bearer ${config.apiKey}` } : {}
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        recordSyncEvent("backend_health_ok", `Conexión correcta con ${healthUrl}`);
-        renderApp();
-        alert("Conexión correcta. El backend respondió /health.");
-      } catch (error) {
-        recordSyncEvent("backend_health_error", `No se pudo conectar con ${healthUrl}`);
-        renderApp();
-        alert("No se pudo conectar al backend. Puede ser normal si todavía no existe, si falta CORS o si la URL /health no está creada.");
-      }
-    }
-
-    function buildBackendPayload() {
-      const products = getProducts();
-      const config = getBackendConfig();
-
-      return {
-        app: "DealWatch MX",
-        project: "Appcomercio",
-        type: "dealwatch-backend-sync-payload",
-        version: "7.0",
-        generatedAt: new Date().toISOString(),
-        backend: getSafeBackendConfig(),
-        suggestedSchedule: {
-          everyMinutes: Number(config.pollMinutes || 60),
-          note: "El backend futuro debe leer productos, revisar precios y devolver alertas. GitHub Pages no ejecuta monitoreo automático por sí solo."
-        },
-        schema: {
-          productRequiredFields: ["id", "name", "store", "url", "currentPrice", "targetPrice"],
-          offerRules: ["currentPrice <= targetPrice", "discountPercent >= minDiscountPercent"],
-          endpointsSuggested: ["GET /health", "POST /api/products/sync", "POST /api/prices/check", "POST /api/alerts/send"]
-        },
-        totals: {
-          products: products.length,
-          productsWithUrl: products.filter(product => normalizeUrl(product.url)).length,
-          activeAlerts: products.filter(productHasActiveAlert).length,
-          historyRecords: products.reduce((total, product) => total + (Array.isArray(product.priceHistory) ? product.priceHistory.length : 0), 0)
-        },
-        syncLog: getSyncLog(),
-        products
-      };
-    }
-
-    function exportBackendPayloadJson() {
-      const payload = buildBackendPayload();
-      const jsonText = JSON.stringify(payload, null, 2);
-      const blob = new Blob([jsonText], { type: "application/json" });
-      const date = new Date().toISOString().slice(0, 10);
-      const fileName = `dealwatch-mx-backend-payload-${date}.json`;
-      const downloadUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-
-      link.href = downloadUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(downloadUrl);
-
-      recordSyncEvent("backend_payload_exported", `Payload exportado: ${fileName}`);
-      renderApp();
-    }
-
-    async function copyBackendApiTemplate() {
-      const template = `DealWatch MX - Plantilla backend futuro
-
-GET /health
-Respuesta esperada:
-{ "ok": true, "app": "DealWatch MX" }
-
-POST /api/products/sync
-Recibe el payload exportado por la app y guarda productos, reglas e historial.
-
-POST /api/prices/check
-Revisa precios por producto y regresa currentPrice actualizado, discountPercent y offerDetected.
-
-POST /api/alerts/send
-Envía alerta por email, Telegram, WhatsApp o notificación externa cuando offerDetected sea true.
-`;
-
-      try {
-        await navigator.clipboard.writeText(template);
-        alert("Plantilla de endpoints copiada.");
-      } catch (error) {
-        prompt("Copia esta plantilla:", template);
-      }
-    }
+    function getDiscountPercent(product) { const normal = Number(product.normalPrice || 0), current = Number(product.currentPrice || 0); if (normal <= 0 || current <= 0 || current >= normal) return 0; return Math.round(((normal - current) / normal) * 100); }
+    function productMeetsTarget(product) { const current = Number(product.currentPrice || 0), target = Number(product.targetPrice || 0); return current > 0 && target > 0 && current <= target; }
+    function productMeetsDiscount(product) { const min = Number(product.minDiscountPercent || 0); return min > 0 && getDiscountPercent(product) >= min; }
+    function productHasOffer(product) { return productMeetsTarget(product) || productMeetsDiscount(product); }
+    function productHasActiveAlert(product) { return product.alertEnabled !== false && productHasOffer(product); }
+    function getProgress(product) { const c=Number(product.currentPrice||0), t=Number(product.targetPrice||0); if(c<=0||t<=0) return 15; if(c<=t) return 100; return Math.max(12, Math.min(Math.round((t/c)*100), 92)); }
+    function getOfferReason(product) { const reasons=[]; if(productMeetsTarget(product)) reasons.push(`llegó a tu meta de ${formatMoney(product.targetPrice)}`); if(productMeetsDiscount(product)) reasons.push(`cumple ${getDiscountPercent(product)}% de descuento mínimo`); return reasons.length ? `Oferta activa: ${reasons.join(" y ")}.` : "Aún no alcanza tus reglas de compra."; }
+    function getSavingsText(product) { if(productMeetsTarget(product)) return `Está ${formatMoney(Number(product.targetPrice)-Number(product.currentPrice))} abajo de tu meta.`; if(productMeetsDiscount(product)) return `Tiene ${getDiscountPercent(product)}% de descuento.`; const missing = Number(product.currentPrice)-Number(product.targetPrice); return missing > 0 ? `Faltan ${formatMoney(missing)} para llegar a tu meta.` : "Configura una meta para este producto."; }
+
+    function isAdminActive() { return localStorage.getItem(ADMIN_KEY) === "true" || !!currentUser; }
+    function setAdminActive(status) { localStorage.setItem(ADMIN_KEY, status ? "true" : "false"); renderApp(); }
+    function goToScreen(name) { document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active")); document.getElementById(`screen-${name}`).classList.add("active"); document.querySelector(`[data-screen="${name}"]`).classList.add("active"); window.scrollTo({top:0, behavior:"smooth"}); renderApp(); }
+    function setTheme(theme) { if(theme==="dark") { root.setAttribute("data-theme","dark"); themeButton.textContent="🌙"; themeSwitch.classList.add("active"); } else { root.removeAttribute("data-theme"); themeButton.textContent="☀️"; themeSwitch.classList.remove("active"); } localStorage.setItem(THEME_KEY, theme); }
+    function toggleTheme() { setTheme((localStorage.getItem(THEME_KEY)||"light") === "dark" ? "light" : "dark"); }
 
     function getFilteredProducts(products) {
-      const searchInput = document.getElementById("searchInput");
-      const storeFilter = document.getElementById("storeFilter");
-      const categoryFilter = document.getElementById("categoryFilter");
-      const onlyOffersFilter = document.getElementById("onlyOffersFilter");
-
-      const search = String(searchInput.value || "").trim().toLowerCase();
-      const store = storeFilter.value;
-      const category = categoryFilter.value;
-      const onlyOffers = onlyOffersFilter.checked;
-
-      return products.filter(product => {
-        const text = [
-          product.name,
-          product.store,
-          product.category,
-          product.priority,
-          product.notes
-        ].join(" ").toLowerCase();
-
-        const matchesSearch = !search || text.includes(search);
-        const matchesStore = !store || product.store === store;
-        const matchesCategory = !category || product.category === category;
-        const matchesOffer = !onlyOffers || productHasOffer(product);
-
-        return matchesSearch && matchesStore && matchesCategory && matchesOffer;
+      const search = String(document.getElementById("searchInput").value || "").trim().toLowerCase();
+      const store = document.getElementById("storeFilter").value;
+      const category = document.getElementById("categoryFilter").value;
+      const onlyOffers = document.getElementById("onlyOffersFilter").checked;
+      return products.filter(p => {
+        const text = [p.name,p.store,p.category,p.priority,p.notes].join(" ").toLowerCase();
+        return (!search || text.includes(search)) && (!store || p.store===store) && (!category || p.category===category) && (!onlyOffers || productHasActiveAlert(p));
       });
     }
-
     function updateFilterOptions(products) {
-      const storeFilter = document.getElementById("storeFilter");
-      const categoryFilter = document.getElementById("categoryFilter");
-
-      const currentStore = storeFilter.value;
-      const currentCategory = categoryFilter.value;
-
-      const stores = [...new Set(products.map(product => product.store).filter(Boolean))].sort();
-      const categories = [...new Set(products.map(product => product.category).filter(Boolean))].sort();
-
-      storeFilter.innerHTML = `<option value="">Todas</option>` +
-        stores.map(store => `<option value="${escapeHTML(store)}">${escapeHTML(store)}</option>`).join("");
-
-      categoryFilter.innerHTML = `<option value="">Todas</option>` +
-        categories.map(category => `<option value="${escapeHTML(category)}">${escapeHTML(category)}</option>`).join("");
-
-      storeFilter.value = stores.includes(currentStore) ? currentStore : "";
-      categoryFilter.value = categories.includes(currentCategory) ? currentCategory : "";
+      const storeFilter = document.getElementById("storeFilter"), categoryFilter = document.getElementById("categoryFilter");
+      const oldStore = storeFilter.value, oldCat = categoryFilter.value;
+      const stores = [...new Set(products.map(p=>p.store).filter(Boolean))].sort();
+      const cats = [...new Set(products.map(p=>p.category).filter(Boolean))].sort();
+      storeFilter.innerHTML = '<option value="">Todas</option>' + stores.map(s=>`<option value="${escapeHTML(s)}">${escapeHTML(s)}</option>`).join("");
+      categoryFilter.innerHTML = '<option value="">Todas</option>' + cats.map(c=>`<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join("");
+      storeFilter.value = stores.includes(oldStore) ? oldStore : "";
+      categoryFilter.value = cats.includes(oldCat) ? oldCat : "";
     }
-
-    function clearFilters() {
-      document.getElementById("searchInput").value = "";
-      document.getElementById("storeFilter").value = "";
-      document.getElementById("categoryFilter").value = "";
-      document.getElementById("onlyOffersFilter").checked = false;
-      renderApp();
-    }
+    function clearFilters() { document.getElementById("searchInput").value=""; document.getElementById("storeFilter").value=""; document.getElementById("categoryFilter").value=""; document.getElementById("onlyOffersFilter").checked=false; renderApp(); }
 
     function createProductCard(product, options = {}) {
-      const isOffer = productHasOffer(product);
-      const alertsMuted = product.alertEnabled === false;
-      const badgeClass = alertsMuted ? "muted" : (isOffer ? "offer" : "watch");
-      const badgeText = alertsMuted ? "Silenciado" : (isOffer ? "OFERTA" : "Vigilando");
-      const progress = getProgress(product);
-      const safeUrl = normalizeUrl(product.url);
-      const savingsText = getSavingsText(product);
-      const discount = getDiscountPercent(product);
-      const normalText = Number(product.normalPrice || 0) > 0
-        ? `Normal: ${formatMoney(product.normalPrice)} · ${discount}% dto.`
-        : "Precio normal no definido";
-
-      const openButton = safeUrl
-        ? `<a class="mini-btn mini-blue" href="${escapeHTML(safeUrl)}" target="_blank" rel="noopener noreferrer">Abrir link</a>`
-        : "";
-
-      const editButton = options.showAdminActions
-        ? `<button class="mini-btn mini-gray" onclick="startEditProduct('${escapeHTML(product.id)}')">Editar</button>`
-        : "";
-
-      const deleteButton = options.showAdminActions
-        ? `<button class="mini-btn mini-red" onclick="deleteProduct('${escapeHTML(product.id)}')">Eliminar</button>`
-        : "";
-
-      const alertToggleButton = options.showAdminActions
-        ? `<button class="mini-btn mini-gray" onclick="toggleProductAlerts('${escapeHTML(product.id)}')">${alertsMuted ? "Activar alertas" : "Silenciar"}</button>`
-        : "";
-
-      const historyButton = `<button class="mini-btn mini-blue" onclick="openProductHistory('${escapeHTML(product.id)}')">Historial</button>`;
-
-      const notes = product.notes
-        ? `<div class="product-notes">${escapeHTML(product.notes)}</div>`
-        : "";
-
-      const alertBox = alertsMuted
-        ? `<div class="alert-muted">Alertas apagadas para este producto.</div>`
-        : (isOffer ? `<div class="alert-reason">${escapeHTML(getOfferReason(product))}</div>` : "");
-
-      return `
-        <article class="product-card">
-          <div class="product-img">${escapeHTML(product.icon || "🛒")}</div>
-
-          <div class="product-info">
-            <div class="product-top">
-              <div>
-                <div class="store">${escapeHTML(product.store)}</div>
-                <div class="product-title">${escapeHTML(product.name)}</div>
-                <div class="category-line">
-                  ${escapeHTML(product.category)} · Prioridad ${escapeHTML(product.priority)}
-                </div>
-              </div>
-
-              <span class="badge ${badgeClass}">${badgeText}</span>
-            </div>
-
-            <div class="price-row">
-              <div class="price">${formatMoney(product.currentPrice)}</div>
-              <div class="target">Meta: ${formatMoney(product.targetPrice)}</div>
-            </div>
-
-            <div class="category-line">${escapeHTML(normalText)} · Mínimo: ${Number(product.minDiscountPercent || 0)}%</div>
-            <div class="savings">${escapeHTML(savingsText)}</div>
-
-            <div class="progress">
-              <span style="width:${progress}%;"></span>
-            </div>
-
-            ${alertBox}
-            ${notes}
-
-            <div class="product-actions">
-              ${openButton}
-              ${historyButton}
-              ${editButton}
-              ${alertToggleButton}
-              ${deleteButton}
-            </div>
-          </div>
-        </article>
-      `;
+      const isOffer = productHasOffer(product), active = productHasActiveAlert(product);
+      const badgeClass = !product.alertEnabled ? "off" : (isOffer ? "offer" : "watch");
+      const badgeText = !product.alertEnabled ? "Silencio" : (isOffer ? "OFERTA" : "Vigilando");
+      const url = normalizeUrl(product.url);
+      const openButton = url ? `<a class="mini-btn mini-blue" href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">Abrir link</a>` : "";
+      const adminButtons = options.showAdminActions ? `
+        <button class="mini-btn mini-gray" onclick="startEditProduct('${escapeHTML(product.id)}')">Editar</button>
+        <button class="mini-btn mini-green" onclick="toggleProductAlert('${escapeHTML(product.id)}')">${product.alertEnabled ? "Silenciar" : "Activar"}</button>
+        <button class="mini-btn mini-red" onclick="deleteProduct('${escapeHTML(product.id)}')">Eliminar</button>` : "";
+      const historyButton = `<button class="mini-btn mini-gray" onclick="showProductHistory('${escapeHTML(product.id)}')">Historial</button>`;
+      const notes = product.notes ? `<div class="product-notes">${escapeHTML(product.notes)}</div>` : "";
+      return `<article class="product-card"><div class="product-img">${escapeHTML(product.icon)}</div><div class="product-info"><div class="product-top"><div><div class="store">${escapeHTML(product.store)}</div><div class="product-title">${escapeHTML(product.name)}</div><div class="category-line">${escapeHTML(product.category)} · Prioridad ${escapeHTML(product.priority)} · ${getDiscountPercent(product)}% desc.</div></div><span class="badge ${badgeClass}">${badgeText}</span></div><div class="price-row"><div class="price">${formatMoney(product.currentPrice)}</div><div class="target">Meta: ${formatMoney(product.targetPrice)} · Normal: ${formatMoney(product.normalPrice)}</div></div><div class="savings">${escapeHTML(getOfferReason(product))}</div><div class="progress"><span style="width:${getProgress(product)}%;"></span></div>${notes}<div class="product-actions">${openButton}${historyButton}${adminButtons}</div></div></article>`;
     }
 
     function renderStats(products) {
-      const offers = products.filter(productHasOffer);
-      const stores = new Set(products.map(product => product.store));
-
+      const offers = products.filter(productHasActiveAlert);
+      const stores = new Set(products.map(p=>p.store));
       document.getElementById("statProducts").textContent = products.length;
       document.getElementById("statOffers").textContent = offers.length;
       document.getElementById("statStores").textContent = stores.size;
-      document.getElementById("summaryLabel").textContent = isAdminActive()
-        ? "Admin activo"
-        : "Modo usuario";
+      document.getElementById("summaryLabel").textContent = currentUser ? "Supabase conectado" : "Modo local";
+      const pill = document.getElementById("cloudPill");
+      pill.textContent = currentUser ? "Nube ON" : "Local";
+      pill.className = currentUser ? "pill on" : "pill warn";
     }
-
     function renderFavorites(products) {
-      const container = document.getElementById("favoritesList");
-      const count = document.getElementById("favoritesCount");
-
       updateFilterOptions(products);
-
-      const filteredProducts = getFilteredProducts(products);
-
-      count.textContent = `${filteredProducts.length} de ${products.length} producto${products.length === 1 ? "" : "s"}`;
-
-      if (products.length === 0) {
-        container.innerHTML = `
-          <div class="empty-card">
-            <div class="big">🛒</div>
-            <strong>No hay productos todavía</strong>
-            Agrega productos desde el panel administrador.
-          </div>
-        `;
-        return;
-      }
-
-      if (filteredProducts.length === 0) {
-        container.innerHTML = `
-          <div class="empty-card">
-            <div class="big">🔍</div>
-            <strong>No encontré productos</strong>
-            Cambia la búsqueda o limpia los filtros.
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = filteredProducts
-        .map(product => createProductCard(product))
-        .join("");
+      const filtered = getFilteredProducts(products);
+      document.getElementById("favoritesCount").textContent = `${filtered.length} de ${products.length}`;
+      const c = document.getElementById("favoritesList");
+      if(!products.length) { c.innerHTML = emptyCard("🛒", "No hay productos", "Agrega productos desde Admin."); return; }
+      if(!filtered.length) { c.innerHTML = emptyCard("🔍", "No encontré productos", "Cambia filtros o búsqueda."); return; }
+      c.innerHTML = filtered.map(p=>createProductCard(p)).join("");
     }
-
-    function getAlertLog() {
-      try {
-        const parsed = JSON.parse(localStorage.getItem(ALERT_LOG_KEY) || "{}");
-        return parsed && typeof parsed === "object" ? parsed : {};
-      } catch (error) {
-        return {};
-      }
-    }
-
-    function saveAlertLog(log) {
-      localStorage.setItem(ALERT_LOG_KEY, JSON.stringify(log));
-    }
-
-    function getAlertSignature(product) {
-      return `${product.id}:${product.currentPrice}:${product.targetPrice}:${product.minDiscountPercent}:${product.alertEnabled}`;
-    }
-
-    function getNotificationStatusLabel() {
-      if (!("Notification" in window)) {
-        return "NO";
-      }
-
-      if (Notification.permission === "granted") {
-        return "ON";
-      }
-
-      if (Notification.permission === "denied") {
-        return "BLOQ";
-      }
-
-      return "OFF";
-    }
-
-    function renderNotificationStatus(products = getProducts()) {
-      const activeAlerts = products.filter(productHasActiveAlert);
-      const mutedOffers = products.filter(product => product.alertEnabled === false && productHasOffer(product));
-
-      const activeEl = document.getElementById("alertStatActive");
-      const mutedEl = document.getElementById("alertStatMuted");
-      const statusEl = document.getElementById("notificationStatusText");
-
-      if (activeEl) {
-        activeEl.textContent = activeAlerts.length;
-      }
-
-      if (mutedEl) {
-        mutedEl.textContent = mutedOffers.length;
-      }
-
-      if (statusEl) {
-        statusEl.textContent = getNotificationStatusLabel();
-      }
-    }
-
-    async function requestOfferNotifications() {
-      if (!("Notification" in window)) {
-        alert("Este navegador no soporta notificaciones locales.");
-        return;
-      }
-
-      const permission = await Notification.requestPermission();
-      localStorage.setItem(NOTIFICATION_PREF_KEY, permission === "granted" ? "enabled" : "disabled");
-
-      if (permission === "granted") {
-        alert("Notificaciones activadas. La app avisará cuando detecte una oferta activa mientras esté abierta o instalada.");
-        checkAndNotifyOffers(getProducts(), true);
-      } else {
-        alert("No se activaron las notificaciones. Puedes permitirlas desde los ajustes del navegador.");
-      }
-
-      renderApp();
-    }
-
-    function testOfferNotification() {
-      if (!("Notification" in window)) {
-        alert("Este navegador no soporta notificaciones locales.");
-        return;
-      }
-
-      if (Notification.permission !== "granted") {
-        alert("Primero activa las notificaciones.");
-        return;
-      }
-
-      new Notification("DealWatch MX", {
-        body: "Prueba lista: así se verá una alerta de oferta.",
-        icon: "icons/icon-192.png"
-      });
-    }
-
-    function notifyOffer(product, force = false) {
-      if (!("Notification" in window) || Notification.permission !== "granted") {
-        return;
-      }
-
-      if (product.alertEnabled === false || !productHasOffer(product)) {
-        return;
-      }
-
-      const log = getAlertLog();
-      const signature = getAlertSignature(product);
-
-      if (!force && log[product.id] === signature) {
-        return;
-      }
-
-      new Notification(`Oferta en ${product.store}`, {
-        body: `${product.name}: ${formatMoney(product.currentPrice)}. ${getOfferReason(product)}`,
-        icon: "icons/icon-192.png"
-      });
-
-      log[product.id] = signature;
-      saveAlertLog(log);
-    }
-
-    function checkAndNotifyOffers(products = getProducts(), force = false) {
-      const activeAlerts = products.filter(productHasActiveAlert);
-
-      activeAlerts.forEach(product => {
-        notifyOffer(product, force);
-      });
-
-      renderNotificationStatus(products);
-    }
-
-    function toggleProductAlerts(productId) {
-      if (!isAdminActive()) {
-        alert("Primero entra como administrador.");
-        return;
-      }
-
-      const products = getProducts();
-      const updatedProducts = products.map(product => {
-        if (product.id !== productId) {
-          return product;
-        }
-
-        return {
-          ...product,
-          alertEnabled: product.alertEnabled === false,
-          updatedAt: new Date().toISOString()
-        };
-      });
-
-      saveProducts(updatedProducts);
-    }
-
     function renderAlerts(products) {
       const alerts = products.filter(productHasActiveAlert);
-      const mutedOffers = products.filter(product => product.alertEnabled === false && productHasOffer(product));
-      const container = document.getElementById("alertsList");
-      const count = document.getElementById("alertsCount");
-
-      renderNotificationStatus(products);
-
-      count.textContent = `${alerts.length} activa${alerts.length === 1 ? "" : "s"}`;
-
-      if (alerts.length === 0 && mutedOffers.length === 0) {
-        container.innerHTML = `
-          <div class="empty-card">
-            <div class="big">🔔</div>
-            <strong>Sin alertas por ahora</strong>
-            Cuando un producto llegue a su precio objetivo o cumpla su descuento mínimo aparecerá aquí.
-          </div>
-        `;
-        return;
-      }
-
-      const activeHtml = alerts.length > 0
-        ? alerts.map(product => createProductCard(product, { showAdminActions: isAdminActive() })).join("")
-        : `
-          <div class="empty-card">
-            <div class="big">✅</div>
-            <strong>No hay alertas activas</strong>
-            Hay ofertas silenciadas o todavía no se cumplen tus reglas.
-          </div>
-        `;
-
-      const mutedHtml = mutedOffers.length > 0
-        ? `
-          <div class="notice">
-            También tienes ${mutedOffers.length} oferta${mutedOffers.length === 1 ? "" : "s"} silenciada${mutedOffers.length === 1 ? "" : "s"}. Entra como admin para reactivar sus alertas.
-          </div>
-          ${mutedOffers.map(product => createProductCard(product, { showAdminActions: isAdminActive() })).join("")}
-        `
-        : "";
-
-      container.innerHTML = activeHtml + mutedHtml;
+      document.getElementById("alertsCount").textContent = `${alerts.length} activa${alerts.length===1?"":"s"}`;
+      document.getElementById("alertsList").innerHTML = alerts.length ? alerts.map(p=>createProductCard(p)).join("") : emptyCard("🔔", "Sin alertas", "Cuando un producto cumpla tus reglas aparecerá aquí.");
     }
-
-    function formatDateTime(value) {
-      try {
-        return new Date(value).toLocaleString("es-MX", {
-          dateStyle: "medium",
-          timeStyle: "short"
-        });
-      } catch (error) {
-        return "Fecha no disponible";
-      }
-    }
-
-    function getHistoryChangeClass(entry) {
-      if (entry.previousPrice === null || entry.previousPrice === undefined) {
-        return "same";
-      }
-
-      if (Number(entry.price) < Number(entry.previousPrice)) {
-        return "down";
-      }
-
-      if (Number(entry.price) > Number(entry.previousPrice)) {
-        return "up";
-      }
-
-      return "same";
-    }
-
-    function getHistoryChangeText(entry) {
-      if (entry.previousPrice === null || entry.previousPrice === undefined) {
-        return "Registro inicial";
-      }
-
-      const difference = Number(entry.price) - Number(entry.previousPrice);
-
-      if (difference < 0) {
-        return `Bajó ${formatMoney(Math.abs(difference))} desde ${formatMoney(entry.previousPrice)}`;
-      }
-
-      if (difference > 0) {
-        return `Subió ${formatMoney(difference)} desde ${formatMoney(entry.previousPrice)}`;
-      }
-
-      return `Sin cambio frente a ${formatMoney(entry.previousPrice)}`;
-    }
-
-    function updateHistoryProductSelect(products) {
-      const select = document.getElementById("historyProductSelect");
-      const currentValue = select.value;
-
-      if (products.length === 0) {
-        select.innerHTML = `<option value="">Sin productos</option>`;
-        return;
-      }
-
-      select.innerHTML = products.map(product => {
-        return `<option value="${escapeHTML(product.id)}">${escapeHTML(product.name)} · ${escapeHTML(product.store)}</option>`;
-      }).join("");
-
-      if (products.some(product => product.id === currentValue)) {
-        select.value = currentValue;
-      }
-    }
-
     function renderHistory(products) {
-      const container = document.getElementById("historyList");
-      const count = document.getElementById("historyCount");
-      const historyAdminCard = document.getElementById("historyAdminCard");
-
-      updateHistoryProductSelect(products);
-      historyAdminCard.style.display = isAdminActive() ? "block" : "none";
-
-      const records = products.flatMap(product => {
-        const history = Array.isArray(product.priceHistory) ? product.priceHistory : [];
-
-        return history.map(entry => ({
-          product,
-          entry: migrateHistoryItem(entry, product.currentPrice, product.createdAt)
-        }));
-      }).sort((a, b) => new Date(b.entry.date) - new Date(a.entry.date));
-
-      count.textContent = `${records.length} registro${records.length === 1 ? "" : "s"}`;
-
-      if (records.length === 0) {
-        container.innerHTML = `
-          <div class="empty-card">
-            <div class="big">📈</div>
-            <strong>Sin historial todavía</strong>
-            Agrega un producto o registra un cambio de precio.
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = records.map(({ product, entry }) => {
-        const changeClass = getHistoryChangeClass(entry);
-        const changeText = getHistoryChangeText(entry);
-        const note = entry.note
-          ? `<div class="history-note">${escapeHTML(entry.note)}</div>`
-          : "";
-        const deleteButton = isAdminActive()
-          ? `<button class="mini-btn mini-red" onclick="deleteHistoryEntry('${escapeHTML(product.id)}', '${escapeHTML(entry.id)}')">Eliminar registro</button>`
-          : "";
-
-        return `
-          <article class="history-item">
-            <div class="history-top">
-              <div class="history-product">
-                <div class="history-icon">${escapeHTML(product.icon || "🛒")}</div>
-                <div>
-                  <div class="history-name">${escapeHTML(product.name)}</div>
-                  <div class="history-store">${escapeHTML(product.store)} · ${escapeHTML(entry.source)}</div>
-                </div>
-              </div>
-
-              <div class="history-price">${formatMoney(entry.price)}</div>
-            </div>
-
-            <div class="history-change ${changeClass}">${escapeHTML(changeText)}</div>
-            <div class="history-date">${escapeHTML(formatDateTime(entry.date))}</div>
-            ${note}
-
-            <div class="product-actions">
-              <button class="mini-btn mini-gray" onclick="startEditProduct('${escapeHTML(product.id)}')">Editar producto</button>
-              ${deleteButton}
-            </div>
-          </article>
-        `;
-      }).join("");
+      const all = [];
+      products.forEach(p => (p.priceHistory || []).forEach(h => all.push({product:p, h:migrateHistoryItem(h,p.currentPrice,p.createdAt)})));
+      all.sort((a,b)=>new Date(b.h.date)-new Date(a.h.date));
+      document.getElementById("historyCount").textContent = `${all.length} registros`;
+      const select = document.getElementById("historyProductId");
+      const selected = select.value;
+      select.innerHTML = products.map(p=>`<option value="${escapeHTML(p.id)}">${escapeHTML(p.name)} · ${formatMoney(p.currentPrice)}</option>`).join("");
+      if(products.some(p=>p.id===selected)) select.value = selected;
+      document.getElementById("historyList").innerHTML = all.length ? all.slice(0,80).map(({product,h})=>`<div class="history-item"><div class="history-icon">${escapeHTML(product.icon)}</div><div><div class="history-title">${escapeHTML(product.name)}</div><div class="history-meta">${formatDate(h.date)} · ${escapeHTML(h.source)} · ${escapeHTML(h.note || h.type)}</div></div><div class="history-price">${formatMoney(h.price)}</div></div>`).join("") : emptyCard("📈", "Sin historial", "Registra o cambia un precio para crear historial.");
     }
-
-    function openProductHistory(productId) {
-      goToScreen("history");
-
-      const select = document.getElementById("historyProductSelect");
-
-      if (select && [...select.options].some(option => option.value === productId)) {
-        select.value = productId;
-      }
-    }
-
-    function addHistoryPrice(productId, newPrice, source, note) {
-      const products = getProducts();
-      const updatedProducts = products.map(product => {
-        if (product.id !== productId) {
-          return product;
-        }
-
-        const previousPrice = Number(product.currentPrice || 0);
-        const priceHistory = Array.isArray(product.priceHistory) ? product.priceHistory : [];
-
-        return {
-          ...product,
-          currentPrice: Number(newPrice),
-          priceHistory: [
-            createPriceHistoryEntry(newPrice, previousPrice, source, note, "manual_update"),
-            ...priceHistory
-          ],
-          updatedAt: new Date().toISOString()
-        };
-      });
-
-      saveProducts(updatedProducts);
-    }
-
-    function deleteHistoryEntry(productId, entryId) {
-      const confirmDelete = confirm("¿Seguro que quieres eliminar este registro del historial?");
-
-      if (!confirmDelete) {
-        return;
-      }
-
-      const products = getProducts();
-      const updatedProducts = products.map(product => {
-        if (product.id !== productId) {
-          return product;
-        }
-
-        const history = Array.isArray(product.priceHistory) ? product.priceHistory : [];
-        const filteredHistory = history.filter(entry => entry.id !== entryId);
-
-        return {
-          ...product,
-          priceHistory: filteredHistory,
-          updatedAt: new Date().toISOString()
-        };
-      });
-
-      saveProducts(updatedProducts);
-    }
-
-
     function renderAdminPanel(products) {
-      const adminActive = isAdminActive();
-      const loginCard = document.getElementById("loginCard");
-      const adminPanel = document.getElementById("adminPanel");
-      const adminHeaderStatus = document.getElementById("adminHeaderStatus");
-      const adminPill = document.getElementById("adminPill");
-      const adminStatusBadge = document.getElementById("adminStatusBadge");
-      const adminSettingText = document.getElementById("adminSettingText");
-      const adminProductList = document.getElementById("adminProductList");
-
-      if (adminActive) {
-        loginCard.style.display = "none";
-        adminPanel.style.display = "block";
-        adminHeaderStatus.textContent = "Activo";
-        adminPill.classList.add("active");
-
-        adminStatusBadge.className = "admin-status on";
-        adminStatusBadge.textContent = "✅ Admin ON";
-        adminSettingText.textContent = "Actualmente tienes permisos locales de administrador.";
-
-        if (products.length === 0) {
-          adminProductList.innerHTML = `
-            <div class="empty-card">
-              <div class="big">📦</div>
-              <strong>No hay productos</strong>
-              Agrega uno usando el formulario superior.
-            </div>
-          `;
-        } else {
-          adminProductList.innerHTML = products
-            .map(product => createProductCard(product, { showAdminActions: true }))
-            .join("");
-        }
-      } else {
-        loginCard.style.display = "block";
-        adminPanel.style.display = "none";
-        adminHeaderStatus.textContent = "Bloqueado";
-        adminPill.classList.remove("active");
-
-        adminStatusBadge.className = "admin-status off";
-        adminStatusBadge.textContent = "🔒 Admin OFF";
-        adminSettingText.textContent = "Actualmente bloqueado. Entra con la clave desde el panel Admin.";
-      }
+      const on = isAdminActive();
+      document.getElementById("loginCard").style.display = on ? "none" : "block";
+      document.getElementById("adminPanel").style.display = on ? "block" : "none";
+      document.getElementById("adminHeaderStatus").textContent = on ? (currentUser ? "Supabase" : "Local") : "Bloqueado";
+      if(on) document.getElementById("adminProductList").innerHTML = products.length ? products.map(p=>createProductCard(p,{showAdminActions:true})).join("") : emptyCard("📦","No hay productos","Agrega uno con el formulario.");
     }
-
-    function renderApp() {
-      const products = getProducts();
-
-      renderStats(products);
-      renderFavorites(products);
-      renderAlerts(products);
-      renderHistory(products);
-      renderAdminPanel(products);
-      renderBackendStatus(products);
-      renderPwaStatus();
+    function renderCloudPanel(products) {
+      const status = document.getElementById("supabaseHeaderStatus");
+      const box = document.getElementById("supabaseConnectionBox");
+      const authCard = document.getElementById("authCard");
+      const sessionCard = document.getElementById("sessionCard");
+      if(!supabaseClient) { status.textContent="Sin cliente"; box.textContent="No se pudo crear cliente Supabase. Revisa la librería CDN o conexión a internet."; box.className="warning"; }
+      else if(currentUser) { status.textContent="Sesión activa"; box.textContent="Conectado a Supabase. Productos en nube disponibles para este usuario."; box.className="success"; authCard.classList.add("hidden"); sessionCard.classList.remove("hidden"); document.getElementById("sessionEmail").textContent = currentUser.email || "Usuario conectado"; }
+      else { status.textContent="Sin sesión"; box.textContent="Proyecto configurado. Inicia sesión para leer y guardar productos en Supabase."; box.className="notice"; authCard.classList.remove("hidden"); sessionCard.classList.add("hidden"); }
+      const logs = getSyncLog();
+      document.getElementById("syncStatusText").textContent = logs[0] ? logs[0].message : "Sin acciones todavía.";
+      document.getElementById("syncLogList").innerHTML = logs.length ? logs.slice(0,10).map(l=>`<div class="history-item"><div class="history-icon">☁️</div><div><div class="history-title">${escapeHTML(l.action)}</div><div class="history-meta">${formatDate(l.date)} · ${escapeHTML(l.message)}</div></div><div class="history-price">${escapeHTML(l.mode || "local")}</div></div>`).join("") : emptyCard("☁️", "Sin sincronización", "Inicia sesión o guarda productos.");
     }
+    function renderSettings() { document.getElementById("pwaStatusText").textContent = window.matchMedia("(display-mode: standalone)").matches ? "Abierta como app instalada." : "Abierta desde navegador. Puedes instalarla."; }
+    function emptyCard(icon,title,text) { return `<div class="empty-card"><div class="big">${icon}</div><strong>${escapeHTML(title)}</strong>${escapeHTML(text)}</div>`; }
+    function renderApp() { const products = getProducts(); renderStats(products); renderFavorites(products); renderAlerts(products); renderHistory(products); renderAdminPanel(products); renderCloudPanel(products); renderSettings(); }
 
-    function resetProductForm() {
-      document.getElementById("productForm").reset();
-      document.getElementById("editingProductId").value = "";
-      document.getElementById("productFormTitle").textContent = "Agregar producto favorito";
-      document.getElementById("productFormSubtitle").textContent = "Guarda productos con tienda, categoría, link, precio actual y precio objetivo.";
-      document.getElementById("saveProductButton").textContent = "Guardar producto";
-      document.getElementById("cancelEditButton").style.display = "none";
-      document.getElementById("productPriority").value = "Media";
-      document.getElementById("normalPrice").value = "";
-      document.getElementById("minDiscountPercent").value = "";
-      document.getElementById("productAlertEnabled").checked = true;
+    function resetProductForm() { document.getElementById("productForm").reset(); document.getElementById("editingProductId").value=""; document.getElementById("productFormTitle").textContent="Agregar producto favorito"; document.getElementById("productFormSubtitle").textContent="Si estás conectado a Supabase, se guarda en la nube y también queda copia local."; document.getElementById("saveProductButton").textContent="Guardar producto"; document.getElementById("cancelEditButton").style.display="none"; document.getElementById("productPriority").value="Media"; document.getElementById("productAlertEnabled").checked=true; }
+    function cancelEdit() { resetProductForm(); }
+    function startEditProduct(id) { const p = getProducts().find(x=>x.id===id); if(!p) return alert("No encontré el producto."); document.getElementById("editingProductId").value=p.id; document.getElementById("productName").value=p.name; document.getElementById("productStore").value=p.store; document.getElementById("productCategory").value=p.category; document.getElementById("productIcon").value=p.icon; document.getElementById("productPriority").value=p.priority; document.getElementById("normalPrice").value=p.normalPrice; document.getElementById("currentPrice").value=p.currentPrice; document.getElementById("targetPrice").value=p.targetPrice; document.getElementById("minDiscountPercent").value=p.minDiscountPercent; document.getElementById("productAlertEnabled").checked=p.alertEnabled!==false; document.getElementById("productUrl").value=p.url; document.getElementById("productNotes").value=p.notes; document.getElementById("productFormTitle").textContent="Editar producto"; document.getElementById("productFormSubtitle").textContent="Modifica los datos y guarda. Si cambia precio se crea historial."; document.getElementById("saveProductButton").textContent="Actualizar producto"; document.getElementById("cancelEditButton").style.display="inline-flex"; goToScreen("admin"); }
+    async function deleteProduct(id) { if(!confirm("¿Seguro que quieres eliminar este producto?")) return; if(currentUser && isUuid(id)) await deleteRemoteProduct(id); saveProducts(getProducts().filter(p=>p.id!==id), "product_deleted"); }
+    async function toggleProductAlert(id) { const products = getProducts().map(p => p.id===id ? {...p, alertEnabled: !p.alertEnabled, updatedAt: new Date().toISOString()} : p); saveProducts(products, "alert_toggled"); const p=products.find(x=>x.id===id); if(currentUser && p && isUuid(p.id)) await upsertRemoteProduct(p); }
+    function clearAllProducts() { if(confirm("¿Borrar todos los productos locales? Esto no borra Supabase.")) { saveProducts([], "local_products_cleared", false); resetProductForm(); } }
+    function loadDemoProducts() { saveProducts(defaultProducts.map(p=>migrateProduct({...p,id:generateId(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()})), "demo_loaded"); resetProductForm(); }
+    function logoutAdmin() { setAdminActive(false); resetProductForm(); goToScreen("home"); }
+    function showProductHistory(id) { document.getElementById("historyProductId").value=id; goToScreen("history"); }
+
+    function toRemoteProduct(product) { return { name: product.name, store: product.store, category: product.category, icon: product.icon, priority: product.priority, product_url: product.url || null, normal_price: Number(product.normalPrice || 0), current_price: Number(product.currentPrice || 0), target_price: Number(product.targetPrice || 0), min_discount_percent: Number(product.minDiscountPercent || 0), alerts_enabled: product.alertEnabled !== false, notes: product.notes || null }; }
+    function fromRemoteProduct(row, histories=[]) { return migrateProduct({ id: row.id, name: row.name, store: row.store, category: row.category, icon: row.icon, priority: row.priority, product_url: row.product_url, normal_price: row.normal_price, current_price: row.current_price, target_price: row.target_price, min_discount_percent: row.min_discount_percent, alerts_enabled: row.alerts_enabled, notes: row.notes, created_at: row.created_at, updated_at: row.updated_at, priceHistory: histories.map(h=>({ id:h.id, date:h.created_at, price:h.new_price, previousPrice:h.previous_price, source:h.source, note:h.note, type:"supabase" })) }); }
+    async function initSupabase() { try { if(!window.supabase) { recordSyncEvent("supabase_cdn_missing", "No cargó librería Supabase", "error"); return; } supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); const { data } = await supabaseClient.auth.getSession(); currentSession = data.session; currentUser = data.session?.user || null; supabaseClient.auth.onAuthStateChange(async (_event, session) => { currentSession=session; currentUser=session?.user||null; if(currentUser) await refreshRemoteProducts(false); renderApp(); }); if(currentUser) await refreshRemoteProducts(false); recordSyncEvent("supabase_ready", currentUser ? "Sesión recuperada" : "Cliente listo sin sesión", currentUser ? "cloud" : "local"); } catch(e) { recordSyncEvent("supabase_error", e.message || "Error Supabase", "error"); } renderApp(); }
+    async function testSupabaseConnection() { if(!supabaseClient) return alert("No está disponible el cliente Supabase. Revisa internet/CDN."); const { data, error } = await supabaseClient.auth.getSession(); if(error) return alert("Error de conexión: " + error.message); alert(currentUser ? "Conexión OK. Sesión: " + (currentUser.email || "activa") : "Conexión OK. Falta iniciar sesión."); }
+    async function signInSupabase(email,password) { const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password }); if(error) throw error; currentSession=data.session; currentUser=data.user; recordSyncEvent("login", "Sesión iniciada en Supabase", "cloud"); await refreshRemoteProducts(false); }
+    async function signUpSupabaseUser() { const email=document.getElementById("supabaseEmail").value.trim(); const password=document.getElementById("supabasePassword").value; if(!email||!password) return alert("Escribe correo y contraseña."); try { const { data, error } = await supabaseClient.auth.signUp({ email, password }); if(error) throw error; alert("Usuario creado. Si Supabase pide confirmación, revisa tu correo. Si lo creaste desde Authentication con Auto Confirm, ya puedes iniciar sesión."); } catch(e) { alert("No se pudo crear usuario: " + e.message); } }
+    async function signOutSupabaseUser() { if(!supabaseClient) return; await supabaseClient.auth.signOut(); currentSession=null; currentUser=null; recordSyncEvent("logout", "Sesión cerrada", "local"); renderApp(); }
+    async function refreshRemoteProducts(showAlert = true) { if(!supabaseClient || !currentUser || isLoadingRemote) { if(showAlert) alert("Primero inicia sesión en Supabase."); return; } isLoadingRemote=true; try { const { data: rows, error } = await supabaseClient.from("products").select("*").order("created_at", { ascending:false }); if(error) throw error; const ids = (rows||[]).map(r=>r.id); let histories = []; if(ids.length) { const { data:hrows, error:herror } = await supabaseClient.from("price_history").select("*").in("product_id", ids).order("created_at", { ascending:false }); if(herror) throw herror; histories = hrows || []; }
+      const byProduct = histories.reduce((acc,h)=>{ (acc[h.product_id] ||= []).push(h); return acc; },{});
+      const products = (rows||[]).map(r=>fromRemoteProduct(r, byProduct[r.id]||[]));
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+      recordSyncEvent("remote_loaded", `${products.length} producto(s) desde Supabase`, "cloud");
+      if(showAlert) alert("Productos actualizados desde Supabase.");
+    } catch(e) { recordSyncEvent("remote_error", e.message || "Error al leer nube", "error"); if(showAlert) alert("No se pudo leer Supabase: " + e.message); }
+    finally { isLoadingRemote=false; renderApp(); }
     }
-
-    function cancelEdit() {
-      resetProductForm();
-    }
-
-    function startEditProduct(productId) {
-      if (!isAdminActive()) {
-        alert("Primero entra como administrador.");
-        return;
-      }
-
-      const products = getProducts();
-      const product = products.find(item => item.id === productId);
-
-      if (!product) {
-        alert("No encontré el producto.");
-        return;
-      }
-
-      document.getElementById("editingProductId").value = product.id;
-      document.getElementById("productName").value = product.name;
-      document.getElementById("productStore").value = product.store;
-      document.getElementById("productCategory").value = product.category;
-      document.getElementById("productIcon").value = product.icon;
-      document.getElementById("productPriority").value = product.priority;
-      document.getElementById("normalPrice").value = product.normalPrice || "";
-      document.getElementById("currentPrice").value = product.currentPrice;
-      document.getElementById("targetPrice").value = product.targetPrice;
-      document.getElementById("minDiscountPercent").value = product.minDiscountPercent || "";
-      document.getElementById("productAlertEnabled").checked = product.alertEnabled !== false;
-      document.getElementById("productUrl").value = product.url;
-      document.getElementById("productNotes").value = product.notes;
-
-      document.getElementById("productFormTitle").textContent = "Editar producto";
-      document.getElementById("productFormSubtitle").textContent = "Modifica los datos del producto y guarda los cambios.";
-      document.getElementById("saveProductButton").textContent = "Actualizar producto";
-      document.getElementById("cancelEditButton").style.display = "inline-flex";
-
-      goToScreen("admin");
-    }
-
-    function deleteProduct(productId) {
-      const confirmDelete = confirm("¿Seguro que quieres eliminar este producto?");
-
-      if (!confirmDelete) {
-        return;
-      }
-
-      const products = getProducts();
-      const filtered = products.filter(product => product.id !== productId);
-      saveProducts(filtered);
-    }
-
-    function clearAllProducts() {
-      const confirmDelete = confirm("¿Seguro que quieres borrar todos los productos?");
-
-      if (!confirmDelete) {
-        return;
-      }
-
-      saveProducts([]);
-      resetProductForm();
-    }
-
-    function loadDemoProducts() {
-      const demo = defaultProducts.map(product => ({
-        ...product,
-        id: generateId(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }));
-
-      saveProducts(demo);
-      resetProductForm();
-    }
-
-    function logoutAdmin() {
-      setAdminActive(false);
-      resetProductForm();
-      goToScreen("home");
-    }
-
-    function exportProductsJson() {
-      if (!isAdminActive()) {
-        alert("Primero entra como administrador.");
-        return;
-      }
-
-      const products = getProducts();
-
-      const backupData = {
-        app: "DealWatch MX",
-        project: "Appcomercio",
-        type: "dealwatch-products-backup-v1-stable-phase8",
-        version: "7.0",
-        exportedAt: new Date().toISOString(),
-        totalProducts: products.length,
-        backendConfig: getSafeBackendConfig(),
-        syncLog: getSyncLog(),
-        products: products
-      };
-
-      const jsonText = JSON.stringify(backupData, null, 2);
-      const blob = new Blob([jsonText], {
-        type: "application/json"
-      });
-
-      const date = new Date().toISOString().slice(0, 10);
-      const fileName = `dealwatch-mx-respaldo-${date}.json`;
-
-      const downloadUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-
-      link.href = downloadUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-
-      document.body.removeChild(link);
-      URL.revokeObjectURL(downloadUrl);
-    }
-
-    function prepareImportJson(mode) {
-      if (!isAdminActive()) {
-        alert("Primero entra como administrador.");
-        return;
-      }
-
-      pendingImportMode = mode;
-      const input = document.getElementById("importJsonInput");
-
-      input.value = "";
-      input.click();
-    }
-
-    function importProductsJson(event) {
-      if (!isAdminActive()) {
-        alert("Primero entra como administrador.");
-        return;
-      }
-
-      const file = event.target.files[0];
-
-      if (!file) {
-        return;
-      }
-
-      const reader = new FileReader();
-
-      reader.onload = function () {
-        try {
-          const parsedData = JSON.parse(reader.result);
-
-          let importedProducts = [];
-
-          if (Array.isArray(parsedData)) {
-            importedProducts = parsedData;
-          } else if (Array.isArray(parsedData.products)) {
-            importedProducts = parsedData.products;
-          } else {
-            throw new Error("El archivo JSON no tiene productos válidos.");
-          }
-
-          const cleanProducts = importedProducts
-            .map(product => migrateProduct(product))
-            .filter(product => product.name && Number(product.currentPrice) >= 0);
-
-          if (cleanProducts.length === 0) {
-            throw new Error("El archivo no contiene productos válidos.");
-          }
-
-          if (pendingImportMode === "replace") {
-            const confirmReplace = confirm(
-              `Se reemplazarán tus productos actuales por ${cleanProducts.length} producto(s) del JSON. ¿Continuar?`
-            );
-
-            if (!confirmReplace) {
-              return;
-            }
-
-            const replacedProducts = cleanProducts.map(product => ({
-              ...product,
-              updatedAt: new Date().toISOString()
-            }));
-
-            saveProducts(replacedProducts);
-            resetProductForm();
-            alert("Respaldo importado correctamente. Se reemplazaron los productos actuales.");
-            return;
-          }
-
-          const currentProducts = getProducts();
-
-          const importedWithNewIds = cleanProducts.map(product => ({
-            ...product,
-            id: generateId(),
-            importedAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }));
-
-          saveProducts([
-            ...importedWithNewIds,
-            ...currentProducts
-          ]);
-
-          resetProductForm();
-          alert("Productos importados y sumados correctamente.");
-        } catch (error) {
-          alert("No se pudo importar el archivo JSON. Revisa que sea un respaldo válido de DealWatch MX.");
-          console.log("Error al importar JSON:", error);
-        }
-      };
-
-      reader.readAsText(file);
-    }
-
-
-    function runStableChecklist() {
-      const products = getProducts();
-      const offers = products.filter(productHasOffer);
-      const admin = isAdminActive() ? "Activo" : "Bloqueado";
-      const installed = isStandalonePwa() ? "Instalada como app" : "Navegador";
-      const checklist = [
-        "FASE 8 · CHECKLIST ESTABLE",
-        "",
-        `Productos guardados: ${products.length}`,
-        `Ofertas activas: ${offers.length}`,
-        `Administrador: ${admin}`,
-        `Modo de apertura: ${installed}`,
-        "",
-        "Prueba manual recomendada:",
-        "1. Entrar a Admin con admin123.",
-        "2. Agregar un producto real con link específico.",
-        "3. Editar precio actual para generar historial.",
-        "4. Revisar Alertas.",
-        "5. Exportar JSON.",
-        "6. Importar JSON en modo sumar o reemplazar.",
-        "7. Limpiar caché si aparece una versión vieja.",
-        "",
-        "Cuando todo funcione, esta versión puede quedar como v1 estable."
-      ].join("\n");
-
-      alert(checklist);
-
-      if (typeof recordSyncEvent === "function") {
-        recordSyncEvent("phase8_checklist_opened", "Checklist de versión estable revisado");
-      }
-    }
-
-    document.getElementById("loginForm").addEventListener("submit", event => {
-      event.preventDefault();
-
-      const password = document.getElementById("adminPassword").value;
-
-      if (password === ADMIN_PASSWORD) {
-        document.getElementById("adminPassword").value = "";
-        setAdminActive(true);
-        goToScreen("admin");
-      } else {
-        alert("Clave incorrecta. Intenta nuevamente.");
-      }
-    });
-
-    document.getElementById("productForm").addEventListener("submit", event => {
-      event.preventDefault();
-
-      if (!isAdminActive()) {
-        alert("Primero entra como administrador.");
-        return;
-      }
-
-      const editingId = document.getElementById("editingProductId").value;
-      const name = document.getElementById("productName").value.trim();
-      const store = document.getElementById("productStore").value;
-      const category = document.getElementById("productCategory").value;
-      const icon = document.getElementById("productIcon").value;
-      const priority = document.getElementById("productPriority").value;
-      const normalPrice = Number(document.getElementById("normalPrice").value || 0);
-      const currentPrice = Number(document.getElementById("currentPrice").value);
-      const targetPrice = Number(document.getElementById("targetPrice").value);
-      const minDiscountPercent = Number(document.getElementById("minDiscountPercent").value || 0);
-      const alertEnabled = document.getElementById("productAlertEnabled").checked;
-      const url = normalizeUrl(document.getElementById("productUrl").value);
-      const notes = document.getElementById("productNotes").value.trim();
-
-      if (!name || normalPrice < 0 || currentPrice < 0 || targetPrice < 0 || minDiscountPercent < 0 || minDiscountPercent > 100) {
-        alert("Revisa los datos del producto.");
-        return;
-      }
-
-      const products = getProducts();
-
-      if (editingId) {
-        const updatedProducts = products.map(product => {
-          if (product.id !== editingId) {
-            return product;
-          }
-
-          const previousPrice = Number(product.currentPrice || 0);
-          const priceChanged = previousPrice !== Number(currentPrice);
-          const priceHistory = Array.isArray(product.priceHistory) ? product.priceHistory : [];
-
-          return {
-            ...product,
-            name,
-            store,
-            category,
-            icon,
-            priority,
-            normalPrice,
-            currentPrice,
-            targetPrice,
-            minDiscountPercent,
-            alertEnabled,
-            url,
-            notes,
-            priceHistory: priceChanged
-              ? [
-                  createPriceHistoryEntry(
-                    currentPrice,
-                    previousPrice,
-                    store,
-                    "Precio actualizado desde edición del producto",
-                    "edit_update"
-                  ),
-                  ...priceHistory
-                ]
-              : priceHistory,
-            updatedAt: new Date().toISOString()
-          };
-        });
-
-        saveProducts(updatedProducts);
-        resetProductForm();
-        alert("Producto actualizado correctamente.");
-        return;
-      }
-
-      const newProduct = {
-        id: generateId(),
-        name,
-        store,
-        category,
-        icon,
-        priority,
-        normalPrice,
-        currentPrice,
-        targetPrice,
-        minDiscountPercent,
-        alertEnabled,
-        url,
-        notes,
-        priceHistory: [
-          createPriceHistoryEntry(currentPrice, null, store, "Precio inicial del producto", "initial")
-        ],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      products.unshift(newProduct);
-      saveProducts(products);
-      resetProductForm();
-
-      alert("Producto guardado correctamente.");
-    });
-
-
-    document.getElementById("historyForm").addEventListener("submit", event => {
-      event.preventDefault();
-
-      if (!isAdminActive()) {
-        alert("Primero entra como administrador.");
-        return;
-      }
-
-      const productId = document.getElementById("historyProductSelect").value;
-      const newPrice = Number(document.getElementById("historyNewPrice").value);
-      const source = document.getElementById("historySource").value;
-      const note = document.getElementById("historyNote").value.trim();
-
-      if (!productId || newPrice < 0) {
-        alert("Selecciona un producto y escribe un precio válido.");
-        return;
-      }
-
-      addHistoryPrice(productId, newPrice, source, note || "Precio registrado manualmente");
-      document.getElementById("historyForm").reset();
-      alert("Precio registrado en historial correctamente.");
-    });
-
-
-    document.getElementById("searchInput").addEventListener("input", renderApp);
-    document.getElementById("storeFilter").addEventListener("change", renderApp);
-    document.getElementById("categoryFilter").addEventListener("change", renderApp);
-    document.getElementById("onlyOffersFilter").addEventListener("change", renderApp);
-
-    document.getElementById("backendConfigForm").addEventListener("submit", event => {
-      event.preventDefault();
-
-      const mode = document.getElementById("backendMode").value;
-      const url = document.getElementById("backendUrl").value.trim();
-      const apiKey = document.getElementById("backendApiKey").value.trim();
-      const pollMinutes = Number(document.getElementById("backendPollMinutes").value || 60);
-      const notes = document.getElementById("backendNotes").value.trim();
-
-      if (url && !normalizeUrl(url)) {
-        alert("La URL del backend debe iniciar con http:// o https://");
-        return;
-      }
-
-      saveBackendConfig({ mode, url, apiKey, pollMinutes, notes });
-      alert("Configuración de backend futuro guardada.");
-    });
-
-
-    window.addEventListener("beforeinstallprompt", event => {
-      event.preventDefault();
-      deferredInstallPrompt = event;
-      renderPwaStatus();
-    });
-
-    window.addEventListener("appinstalled", () => {
-      localStorage.setItem(PWA_INSTALLED_KEY, "true");
-      deferredInstallPrompt = null;
-      renderPwaStatus();
-    });
-
-    window.addEventListener("online", renderPwaStatus);
-    window.addEventListener("offline", renderPwaStatus);
-
+    async function upsertRemoteProduct(product) { if(!supabaseClient || !currentUser) return product; const payload = toRemoteProduct(product); let result; if(isUuid(product.id)) result = await supabaseClient.from("products").update(payload).eq("id", product.id).select().single(); else result = await supabaseClient.from("products").insert(payload).select().single(); if(result.error) throw result.error; return fromRemoteProduct(result.data, product.priceHistory || []); }
+    async function insertRemoteHistory(productId, entry) { if(!supabaseClient || !currentUser || !isUuid(productId)) return; const payload = { product_id: productId, previous_price: entry.previousPrice, new_price: Number(entry.price || 0), source: entry.source || "manual", note: entry.note || null }; const { error } = await supabaseClient.from("price_history").insert(payload); if(error) throw error; }
+    async function deleteRemoteProduct(id) { if(!supabaseClient || !currentUser || !isUuid(id)) return; const { error } = await supabaseClient.from("products").delete().eq("id", id); if(error) alert("No se pudo borrar en Supabase: " + error.message); else recordSyncEvent("remote_deleted", "Producto borrado en Supabase", "cloud"); }
+    async function migrateLocalToSupabase() { if(!currentUser) return alert("Primero inicia sesión en Supabase."); const products = getProducts(); if(!products.length) return alert("No hay productos locales para migrar."); if(!confirm(`Se subirán ${products.length} producto(s) locales a Supabase. ¿Continuar?`)) return; const migrated=[]; try { for(const p of products) { const inserted = await upsertRemoteProduct({...p, id: isUuid(p.id) ? p.id : ""}); for(const h of (p.priceHistory||[]).slice().reverse()) await insertRemoteHistory(inserted.id, h); migrated.push(inserted); } saveProducts(migrated, "migrated_to_supabase"); alert("Migración completada. Tus productos ya están en Supabase."); await refreshRemoteProducts(false); } catch(e) { alert("Error al migrar: " + e.message); recordSyncEvent("migration_error", e.message, "error"); } }
+    function downloadSupabasePayload() { const data = { app:"DealWatch MX", type:"supabase-payload", exportedAt:new Date().toISOString(), user: currentUser?.email || null, products:getProducts() }; downloadJson(data, `dealwatch-supabase-payload-${new Date().toISOString().slice(0,10)}.json`); }
+
+    function getSyncLog() { try { return JSON.parse(localStorage.getItem(SYNC_LOG_KEY) || "[]"); } catch { return []; } }
+    function recordSyncEvent(action, message, mode = currentUser ? "cloud" : "local") { const log = getSyncLog(); log.unshift({ id:generateId(), action, message, mode, date:new Date().toISOString() }); localStorage.setItem(SYNC_LOG_KEY, JSON.stringify(log.slice(0,80))); }
+
+    function downloadJson(data, fileName) { const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"}); const url = URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
+    function exportProductsJson() { downloadJson({ app:"DealWatch MX", project:"Appcomercio", type:"dealwatch-products-backup", version:"9.2-supabase", exportedAt:new Date().toISOString(), totalProducts:getProducts().length, products:getProducts() }, `dealwatch-mx-respaldo-${new Date().toISOString().slice(0,10)}.json`); }
+    function prepareImportJson(mode) { pendingImportMode=mode; const input=document.getElementById("importJsonInput"); input.value=""; input.click(); }
+    function importProductsJson(event) { const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try { const parsed=JSON.parse(reader.result); const raw=Array.isArray(parsed) ? parsed : parsed.products; if(!Array.isArray(raw)) throw new Error("sin productos"); const clean=raw.map(migrateProduct); if(pendingImportMode==="replace") { if(!confirm("¿Reemplazar productos locales por el JSON?")) return; saveProducts(clean,"json_import_replace"); } else saveProducts([...clean.map(p=>({...p,id:generateId(),importedAt:new Date().toISOString()})), ...getProducts()],"json_import_merge"); alert("JSON importado correctamente."); } catch(e){ alert("JSON inválido para DealWatch MX."); } }; reader.readAsText(file); }
+
+    function getAlertLog() { try { return JSON.parse(localStorage.getItem(ALERT_LOG_KEY)||"{}"); } catch { return {}; } }
+    function saveAlertLog(log) { localStorage.setItem(ALERT_LOG_KEY, JSON.stringify(log)); }
+    function checkAndNotifyOffers(products=getProducts()) { const log=getAlertLog(); products.filter(productHasActiveAlert).forEach(p=>{ const key=p.id+":"+p.currentPrice; if(log[key]) return; log[key]=new Date().toISOString(); showLocalNotification(`Oferta: ${p.name}`, `${formatMoney(p.currentPrice)} · ${getOfferReason(p)}`); }); saveAlertLog(log); }
+    function manualOfferCheck() { checkAndNotifyOffers(); alert("Revisión de ofertas terminada."); renderApp(); }
+    async function requestNotificationPermission() { if(!("Notification" in window)) return alert("Este navegador no soporta notificaciones."); const permission = await Notification.requestPermission(); localStorage.setItem(NOTIFICATION_PREF_KEY, permission); alert("Permiso de notificaciones: " + permission); }
+    function showLocalNotification(title, body) { if("Notification" in window && Notification.permission === "granted") new Notification(title, { body, icon:"icons/icon-192.png" }); }
+    function sendTestNotification() { showLocalNotification("DealWatch MX", "Notificación de prueba activa."); alert("Si diste permiso, debe aparecer una notificación."); }
+
+    function installPwaApp() { if(deferredInstallPrompt) { deferredInstallPrompt.prompt(); return; } alert("En Android/Chrome usa Instalar app. En iPhone: Safari → Compartir → Agregar a pantalla de inicio."); }
+    async function copyAppLink() { try { await navigator.clipboard.writeText(location.href); alert("Link copiado."); } catch { alert(location.href); } }
+    async function clearAppCache() { if("serviceWorker" in navigator) { const regs=await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r=>r.unregister())); } if(window.caches) { const keys=await caches.keys(); await Promise.all(keys.map(k=>caches.delete(k))); } alert("Caché PWA limpiado. Recarga con Ctrl+F5."); }
+
+    document.getElementById("loginForm").addEventListener("submit", e => { e.preventDefault(); if(document.getElementById("adminPassword").value === ADMIN_PASSWORD) { document.getElementById("adminPassword").value=""; setAdminActive(true); goToScreen("admin"); } else alert("Clave incorrecta."); });
+    document.getElementById("supabaseLoginForm").addEventListener("submit", async e => { e.preventDefault(); try { await signInSupabase(document.getElementById("supabaseEmail").value.trim(), document.getElementById("supabasePassword").value); document.getElementById("supabasePassword").value=""; alert("Sesión iniciada."); goToScreen("cloud"); } catch(err) { alert("No se pudo iniciar sesión: " + err.message); } });
+    document.getElementById("productForm").addEventListener("submit", async e => { e.preventDefault(); if(!isAdminActive()) return alert("Primero entra como administrador o inicia sesión en Supabase."); const editingId=document.getElementById("editingProductId").value; const products=getProducts(); const old=products.find(p=>p.id===editingId); const p=migrateProduct({ id: editingId || generateId(), name:document.getElementById("productName").value.trim(), store:document.getElementById("productStore").value, category:document.getElementById("productCategory").value, icon:document.getElementById("productIcon").value, priority:document.getElementById("productPriority").value, normalPrice:Number(document.getElementById("normalPrice").value||0), currentPrice:Number(document.getElementById("currentPrice").value||0), targetPrice:Number(document.getElementById("targetPrice").value||0), minDiscountPercent:Number(document.getElementById("minDiscountPercent").value||0), alertEnabled:document.getElementById("productAlertEnabled").checked, url:normalizeUrl(document.getElementById("productUrl").value), notes:document.getElementById("productNotes").value.trim(), createdAt: old?.createdAt || new Date().toISOString(), updatedAt:new Date().toISOString(), priceHistory: old?.priceHistory || [] }); if(!p.name || p.currentPrice<0 || p.targetPrice<0 || p.minDiscountPercent<0 || p.minDiscountPercent>100) return alert("Revisa los datos."); const priceChanged = old && Number(old.currentPrice)!==Number(p.currentPrice); if(!old) p.priceHistory=[createPriceHistoryEntry(p.currentPrice,null,p.store,"Precio inicial","initial")]; if(priceChanged) p.priceHistory=[createPriceHistoryEntry(p.currentPrice, old.currentPrice, p.store, "Precio actualizado desde edición", "edit_update"), ...p.priceHistory]; try { let saved = p; if(currentUser) { saved = await upsertRemoteProduct(p); if(priceChanged) await insertRemoteHistory(saved.id, p.priceHistory[0]); if(!old && p.priceHistory[0]) await insertRemoteHistory(saved.id, p.priceHistory[0]); recordSyncEvent(editingId?"remote_product_updated":"remote_product_inserted", saved.name, "cloud"); } const updated = editingId ? products.map(x=>x.id===editingId ? saved : x) : [saved, ...products]; saveProducts(updated, editingId ? "product_updated" : "product_created"); resetProductForm(); alert(editingId ? "Producto actualizado." : "Producto guardado."); } catch(err) { alert("No se pudo guardar en Supabase: " + err.message + "\nSe guardará localmente."); const updated = editingId ? products.map(x=>x.id===editingId ? p : x) : [p, ...products]; saveProducts(updated, "product_saved_local_fallback"); } });
+    document.getElementById("priceForm").addEventListener("submit", async e => { e.preventDefault(); const id=document.getElementById("historyProductId").value; const newPrice=Number(document.getElementById("historyNewPrice").value); const source=document.getElementById("historySource").value.trim() || "Registro manual"; const note=document.getElementById("historyNote").value.trim(); let entry=null; const products=getProducts().map(p=>{ if(p.id!==id) return p; entry=createPriceHistoryEntry(newPrice,p.currentPrice,source,note,"manual_history"); return {...p,currentPrice:newPrice,updatedAt:new Date().toISOString(),priceHistory:[entry,...(p.priceHistory||[])]}; }); const product=products.find(p=>p.id===id); try { if(currentUser && product) { await upsertRemoteProduct(product); await insertRemoteHistory(product.id, entry); recordSyncEvent("remote_price_history", product.name, "cloud"); } saveProducts(products,"price_history_added"); document.getElementById("priceForm").reset(); alert("Precio registrado."); } catch(err) { alert("Se guardó localmente, pero falló Supabase: " + err.message); saveProducts(products,"price_history_local_fallback"); } });
+    ["searchInput","storeFilter","categoryFilter","onlyOffersFilter"].forEach(id=>document.getElementById(id).addEventListener(id==="searchInput"?"input":"change", renderApp));
     themeButton.addEventListener("click", toggleTheme);
+    window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstallPrompt=e; });
 
     const savedTheme = localStorage.getItem(THEME_KEY) || "light";
     setTheme(savedTheme);
-
     renderApp();
+    initSupabase();
 
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("service-worker.js")
-          .then(() => renderPwaStatus())
-          .catch(error => {
-            console.log("Service Worker no registrado:", error);
-            renderPwaStatus();
-          });
-      });
-    }
+    if("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js").catch(err => console.log("SW no registrado", err)));
   </script>
 </body>
 </html>
