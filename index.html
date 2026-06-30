@@ -9,6 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
 
   <title>DealWatch MX | Appcomercio</title>
+  <!-- Fase 8: versión estable HTML/PWA para GitHub Pages -->
 
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
@@ -1142,15 +1143,15 @@
     <!-- INICIO -->
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>🧩 Fase 7 · Backend listo</small>
-        <h2>Prepara DealWatch MX para backend real.</h2>
+        <small>✅ Fase 8 · Versión estable</small>
+        <h2>DealWatch MX listo para usar.</h2>
         <p>
-          La app sigue funcionando en GitHub Pages, pero ya queda preparada para conectarse más adelante a una API, Supabase, Firebase, GitHub Actions o cron.
+          Esta versión deja cerrada una base estable: favoritos, admin, historial, alertas, respaldo JSON, PWA y preparación para backend futuro.
         </p>
 
         <div class="hero-actions">
-          <button class="btn btn-light" onclick="goToScreen('settings')">Configurar backend</button>
-          <button class="btn btn-ghost" onclick="exportBackendPayloadJson()">Exportar payload</button>
+          <button class="btn btn-light" onclick="goToScreen('favorites')">Probar favoritos</button>
+          <button class="btn btn-ghost" onclick="goToScreen('settings')">Checklist</button>
         </div>
       </div>
 
@@ -1181,7 +1182,7 @@
       <section class="section">
         <div class="section-header">
           <h3>Accesos rápidos</h3>
-          <span>Fase 7</span>
+          <span>Fase 8</span>
         </div>
 
         <div class="quick-actions">
@@ -1745,6 +1746,43 @@
             <button class="btn btn-soft" type="button" onclick="testOfferNotification()">
               Probar
             </button>
+          </div>
+        </div>
+
+        <div class="setting-card" id="stableVersionCard">
+          <div class="setting-row">
+            <div>
+              <strong>Fase 8 · Versión estable</strong>
+              <span>
+                Usa este bloque para revisar que la app quedó limpia antes de avanzar al backend real. Idealmente prueba en incógnito y en celular.
+              </span>
+            </div>
+            <div style="font-size: 24px;">✅</div>
+          </div>
+
+          <div class="device-steps">
+            <div class="device-step">
+              <strong>1. GitHub Pages</strong>
+              <span>Debe estar en Settings → Pages → Deploy from a branch → main → /root.</span>
+            </div>
+            <div class="device-step">
+              <strong>2. Archivos raíz</strong>
+              <span>Conserva index.html, service-worker.js, manifest.webmanifest, icons/ y README. Evita mezclar src/, public/, package.json o .github/workflows.</span>
+            </div>
+            <div class="device-step">
+              <strong>3. Pruebas rápidas</strong>
+              <span>Admin, agregar producto, editar precio, historial, alertas, exportar JSON e importar JSON.</span>
+            </div>
+            <div class="device-step">
+              <strong>4. Caché</strong>
+              <span>Si ves una versión vieja, usa Limpiar caché o abre en incógnito.</span>
+            </div>
+          </div>
+
+          <div class="form-actions" style="margin-top:16px;">
+            <button class="btn btn-primary" type="button" onclick="runStableChecklist()">Ver checklist</button>
+            <button class="btn btn-soft" type="button" onclick="exportProductsJson()">Exportar respaldo</button>
+            <button class="btn btn-danger" type="button" onclick="clearAppCacheAndReload()">Limpiar caché</button>
           </div>
         </div>
 
@@ -3335,7 +3373,7 @@ Envía alerta por email, Telegram, WhatsApp o notificación externa cuando offer
       const backupData = {
         app: "DealWatch MX",
         project: "Appcomercio",
-        type: "dealwatch-products-backup-with-price-history-alerts-pwa-backend-ready",
+        type: "dealwatch-products-backup-v1-stable-phase8",
         version: "7.0",
         exportedAt: new Date().toISOString(),
         totalProducts: products.length,
@@ -3456,6 +3494,39 @@ Envía alerta por email, Telegram, WhatsApp o notificación externa cuando offer
       };
 
       reader.readAsText(file);
+    }
+
+
+    function runStableChecklist() {
+      const products = getProducts();
+      const offers = products.filter(productHasOffer);
+      const admin = isAdminActive() ? "Activo" : "Bloqueado";
+      const installed = isStandalonePwa() ? "Instalada como app" : "Navegador";
+      const checklist = [
+        "FASE 8 · CHECKLIST ESTABLE",
+        "",
+        `Productos guardados: ${products.length}`,
+        `Ofertas activas: ${offers.length}`,
+        `Administrador: ${admin}`,
+        `Modo de apertura: ${installed}`,
+        "",
+        "Prueba manual recomendada:",
+        "1. Entrar a Admin con admin123.",
+        "2. Agregar un producto real con link específico.",
+        "3. Editar precio actual para generar historial.",
+        "4. Revisar Alertas.",
+        "5. Exportar JSON.",
+        "6. Importar JSON en modo sumar o reemplazar.",
+        "7. Limpiar caché si aparece una versión vieja.",
+        "",
+        "Cuando todo funcione, esta versión puede quedar como v1 estable."
+      ].join("\n");
+
+      alert(checklist);
+
+      if (typeof recordSyncEvent === "function") {
+        recordSyncEvent("phase8_checklist_opened", "Checklist de versión estable revisado");
+      }
     }
 
     document.getElementById("loginForm").addEventListener("submit", event => {

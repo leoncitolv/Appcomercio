@@ -1,7 +1,7 @@
 {
   "name": "DealWatch MX - Appcomercio",
   "short_name": "DealWatch MX",
-  "description": "App PWA para productos favoritos, historial, alertas locales y preparación para backend futuro.",
+  "description": "App PWA estable para productos favoritos, historial, alertas locales, respaldo JSON y backend futuro.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
