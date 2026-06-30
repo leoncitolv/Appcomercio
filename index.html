@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 13.2 Mercado Libre estable</title>
+  <title>DealWatch MX | Fase 13.3 Mercado Libre producción</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -177,7 +177,7 @@
 
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>🛒 Fase 13.2 · Mercado Libre estable</small>
+        <small>🛒 Fase 13.3 · Mercado Libre producción</small>
         <h2>Tu app ya entiende links reales de Mercado Libre.</h2>
         <p>El robot ahora detecta links de artículo y links de catálogo /p/ con wid o item_id, actualiza Supabase y avisa por Telegram.</p>
         <div class="hero-actions">
@@ -196,7 +196,7 @@
       </section>
 
       <section class="section">
-        <div class="section-header"><h3>Accesos rápidos</h3><span>Fase 13.2</span></div>
+        <div class="section-header"><h3>Accesos rápidos</h3><span>Fase 13.3</span></div>
         <div class="quick-actions">
           <article class="action-card" onclick="goToScreen('favorites')"><div class="action-icon blue">🛒</div><strong>Favoritos</strong><p>Busca, filtra y abre links de productos.</p></article>
           <article class="action-card" onclick="goToScreen('alerts')"><div class="action-icon green">🔔</div><strong>Alertas</strong><p>Detecta precio objetivo o descuento mínimo.</p></article>
@@ -415,10 +415,10 @@
 
 
         <div class="card" id="monitorCard">
-          <strong>Fase 13.2 · Mercado Libre estable</strong>
-          <span>GitHub Actions ahora obtiene precios de Mercado Libre con diagnóstico mejorado: artículos directos, links /p/ con wid, item_id y errores claros si el link no trae publicación real.</span>
+          <strong>Fase 13.3 · Mercado Libre producción</strong>
+          <span>GitHub Actions obtiene precios reales de Mercado Libre y aplica anti-spam: solo manda Telegram cuando hay oferta nueva o una bajada relevante del precio.</span>
           <div class="notice">
-            Para activarlo debes tener <b>SUPABASE_SERVICE_ROLE_KEY</b>, <b>TELEGRAM_BOT_TOKEN</b> y <b>TELEGRAM_CHAT_ID</b> en GitHub Actions. En el workflow activa <b>live_prices</b> para revisar Mercado Libre. Ninguna llave secreta va en index.html.
+            Para activarlo debes tener <b>SUPABASE_SERVICE_ROLE_KEY</b>, <b>TELEGRAM_BOT_TOKEN</b> y <b>TELEGRAM_CHAT_ID</b> en GitHub Actions. El anti-spam evita repetir Telegram por el mismo producto/precio durante 7 días y solo avisa nuevas bajadas relevantes.
           </div>
           <div class="form-actions" style="margin-top:16px;">
             <button class="btn btn-primary" type="button" onclick="refreshMonitorStatus(true)">Actualizar monitoreo</button>
@@ -432,10 +432,10 @@
 
 
         <div class="card" id="mercadoLibreCard">
-          <strong>Fase 13.2 · Precios reales de Mercado Libre</strong>
-          <span>Para que el robot actualice precios automáticamente, pega el link completo del producto. Ahora también se aceptan links de catálogo /p/ si traen wid o item_id.</span>
+          <strong>Fase 13.3 · Precios reales de Mercado Libre</strong>
+          <span>Para que el robot actualice precios automáticamente, pega el link completo del producto. Se aceptan links directos, links /p/ con wid o item_id, y se muestra diagnóstico del último monitoreo.</span>
           <div class="notice">
-            Ejemplos válidos: <b>https://articulo.mercadolibre.com.mx/MLM-1234567890-producto</b> o links como <b>/p/MLM...</b> cuando incluyan <b>wid=MLM...</b> o <b>item_id=MLM...</b>. No uses solo <b>mercadolibre.com.mx</b>.
+            Ejemplos válidos: <b>https://articulo.mercadolibre.com.mx/MLM-1234567890-producto</b> o links como <b>/p/MLM...</b> cuando incluyan <b>wid=MLM...</b> o <b>item_id=MLM...</b>. El panel mostrará si se actualizó precio, item ML y último error.
           </div>
           <div class="form-actions" style="margin-top:16px;">
             <button class="btn btn-primary" type="button" onclick="showMercadoLibreHelp()">Ver formato correcto</button>
@@ -1230,27 +1230,49 @@
             </div>
           </article>` : "";
 
-        const eventCards = latestEvents.map(ev => `
+        const eventCards = latestEvents.map(ev => {
+          const raw = ev.raw || {};
+          const antiSpam = raw.antiSpamReason ? `Anti-spam: ${raw.antiSpamReason}` : "Evento generado por GitHub Actions.";
+          const itemId = raw.mercadoLibreItemId ? ` · ${raw.mercadoLibreItemId}` : "";
+          return `
           <article class="product-card">
             <div class="product-img">🔔</div>
             <div class="product-info">
-              <div class="product-top"><div><div class="store">Alerta automática</div><div class="product-title">${escapeHTML(ev.title || "Oferta detectada")}</div><div class="category-line">${escapeHTML(formatDate(ev.created_at))} · ${escapeHTML(ev.status || "new")}</div></div><span class="badge offer">Oferta</span></div>
+              <div class="product-top"><div><div class="store">Alerta automática${escapeHTML(itemId)}</div><div class="product-title">${escapeHTML(ev.title || "Oferta detectada")}</div><div class="category-line">${escapeHTML(formatDate(ev.created_at))} · ${escapeHTML(ev.status || "new")}</div></div><span class="badge offer">Oferta</span></div>
               <div class="price-row"><div class="price">${formatMoney(ev.current_price)}</div><div class="target">Meta: ${formatMoney(ev.target_price)}</div></div>
               <div class="product-notes">${escapeHTML(ev.message || "Evento generado por GitHub Actions.")}</div>
+              <div class="product-notes">${escapeHTML(antiSpam)}</div>
             </div>
           </article>
-        `).join("");
+        `;
+        }).join("");
 
-        const resultCards = latestResults.map(r => `
+        const resultCards = latestResults.map(r => {
+          const raw = r.raw || {};
+          const liveSource = raw.livePriceSource || "manual_rules";
+          const itemId = raw.mercadoLibreItemId || "";
+          const liveUpdated = Boolean(raw.livePriceUpdated);
+          const previous = Number(raw.previousPrice || 0);
+          const liveMessage = raw.livePriceMessage || raw.mercadoLibreReason || "Revisión automática registrada.";
+          const extraLines = [
+            liveSource ? `Fuente: ${liveSource}` : "",
+            itemId ? `Item ML: ${itemId}` : "",
+            liveUpdated ? "Precio actualizado automáticamente" : "Sin cambio de precio",
+            previous > 0 ? `Anterior: ${formatMoney(previous)}` : "",
+          ].filter(Boolean).join(" · ");
+
+          return `
           <article class="product-card">
             <div class="product-img">📡</div>
             <div class="product-info">
               <div class="product-top"><div><div class="store">${escapeHTML(r.store || "Tienda")}</div><div class="product-title">${escapeHTML(r.product_name || "Producto")}</div><div class="category-line">${escapeHTML(formatDate(r.checked_at))} · ${Number(r.discount_percent || 0)}% desc.</div></div><span class="badge ${r.is_offer ? "offer" : "watch"}">${r.is_offer ? "Oferta" : "Vigilando"}</span></div>
               <div class="price-row"><div class="price">${formatMoney(r.current_price)}</div><div class="target">Meta: ${formatMoney(r.target_price)}</div></div>
               <div class="product-notes">${escapeHTML(r.alert_reason || "Revisión automática registrada.")}</div>
+              <div class="product-notes"><b>Monitoreo:</b> ${escapeHTML(extraLines || liveMessage)}</div>
             </div>
           </article>
-        `).join("");
+        `;
+        }).join("");
 
         box.innerHTML = runCard + eventCards + resultCards;
         if (showAlert) alert("Estado de monitoreo actualizado.");
@@ -1263,7 +1285,7 @@
 
     function showMercadoLibreHelp() {
       alert(
-        "Fase 13.2 Mercado Libre estable:\n\n" +
+        "Fase 13.3 Mercado Libre producción:\n\n" +
         "1. En el producto guarda la tienda como Mercado Libre.\n" +
         "2. En Link del producto pega el link completo que te da Mercado Libre.\n" +
         "3. El robot busca primero wid=MLM..., después item_id=MLM... y después links tipo MLM-1234567890.\n" +
@@ -1285,7 +1307,7 @@
         "5. Obtén el chat_id con getUpdates.\n" +
         "6. En GitHub Secrets agrega TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID.\n" +
         "7. En Actions ejecuta el workflow con telegram_test activado.\n\n" +
-        "Fase 13.2: para Mercado Libre también activa live_prices."
+        "Fase 13.3: para Mercado Libre también activa live_prices."
       );
     }
 
