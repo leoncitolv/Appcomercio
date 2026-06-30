@@ -9,7 +9,7 @@ on:
         type: boolean
         default: false
       live_prices:
-        description: "Intentar actualizar precios reales de Mercado Libre con diagnóstico"
+        description: "Actualizar precios reales de Mercado Libre con anti-spam"
         required: false
         type: boolean
         default: true
@@ -36,7 +36,7 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Revisar Mercado Libre estable, reglas de oferta y Telegram
+      - name: Revisar Mercado Libre producción, anti-spam y Telegram
         run: node scripts/check-prices.mjs
         env:
           SUPABASE_URL: "https://ltsrjxvisptbdhhkabhj.supabase.co"
@@ -45,4 +45,6 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.telegram_test || false }}
           DEALWATCH_LIVE_PRICES: ${{ github.event_name == 'workflow_dispatch' && inputs.live_prices || true }}
-          DEALWATCH_MODE: "mercadolibre_stable_auto_telegram"
+          DEALWATCH_MODE: "mercadolibre_production_antispam"
+          DEALWATCH_ALERT_LOOKBACK_DAYS: "7"
+          DEALWATCH_SIGNIFICANT_DROP_PERCENT: "1"
