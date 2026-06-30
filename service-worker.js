@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-pwa-v6-install";
+const CACHE_NAME = "dealwatch-mx-pwa-v7-backend-ready";
 const CORE_ASSETS = [
   "./",
   "./index.html",

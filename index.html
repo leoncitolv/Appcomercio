@@ -1142,16 +1142,15 @@
     <!-- INICIO -->
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>📲 Fase 6 · Instalación PWA</small>
-        <h2>Instala DealWatch MX como app.</h2>
+        <small>🧩 Fase 7 · Backend listo</small>
+        <h2>Prepara DealWatch MX para backend real.</h2>
         <p>
-          Ahora la app está preparada para instalarse en celular, funcionar offline,
-          limpiar caché vieja y verificar el estado de GitHub Pages como PWA.
+          La app sigue funcionando en GitHub Pages, pero ya queda preparada para conectarse más adelante a una API, Supabase, Firebase, GitHub Actions o cron.
         </p>
 
         <div class="hero-actions">
-          <button class="btn btn-light" onclick="installPwa()">Instalar app</button>
-          <button class="btn btn-ghost" onclick="goToScreen('settings')">Ver estado PWA</button>
+          <button class="btn btn-light" onclick="goToScreen('settings')">Configurar backend</button>
+          <button class="btn btn-ghost" onclick="exportBackendPayloadJson()">Exportar payload</button>
         </div>
       </div>
 
@@ -1182,7 +1181,7 @@
       <section class="section">
         <div class="section-header">
           <h3>Accesos rápidos</h3>
-          <span>Fase 6</span>
+          <span>Fase 7</span>
         </div>
 
         <div class="quick-actions">
@@ -1205,8 +1204,14 @@
           </article>
 
           <article class="action-card" onclick="goToScreen('settings')">
-            <div class="action-icon purple">⚙️</div>
-            <strong>Ajustes</strong>
+            <div class="action-icon purple">🧩</div>
+            <strong>Backend futuro</strong>
+            <p>Guarda configuración API y exporta payload para automatizar.</p>
+          </article>
+
+          <article class="action-card" onclick="goToScreen('settings')">
+            <div class="action-icon blue">⚙️</div>
+            <strong>Ajustes PWA</strong>
             <p>Instalación, offline, caché y estado administrador.</p>
           </article>
         </div>
@@ -1743,6 +1748,90 @@
           </div>
         </div>
 
+        <div class="setting-card" id="backendSettingsCard">
+          <div class="setting-row">
+            <div>
+              <strong>Fase 7 · Backend futuro</strong>
+              <span>
+                La app sigue trabajando localmente, pero aquí preparas la conexión para un backend real: API propia, Supabase, Firebase, GitHub Actions o cron.
+              </span>
+            </div>
+            <div style="font-size: 24px;">🧩</div>
+          </div>
+
+          <div class="pwa-status-grid">
+            <div class="pwa-status-item">
+              <b>Modo</b>
+              <span id="backendModeStatus">Local</span>
+            </div>
+            <div class="pwa-status-item">
+              <b>Endpoint</b>
+              <span id="backendUrlStatus">No configurado</span>
+            </div>
+            <div class="pwa-status-item">
+              <b>Productos listos</b>
+              <span id="backendReadyProducts">0</span>
+            </div>
+            <div class="pwa-status-item">
+              <b>Cola sync</b>
+              <span id="backendSyncQueue">0 cambios</span>
+            </div>
+          </div>
+
+          <form class="form-grid" id="backendConfigForm" style="margin-top:16px;">
+            <div class="two-cols">
+              <div class="field">
+                <label for="backendMode">Tipo de backend futuro</label>
+                <select id="backendMode">
+                  <option value="local">Solo local por ahora</option>
+                  <option value="api">API propia</option>
+                  <option value="supabase">Supabase</option>
+                  <option value="firebase">Firebase</option>
+                  <option value="github-actions">GitHub Actions / cron</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="backendPollMinutes">Frecuencia sugerida</label>
+                <select id="backendPollMinutes">
+                  <option value="60">Cada 1 hora</option>
+                  <option value="180">Cada 3 horas</option>
+                  <option value="360">Cada 6 horas</option>
+                  <option value="720">Cada 12 horas</option>
+                  <option value="1440">Cada 24 horas</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="backendUrl">URL base del backend futuro</label>
+              <input id="backendUrl" type="url" placeholder="https://tu-api.com o https://proyecto.supabase.co" />
+            </div>
+
+            <div class="field">
+              <label for="backendApiKey">API key / token futuro</label>
+              <input id="backendApiKey" type="password" placeholder="Opcional. No subas claves reales a GitHub." autocomplete="off" />
+            </div>
+
+            <div class="field">
+              <label for="backendNotes">Notas de integración</label>
+              <textarea id="backendNotes" placeholder="Ej. usar cron para revisar Amazon/Mercado Libre; enviar alertas por Telegram o email..."></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Guardar configuración</button>
+              <button class="btn btn-soft" type="button" onclick="testBackendConnection()">Probar conexión</button>
+              <button class="btn btn-soft" type="button" onclick="exportBackendPayloadJson()">Exportar payload JSON</button>
+              <button class="btn btn-soft" type="button" onclick="copyBackendApiTemplate()">Copiar plantilla API</button>
+              <button class="btn btn-danger" type="button" onclick="clearBackendConfig()">Limpiar backend</button>
+            </div>
+          </form>
+
+          <div class="notice">
+            En esta fase no se monitorean precios automáticamente todavía. Se deja lista la estructura de datos para que un backend futuro lea tus productos, revise precios y regrese alertas.
+          </div>
+        </div>
+
         <div class="setting-card">
           <div class="setting-row">
             <div>
@@ -1800,6 +1889,8 @@
     const ALERT_LOG_KEY = "dealwatch_alert_log_v5";
     const NOTIFICATION_PREF_KEY = "dealwatch_notifications_pref";
     const PWA_INSTALLED_KEY = "dealwatch_pwa_installed_v6";
+    const BACKEND_CONFIG_KEY = "dealwatch_backend_config_v7";
+    const SYNC_LOG_KEY = "dealwatch_sync_log_v7";
 
     let deferredInstallPrompt = null;
 
@@ -1994,9 +2085,10 @@
       return initialProducts;
     }
 
-    function saveProducts(products) {
+    function saveProducts(products, syncAction = "products_saved") {
       const cleanProducts = products.map(migrateProduct);
       localStorage.setItem(PRODUCTS_KEY, JSON.stringify(cleanProducts));
+      recordSyncEvent(syncAction, `${cleanProducts.length} producto(s) guardado(s) localmente`);
       renderApp();
       checkAndNotifyOffers(cleanProducts);
     }
@@ -2265,6 +2357,250 @@
       }
 
       window.location.reload();
+    }
+
+
+    function getBackendConfig() {
+      const fallback = {
+        mode: "local",
+        url: "",
+        apiKey: "",
+        pollMinutes: 60,
+        notes: "",
+        savedAt: ""
+      };
+
+      try {
+        const parsed = JSON.parse(localStorage.getItem(BACKEND_CONFIG_KEY) || "{}");
+        return {
+          ...fallback,
+          ...parsed,
+          url: normalizeUrl(parsed.url || ""),
+          pollMinutes: Number(parsed.pollMinutes || fallback.pollMinutes)
+        };
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function getSafeBackendConfig() {
+      const config = getBackendConfig();
+
+      return {
+        mode: config.mode,
+        url: config.url,
+        hasApiKey: Boolean(config.apiKey),
+        pollMinutes: config.pollMinutes,
+        notes: config.notes,
+        savedAt: config.savedAt
+      };
+    }
+
+    function saveBackendConfig(config) {
+      localStorage.setItem(BACKEND_CONFIG_KEY, JSON.stringify({
+        mode: config.mode || "local",
+        url: normalizeUrl(config.url || ""),
+        apiKey: config.apiKey || "",
+        pollMinutes: Number(config.pollMinutes || 60),
+        notes: config.notes || "",
+        savedAt: new Date().toISOString()
+      }));
+
+      recordSyncEvent("backend_config_saved", "Configuración de backend futuro actualizada");
+      renderApp();
+    }
+
+    function clearBackendConfig() {
+      const confirmClear = confirm("¿Seguro que quieres borrar la configuración de backend futuro? No se borrarán tus productos.");
+
+      if (!confirmClear) {
+        return;
+      }
+
+      localStorage.removeItem(BACKEND_CONFIG_KEY);
+      recordSyncEvent("backend_config_cleared", "Configuración de backend futuro eliminada");
+      renderApp();
+      alert("Configuración de backend limpiada.");
+    }
+
+    function getSyncLog() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(SYNC_LOG_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveSyncLog(log) {
+      localStorage.setItem(SYNC_LOG_KEY, JSON.stringify(log.slice(0, 80)));
+    }
+
+    function recordSyncEvent(action, detail = "") {
+      const log = getSyncLog();
+
+      log.unshift({
+        id: generateId(),
+        date: new Date().toISOString(),
+        action,
+        detail
+      });
+
+      saveSyncLog(log);
+    }
+
+    function getBackendModeLabel(mode) {
+      const labels = {
+        local: "Solo local",
+        api: "API propia",
+        supabase: "Supabase",
+        firebase: "Firebase",
+        "github-actions": "GitHub Actions"
+      };
+
+      return labels[mode] || "Solo local";
+    }
+
+    function renderBackendStatus(products = getProducts()) {
+      const config = getBackendConfig();
+      const readyProducts = products.filter(product => normalizeUrl(product.url)).length;
+      const syncLog = getSyncLog();
+
+      const modeStatus = document.getElementById("backendModeStatus");
+      const urlStatus = document.getElementById("backendUrlStatus");
+      const readyStatus = document.getElementById("backendReadyProducts");
+      const queueStatus = document.getElementById("backendSyncQueue");
+      const form = document.getElementById("backendConfigForm");
+
+      if (modeStatus) {
+        modeStatus.textContent = getBackendModeLabel(config.mode);
+      }
+
+      if (urlStatus) {
+        urlStatus.textContent = config.url ? "Configurado" : "No configurado";
+      }
+
+      if (readyStatus) {
+        readyStatus.textContent = `${readyProducts} de ${products.length}`;
+      }
+
+      if (queueStatus) {
+        queueStatus.textContent = `${syncLog.length} cambio${syncLog.length === 1 ? "" : "s"}`;
+      }
+
+      if (form && !form.contains(document.activeElement)) {
+        document.getElementById("backendMode").value = config.mode;
+        document.getElementById("backendPollMinutes").value = String(config.pollMinutes || 60);
+        document.getElementById("backendUrl").value = config.url;
+        document.getElementById("backendApiKey").value = config.apiKey;
+        document.getElementById("backendNotes").value = config.notes;
+      }
+    }
+
+    async function testBackendConnection() {
+      const config = getBackendConfig();
+
+      if (config.mode === "local" || !config.url) {
+        alert("Modo local activo. Todavía no hay backend real configurado, pero la app puede seguir usando localStorage y exportar payload JSON.");
+        return;
+      }
+
+      const healthUrl = `${config.url.replace(/\/$/, "")}/health`;
+
+      try {
+        const response = await fetch(healthUrl, {
+          method: "GET",
+          headers: config.apiKey ? { "Authorization": `Bearer ${config.apiKey}` } : {}
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        recordSyncEvent("backend_health_ok", `Conexión correcta con ${healthUrl}`);
+        renderApp();
+        alert("Conexión correcta. El backend respondió /health.");
+      } catch (error) {
+        recordSyncEvent("backend_health_error", `No se pudo conectar con ${healthUrl}`);
+        renderApp();
+        alert("No se pudo conectar al backend. Puede ser normal si todavía no existe, si falta CORS o si la URL /health no está creada.");
+      }
+    }
+
+    function buildBackendPayload() {
+      const products = getProducts();
+      const config = getBackendConfig();
+
+      return {
+        app: "DealWatch MX",
+        project: "Appcomercio",
+        type: "dealwatch-backend-sync-payload",
+        version: "7.0",
+        generatedAt: new Date().toISOString(),
+        backend: getSafeBackendConfig(),
+        suggestedSchedule: {
+          everyMinutes: Number(config.pollMinutes || 60),
+          note: "El backend futuro debe leer productos, revisar precios y devolver alertas. GitHub Pages no ejecuta monitoreo automático por sí solo."
+        },
+        schema: {
+          productRequiredFields: ["id", "name", "store", "url", "currentPrice", "targetPrice"],
+          offerRules: ["currentPrice <= targetPrice", "discountPercent >= minDiscountPercent"],
+          endpointsSuggested: ["GET /health", "POST /api/products/sync", "POST /api/prices/check", "POST /api/alerts/send"]
+        },
+        totals: {
+          products: products.length,
+          productsWithUrl: products.filter(product => normalizeUrl(product.url)).length,
+          activeAlerts: products.filter(productHasActiveAlert).length,
+          historyRecords: products.reduce((total, product) => total + (Array.isArray(product.priceHistory) ? product.priceHistory.length : 0), 0)
+        },
+        syncLog: getSyncLog(),
+        products
+      };
+    }
+
+    function exportBackendPayloadJson() {
+      const payload = buildBackendPayload();
+      const jsonText = JSON.stringify(payload, null, 2);
+      const blob = new Blob([jsonText], { type: "application/json" });
+      const date = new Date().toISOString().slice(0, 10);
+      const fileName = `dealwatch-mx-backend-payload-${date}.json`;
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = downloadUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+
+      recordSyncEvent("backend_payload_exported", `Payload exportado: ${fileName}`);
+      renderApp();
+    }
+
+    async function copyBackendApiTemplate() {
+      const template = `DealWatch MX - Plantilla backend futuro
+
+GET /health
+Respuesta esperada:
+{ "ok": true, "app": "DealWatch MX" }
+
+POST /api/products/sync
+Recibe el payload exportado por la app y guarda productos, reglas e historial.
+
+POST /api/prices/check
+Revisa precios por producto y regresa currentPrice actualizado, discountPercent y offerDetected.
+
+POST /api/alerts/send
+Envía alerta por email, Telegram, WhatsApp o notificación externa cuando offerDetected sea true.
+`;
+
+      try {
+        await navigator.clipboard.writeText(template);
+        alert("Plantilla de endpoints copiada.");
+      } catch (error) {
+        prompt("Copia esta plantilla:", template);
+      }
     }
 
     function getFilteredProducts(products) {
@@ -2890,6 +3226,8 @@
       renderAlerts(products);
       renderHistory(products);
       renderAdminPanel(products);
+      renderBackendStatus(products);
+      renderPwaStatus();
     }
 
     function resetProductForm() {
@@ -2997,10 +3335,12 @@
       const backupData = {
         app: "DealWatch MX",
         project: "Appcomercio",
-        type: "dealwatch-products-backup-with-price-history-alerts-pwa",
-        version: "6.0",
+        type: "dealwatch-products-backup-with-price-history-alerts-pwa-backend-ready",
+        version: "7.0",
         exportedAt: new Date().toISOString(),
         totalProducts: products.length,
+        backendConfig: getSafeBackendConfig(),
+        syncLog: getSyncLog(),
         products: products
       };
 
@@ -3264,6 +3604,24 @@
     document.getElementById("storeFilter").addEventListener("change", renderApp);
     document.getElementById("categoryFilter").addEventListener("change", renderApp);
     document.getElementById("onlyOffersFilter").addEventListener("change", renderApp);
+
+    document.getElementById("backendConfigForm").addEventListener("submit", event => {
+      event.preventDefault();
+
+      const mode = document.getElementById("backendMode").value;
+      const url = document.getElementById("backendUrl").value.trim();
+      const apiKey = document.getElementById("backendApiKey").value.trim();
+      const pollMinutes = Number(document.getElementById("backendPollMinutes").value || 60);
+      const notes = document.getElementById("backendNotes").value.trim();
+
+      if (url && !normalizeUrl(url)) {
+        alert("La URL del backend debe iniciar con http:// o https://");
+        return;
+      }
+
+      saveBackendConfig({ mode, url, apiKey, pollMinutes, notes });
+      alert("Configuración de backend futuro guardada.");
+    });
 
 
     window.addEventListener("beforeinstallprompt", event => {
