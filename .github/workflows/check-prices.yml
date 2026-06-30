@@ -1,0 +1,33 @@
+name: DealWatch MX - Revisar ofertas
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Cada 6 horas, minuto 17 UTC. Cambia este cron si quieres otro horario.
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dealwatch-price-monitor
+  cancel-in-progress: false
+
+jobs:
+  check-prices:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repo
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Revisar reglas de oferta
+        run: node scripts/check-prices.mjs
+        env:
+          SUPABASE_URL: "https://ltsrjxvisptbdhhkabhj.supabase.co"
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DEALWATCH_MODE: "rules_only"
