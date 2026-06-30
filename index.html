@@ -1,245 +1,952 @@
-<!doctype html>
-<html lang="es">
+<!DOCTYPE html>
+<html lang="es-MX">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0f172a" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f5f7" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Appcomercio" />
-  <meta name="description" content="App web instalable para monitorear productos favoritos y detectar ofertas realmente buenas." />
-  <title>Appcomercio · DealWatch MX</title>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
+
+  <title>DealWatch MX | Appcomercio</title>
+
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
-  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --card: rgba(255, 255, 255, 0.82);
+      --card-solid: #ffffff;
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --border: rgba(0, 0, 0, 0.08);
+      --primary: #007aff;
+      --primary-dark: #005ecb;
+      --green: #34c759;
+      --orange: #ff9500;
+      --red: #ff3b30;
+      --purple: #af52de;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.10);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --safe-bottom: env(safe-area-inset-bottom);
+    }
+
+    [data-theme="dark"] {
+      --bg: #000000;
+      --card: rgba(28, 28, 30, 0.84);
+      --card-solid: #1c1c1e;
+      --text: #f5f5f7;
+      --muted: #a1a1a6;
+      --border: rgba(255, 255, 255, 0.12);
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(0, 122, 255, 0.18), transparent 32%),
+        radial-gradient(circle at top right, rgba(175, 82, 222, 0.16), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: calc(92px + var(--safe-bottom));
+    }
+
+    .app {
+      width: min(100%, 520px);
+      margin: 0 auto;
+      padding: 18px 16px 0;
+    }
+
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 14px 0 12px;
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #007aff, #5ac8fa);
+      display: grid;
+      place-items: center;
+      color: white;
+      box-shadow: 0 12px 25px rgba(0, 122, 255, 0.32);
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.18rem;
+      letter-spacing: -0.03em;
+    }
+
+    .brand p {
+      margin: 2px 0 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: var(--card);
+      color: var(--text);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 18px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .hero {
+      margin-top: 14px;
+      padding: 26px 22px;
+      border-radius: var(--radius-xl);
+      background:
+        linear-gradient(145deg, rgba(0, 122, 255, 0.95), rgba(90, 200, 250, 0.88)),
+        #007aff;
+      color: white;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      right: -50px;
+      top: -40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .hero small {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.20);
+      font-weight: 600;
+      font-size: 0.76rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h2 {
+      margin: 18px 0 8px;
+      font-size: 2.05rem;
+      line-height: 1.02;
+      letter-spacing: -0.06em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero p {
+      margin: 0;
+      font-size: 0.98rem;
+      line-height: 1.45;
+      opacity: 0.92;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 16px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-light {
+      background: white;
+      color: #007aff;
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.18);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .section {
+      margin-top: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 0 2px;
+    }
+
+    .section-header h3 {
+      margin: 0;
+      font-size: 1.22rem;
+      letter-spacing: -0.04em;
+    }
+
+    .section-header span {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 15px 12px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 1.35rem;
+      letter-spacing: -0.05em;
+    }
+
+    .stat-card span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 600;
+    }
+
+    .product-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .product-card {
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      gap: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 13px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+    }
+
+    .product-img {
+      width: 82px;
+      height: 82px;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      font-size: 32px;
+      background: linear-gradient(145deg, rgba(0, 122, 255, 0.16), rgba(175, 82, 222, 0.16));
+      border: 1px solid var(--border);
+    }
+
+    .product-info {
+      min-width: 0;
+    }
+
+    .product-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .product-title {
+      margin: 3px 0 2px;
+      font-size: 0.99rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+
+    .store {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .badge {
+      white-space: nowrap;
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: 0.68rem;
+      font-weight: 800;
+    }
+
+    .badge.offer {
+      background: rgba(52, 199, 89, 0.15);
+      color: var(--green);
+    }
+
+    .badge.watch {
+      background: rgba(255, 149, 0, 0.15);
+      color: var(--orange);
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .price {
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+    }
+
+    .target {
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .progress {
+      height: 7px;
+      background: rgba(120, 120, 128, 0.16);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--primary);
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .action-card {
+      min-height: 120px;
+      border-radius: var(--radius-xl);
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 18px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .action-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    .blue {
+      background: var(--primary);
+    }
+
+    .green {
+      background: var(--green);
+    }
+
+    .orange {
+      background: var(--orange);
+    }
+
+    .purple {
+      background: var(--purple);
+    }
+
+    .action-card strong {
+      display: block;
+      font-size: 0.98rem;
+      margin-bottom: 5px;
+      letter-spacing: -0.03em;
+    }
+
+    .action-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.35;
+      font-weight: 600;
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.24s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .empty-card {
+      padding: 28px 20px;
+      text-align: center;
+      border-radius: var(--radius-xl);
+      background: var(--card);
+      border: 1px dashed var(--border);
+      color: var(--muted);
+    }
+
+    .empty-card .big {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    .empty-card strong {
+      display: block;
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .setting-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
+      margin-bottom: 12px;
+    }
+
+    .setting-card strong {
+      display: block;
+      font-size: 0.96rem;
+    }
+
+    .setting-card span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.35;
+      font-weight: 600;
+    }
+
+    .switch {
+      width: 54px;
+      height: 32px;
+      border-radius: 999px;
+      background: rgba(120, 120, 128, 0.22);
+      padding: 3px;
+      cursor: pointer;
+      flex: 0 0 auto;
+      transition: 0.2s ease;
+    }
+
+    .switch.active {
+      background: var(--green);
+    }
+
+    .switch span {
+      width: 26px;
+      height: 26px;
+      display: block;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+      transition: 0.2s ease;
+    }
+
+    .switch.active span {
+      transform: translateX(22px);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: calc(12px + var(--safe-bottom));
+      transform: translateX(-50%);
+      width: min(calc(100% - 24px), 500px);
+      z-index: 30;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 28px;
+      padding: 8px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+      backdrop-filter: blur(26px);
+      -webkit-backdrop-filter: blur(26px);
+    }
+
+    [data-theme="dark"] .bottom-nav {
+      background: rgba(28, 28, 30, 0.78);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .nav-btn {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 21px;
+      padding: 9px 4px;
+      font-weight: 800;
+      font-size: 0.68rem;
+      cursor: pointer;
+      display: grid;
+      gap: 3px;
+      place-items: center;
+    }
+
+    .nav-btn .nav-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .nav-btn.active {
+      background: rgba(0, 122, 255, 0.12);
+      color: var(--primary);
+    }
+
+    .install-tip {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      background: rgba(0, 122, 255, 0.10);
+      color: var(--primary);
+      font-size: 0.84rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    @media (min-width: 700px) {
+      body {
+        padding-top: 20px;
+      }
+
+      .app {
+        padding-top: 10px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <div class="aurora one"></div>
-  <div class="aurora two"></div>
-  <div class="phone-safe"></div>
-
-  <main class="app-shell">
-    <section id="loginView" class="auth-view">
-      <div class="brand-card glass">
-        <div class="app-icon">A</div>
-        <p class="eyebrow">PWA privada</p>
-        <h1>Appcomercio</h1>
-        <p class="muted">Monitorea tus productos favoritos de Amazon, Mercado Libre, PlayStation y más.</p>
-
-        <div id="setupBox" class="panel hidden">
-          <h2>Crear acceso de administrador</h2>
-          <label>Tu nombre</label>
-          <input id="setupName" type="text" placeholder="David" autocomplete="name" />
-          <label>PIN de administrador</label>
-          <input id="setupPin" type="password" inputmode="numeric" maxlength="8" placeholder="Mínimo 4 dígitos" autocomplete="new-password" />
-          <button id="setupBtn" class="primary">Crear acceso</button>
-          <p class="tiny">Este acceso se guarda solo en este navegador. Para seguridad real se necesita backend.</p>
+  <main class="app">
+    <header class="top-bar">
+      <div class="top-row">
+        <div class="brand">
+          <div class="logo">D</div>
+          <div>
+            <h1>DealWatch MX</h1>
+            <p>Appcomercio · Ofertas favoritas</p>
+          </div>
         </div>
 
-        <div id="loginBox" class="panel hidden">
-          <h2>Modo administrador</h2>
-          <label>PIN</label>
-          <input id="loginPin" type="password" inputmode="numeric" maxlength="8" placeholder="Tu PIN" autocomplete="current-password" />
-          <button id="loginBtn" class="primary">Entrar</button>
-          <button id="resetBtn" class="ghost danger">Restablecer app local</button>
+        <button class="icon-btn" id="themeButton" aria-label="Cambiar tema">
+          ☀️
+        </button>
+      </div>
+    </header>
+
+    <!-- Pantalla Inicio -->
+    <section class="screen active" id="screen-home">
+      <div class="hero">
+        <small>🔥 Monitoreo visual de ofertas</small>
+        <h2>Compra cuando el precio baje.</h2>
+        <p>
+          Guarda tus productos favoritos de Amazon, Mercado Libre y PlayStation.
+          En esta fase dejamos lista la interfaz tipo iOS.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn btn-light" onclick="goToScreen('favorites')">
+            Ver favoritos
+          </button>
+          <button class="btn btn-ghost" onclick="goToScreen('alerts')">
+            Alertas
+          </button>
         </div>
       </div>
+
+      <section class="section">
+        <div class="section-header">
+          <h3>Resumen</h3>
+          <span>Demo visual</span>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <strong>3</strong>
+            <span>Productos</span>
+          </div>
+
+          <div class="stat-card">
+            <strong>1</strong>
+            <span>Oferta</span>
+          </div>
+
+          <div class="stat-card">
+            <strong>MX</strong>
+            <span>Tiendas</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h3>Accesos rápidos</h3>
+          <span>Fase 1</span>
+        </div>
+
+        <div class="quick-actions">
+          <article class="action-card" onclick="goToScreen('favorites')">
+            <div class="action-icon blue">🛒</div>
+            <strong>Favoritos</strong>
+            <p>Vista bonita para productos guardados.</p>
+          </article>
+
+          <article class="action-card" onclick="goToScreen('alerts')">
+            <div class="action-icon green">🔔</div>
+            <strong>Alertas</strong>
+            <p>Diseño para detectar precios bajos.</p>
+          </article>
+
+          <article class="action-card">
+            <div class="action-icon orange">📈</div>
+            <strong>Historial</strong>
+            <p>Preparado para precios por fecha.</p>
+          </article>
+
+          <article class="action-card" onclick="goToScreen('settings')">
+            <div class="action-icon purple">⚙️</div>
+            <strong>Ajustes</strong>
+            <p>Modo oscuro e instalación PWA.</p>
+          </article>
+        </div>
+      </section>
     </section>
 
-    <section id="dashboardView" class="dashboard hidden">
-      <header class="topbar glass">
-        <div>
-          <p class="eyebrow">DealWatch MX</p>
-          <h1>Mis ofertas</h1>
+    <!-- Pantalla Favoritos -->
+    <section class="screen" id="screen-favorites">
+      <section class="section">
+        <div class="section-header">
+          <h3>Favoritos</h3>
+          <span>Productos demo</span>
         </div>
-        <div class="top-actions">
-          <button id="installBtn" class="pill hidden">Instalar</button>
-          <button id="notifyBtn" class="pill">Notificaciones</button>
-          <button id="logoutBtn" class="avatar" title="Salir">↗</button>
-        </div>
-      </header>
 
-      <section class="hero glass">
-        <div>
-          <p class="eyebrow">Hola, <span id="adminName">admin</span></p>
-          <h2>Detecta ofertas realmente buenas sin usar una cuenta compartida.</h2>
-          <p>Guarda tus productos, precio objetivo y descuento mínimo. Cuando actualices el precio, la app decide si vale la pena avisarte.</p>
-        </div>
-        <div class="score-card">
-          <span id="goodDealsCount">0</span>
-          <small>ofertas buenas</small>
-        </div>
-      </section>
+        <div class="product-list">
+          <article class="product-card">
+            <div class="product-img">🎮</div>
+            <div class="product-info">
+              <div class="product-top">
+                <div>
+                  <div class="store">PlayStation Store</div>
+                  <div class="product-title">EA Sports FC 26</div>
+                </div>
+                <span class="badge offer">OFERTA</span>
+              </div>
 
-      <nav class="tabs glass" aria-label="Secciones">
-        <button class="tab active" data-tab="products">Productos</button>
-        <button class="tab" data-tab="add">Agregar</button>
-        <button class="tab" data-tab="admin">Admin</button>
-        <button class="tab" data-tab="help">Guía</button>
-      </nav>
+              <div class="price-row">
+                <div class="price">$699</div>
+                <div class="target">Meta: $799</div>
+              </div>
 
-      <section id="productsTab" class="tab-page active">
-        <div class="toolbar">
-          <div class="search glass">
-            <span>⌕</span>
-            <input id="searchInput" type="search" placeholder="Buscar producto o tienda" />
-          </div>
-          <select id="storeFilter" class="select glass">
-            <option value="all">Todas</option>
-            <option>Amazon</option>
-            <option>Mercado Libre</option>
-            <option>PlayStation</option>
-            <option>Otra</option>
-          </select>
-        </div>
-        <div id="productList" class="product-grid"></div>
-        <div id="emptyState" class="empty glass hidden">
-          <div class="emoji">🛍️</div>
-          <h3>Aún no tienes productos</h3>
-          <p>Agrega tu primer producto favorito para empezar a medir precios.</p>
-          <button class="primary go-add">Agregar producto</button>
-        </div>
-      </section>
-
-      <section id="addTab" class="tab-page">
-        <form id="productForm" class="form-card glass">
-          <div class="form-head">
-            <div>
-              <p class="eyebrow">Nuevo favorito</p>
-              <h2 id="formTitle">Agregar producto</h2>
+              <div class="progress">
+                <span style="width: 84%;"></span>
+              </div>
             </div>
-            <button type="button" id="clearFormBtn" class="ghost">Limpiar</button>
-          </div>
-
-          <input id="editingId" type="hidden" />
-
-          <label>Nombre del producto</label>
-          <input id="nameInput" required placeholder="Ej. Control DualSense PS5" />
-
-          <div class="two-cols">
-            <div>
-              <label>Tienda</label>
-              <select id="storeInput" required>
-                <option>Amazon</option>
-                <option>Mercado Libre</option>
-                <option>PlayStation</option>
-                <option>Otra</option>
-              </select>
-            </div>
-            <div>
-              <label>Categoría</label>
-              <input id="categoryInput" placeholder="Gaming, hogar, escuela..." />
-            </div>
-          </div>
-
-          <label>Link del producto</label>
-          <input id="urlInput" type="url" required placeholder="https://..." />
-
-          <div class="two-cols">
-            <div>
-              <label>Precio normal</label>
-              <input id="regularPriceInput" type="number" min="0" step="0.01" placeholder="1499" />
-            </div>
-            <div>
-              <label>Precio actual</label>
-              <input id="currentPriceInput" type="number" min="0" step="0.01" placeholder="999" />
-            </div>
-          </div>
-
-          <div class="two-cols">
-            <div>
-              <label>Precio objetivo</label>
-              <input id="targetPriceInput" type="number" min="0" step="0.01" placeholder="1000" />
-            </div>
-            <div>
-              <label>Descuento mínimo %</label>
-              <input id="discountInput" type="number" min="0" max="99" step="1" value="25" />
-            </div>
-          </div>
-
-          <label>Notas</label>
-          <textarea id="notesInput" rows="3" placeholder="Ej. avisar solo si es vendido por tienda oficial"></textarea>
-
-          <button class="primary" type="submit">Guardar producto</button>
-        </form>
-      </section>
-
-      <section id="adminTab" class="tab-page">
-        <div class="settings-grid">
-          <article class="glass settings-card">
-            <p class="eyebrow">Seguridad local</p>
-            <h2>Administrador</h2>
-            <label>Nombre visible</label>
-            <input id="adminNameInput" placeholder="David" />
-            <label>Nuevo PIN</label>
-            <input id="newPinInput" type="password" inputmode="numeric" maxlength="8" placeholder="Opcional" />
-            <button id="saveAdminBtn" class="primary">Guardar cambios</button>
-            <p class="tiny">En una app 100% HTML el acceso solo protege esta pantalla en tu dispositivo. No subas datos sensibles.</p>
           </article>
 
-          <article class="glass settings-card">
-            <p class="eyebrow">Respaldo</p>
-            <h2>Exportar / importar</h2>
-            <button id="exportBtn" class="secondary">Descargar respaldo JSON</button>
-            <label class="file-label">Importar respaldo
-              <input id="importInput" type="file" accept="application/json" />
-            </label>
-            <button id="wipeProductsBtn" class="ghost danger">Borrar productos</button>
+          <article class="product-card">
+            <div class="product-img">🎧</div>
+            <div class="product-info">
+              <div class="product-top">
+                <div>
+                  <div class="store">Amazon México</div>
+                  <div class="product-title">Audífonos Bluetooth Pro</div>
+                </div>
+                <span class="badge watch">Vigilando</span>
+              </div>
+
+              <div class="price-row">
+                <div class="price">$1,299</div>
+                <div class="target">Meta: $999</div>
+              </div>
+
+              <div class="progress">
+                <span style="width: 58%;"></span>
+              </div>
+            </div>
           </article>
 
-          <article class="glass settings-card">
-            <p class="eyebrow">Equipo</p>
-            <h2>Próximamente multi-admin</h2>
-            <p>Esta versión es para uso personal. Más adelante se puede conectar a Supabase, Firebase o un backend para tener usuarios reales.</p>
-            <div class="fake-user"><span>👤</span><div><b>Tú</b><small>Administrador principal</small></div></div>
+          <article class="product-card">
+            <div class="product-img">📱</div>
+            <div class="product-info">
+              <div class="product-top">
+                <div>
+                  <div class="store">Mercado Libre</div>
+                  <div class="product-title">Smartphone gama media</div>
+                </div>
+                <span class="badge watch">Vigilando</span>
+              </div>
+
+              <div class="price-row">
+                <div class="price">$4,899</div>
+                <div class="target">Meta: $4,500</div>
+              </div>
+
+              <div class="progress">
+                <span style="width: 66%;"></span>
+              </div>
+            </div>
           </article>
         </div>
       </section>
+    </section>
 
-      <section id="helpTab" class="tab-page">
-        <div class="help-card glass">
-          <p class="eyebrow">Importante</p>
-          <h2>Por qué esta versión sí sirve en GitHub Pages</h2>
-          <p>Esta app está hecha como HTML estático: <b>index.html + CSS + JS + manifest</b>. Súbela a GitHub Pages y se abre como app instalable.</p>
-          <div class="notice">
-            <b>Limitación honesta:</b> Amazon, Mercado Libre y PlayStation normalmente no permiten leer precios directo desde un HTML por bloqueos de seguridad del navegador. Esta versión guarda tus productos y calcula ofertas cuando actualizas el precio. Para monitoreo automático real se agrega después un backend o GitHub Actions.
+    <!-- Pantalla Alertas -->
+    <section class="screen" id="screen-alerts">
+      <section class="section">
+        <div class="section-header">
+          <h3>Alertas</h3>
+          <span>Diseño base</span>
+        </div>
+
+        <article class="product-card">
+          <div class="product-img">🔥</div>
+          <div class="product-info">
+            <div class="product-top">
+              <div>
+                <div class="store">Alerta activa</div>
+                <div class="product-title">EA Sports FC 26 bajó de precio</div>
+              </div>
+              <span class="badge offer">Detectada</span>
+            </div>
+
+            <div class="price-row">
+              <div class="price">$699</div>
+              <div class="target">Precio objetivo: $799</div>
+            </div>
+
+            <div class="progress">
+              <span style="width: 100%;"></span>
+            </div>
           </div>
-          <ol>
-            <li>Sube todos estos archivos a la raíz del repo.</li>
-            <li>En GitHub entra a <b>Settings → Pages</b>.</li>
-            <li>Selecciona <b>Deploy from a branch</b>, rama <b>main</b>, carpeta <b>/root</b>.</li>
-            <li>Abre tu URL <b>usuario.github.io/repositorio</b>.</li>
-            <li>En celular usa <b>Compartir → Agregar a pantalla de inicio</b>.</li>
-          </ol>
+        </article>
+
+        <div class="install-tip">
+          En la Fase 5 estas alertas podrán activarse cuando el precio actual sea menor o igual al precio objetivo.
+        </div>
+      </section>
+    </section>
+
+    <!-- Pantalla Ajustes -->
+    <section class="screen" id="screen-settings">
+      <section class="section">
+        <div class="section-header">
+          <h3>Ajustes</h3>
+          <span>PWA</span>
+        </div>
+
+        <div class="setting-card">
+          <div>
+            <strong>Modo oscuro</strong>
+            <span>Cambia la apariencia visual tipo iPhone.</span>
+          </div>
+
+          <div class="switch" id="themeSwitch" onclick="toggleTheme()">
+            <span></span>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div>
+            <strong>Modo administrador</strong>
+            <span>Disponible en la Fase 2 para agregar y editar productos.</span>
+          </div>
+          <div style="font-size: 24px;">🔐</div>
+        </div>
+
+        <div class="setting-card">
+          <div>
+            <strong>Instalar en celular</strong>
+            <span>En iPhone: Safari → Compartir → Agregar a pantalla de inicio.</span>
+          </div>
+          <div style="font-size: 24px;">📲</div>
+        </div>
+
+        <div class="setting-card">
+          <div>
+            <strong>GitHub Pages</strong>
+            <span>Esta versión sigue siendo 100% HTML, CSS y JavaScript.</span>
+          </div>
+          <div style="font-size: 24px;">🌐</div>
         </div>
       </section>
     </section>
   </main>
 
-  <template id="productTemplate">
-    <article class="product-card glass">
-      <div class="card-top">
-        <span class="store-badge"></span>
-        <button class="menu-btn" title="Editar">•••</button>
-      </div>
-      <h3></h3>
-      <p class="category"></p>
-      <div class="price-row">
-        <div><small>Actual</small><strong class="current"></strong></div>
-        <div><small>Objetivo</small><strong class="target"></strong></div>
-      </div>
-      <div class="status"></div>
-      <div class="mini-history"></div>
-      <div class="card-actions">
-        <a class="open-link" target="_blank" rel="noopener">Abrir tienda</a>
-        <button class="update-price">Actualizar precio</button>
-        <button class="delete danger-text">Eliminar</button>
-      </div>
-    </article>
-  </template>
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-screen="home" onclick="goToScreen('home')">
+      <span class="nav-icon">🏠</span>
+      Inicio
+    </button>
 
-  <div id="toast" class="toast hidden"></div>
-  <script src="assets/app.js" defer></script>
+    <button class="nav-btn" data-screen="favorites" onclick="goToScreen('favorites')">
+      <span class="nav-icon">🛒</span>
+      Favoritos
+    </button>
+
+    <button class="nav-btn" data-screen="alerts" onclick="goToScreen('alerts')">
+      <span class="nav-icon">🔔</span>
+      Alertas
+    </button>
+
+    <button class="nav-btn" data-screen="settings" onclick="goToScreen('settings')">
+      <span class="nav-icon">⚙️</span>
+      Ajustes
+    </button>
+  </nav>
+
+  <script>
+    const root = document.documentElement;
+    const themeButton = document.getElementById("themeButton");
+    const themeSwitch = document.getElementById("themeSwitch");
+
+    function goToScreen(screenName) {
+      const screens = document.querySelectorAll(".screen");
+      const navButtons = document.querySelectorAll(".nav-btn");
+
+      screens.forEach(screen => {
+        screen.classList.remove("active");
+      });
+
+      navButtons.forEach(button => {
+        button.classList.remove("active");
+      });
+
+      document.getElementById(`screen-${screenName}`).classList.add("active");
+      document.querySelector(`[data-screen="${screenName}"]`).classList.add("active");
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    function setTheme(theme) {
+      if (theme === "dark") {
+        root.setAttribute("data-theme", "dark");
+        themeButton.textContent = "🌙";
+        themeSwitch.classList.add("active");
+      } else {
+        root.removeAttribute("data-theme");
+        themeButton.textContent = "☀️";
+        themeSwitch.classList.remove("active");
+      }
+
+      localStorage.setItem("dealwatch_theme", theme);
+    }
+
+    function toggleTheme() {
+      const currentTheme = localStorage.getItem("dealwatch_theme") || "light";
+      const nextTheme = currentTheme === "dark" ? "light" : "dark";
+      setTheme(nextTheme);
+    }
+
+    themeButton.addEventListener("click", toggleTheme);
+
+    const savedTheme = localStorage.getItem("dealwatch_theme") || "light";
+    setTheme(savedTheme);
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .catch(error => {
+            console.log("Service Worker no registrado:", error);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
