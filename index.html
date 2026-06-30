@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 11 Monitoreo automático</title>
+  <title>DealWatch MX | Fase 12 Telegram</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -177,7 +177,7 @@
 
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>👥 Fase 11 · Monitoreo automático</small>
+        <small>👥 Fase 12 · Telegram + monitoreo</small>
         <h2>Tu app ya puede usar base de datos real.</h2>
         <p>Crea cuentas, acepta invitaciones y comparte productos del equipo en Supabase.</p>
         <div class="hero-actions">
@@ -415,17 +415,31 @@
 
 
         <div class="card" id="monitorCard">
-          <strong>Fase 11 · Monitoreo automático</strong>
-          <span>GitHub Actions puede revisar tus productos cada cierto tiempo y guardar resultados en Supabase. En esta fase revisa las reglas ya guardadas: precio objetivo y descuento mínimo.</span>
+          <strong>Fase 12 · Telegram + monitoreo</strong>
+          <span>GitHub Actions puede revisar tus productos cada cierto tiempo, guardar resultados en Supabase y avisar por Telegram cuando detecte ofertas nuevas.</span>
           <div class="notice">
-            Para activarlo debes ejecutar el SQL de Fase 11 y agregar el secreto <b>SUPABASE_SERVICE_ROLE_KEY</b> en GitHub Actions. La llave secreta no va en index.html.
+            Para activarlo debes tener el SQL de Fase 11, <b>SUPABASE_SERVICE_ROLE_KEY</b>, <b>TELEGRAM_BOT_TOKEN</b> y <b>TELEGRAM_CHAT_ID</b> en GitHub Actions. Ninguna llave secreta va en index.html.
           </div>
           <div class="form-actions" style="margin-top:16px;">
             <button class="btn btn-primary" type="button" onclick="refreshMonitorStatus(true)">Actualizar monitoreo</button>
-            <button class="btn btn-soft" type="button" onclick="openGitHubActionsPage()">Abrir GitHub Actions</button>
+            <button class="btn btn-soft" type="button" onclick="openGitHubActionsPage()">Abrir GitHub Actions</button><button class="btn btn-soft" type="button" onclick="showTelegramHelp()">Configurar Telegram</button>
           </div>
           <div class="product-list" id="monitorStatusList" style="margin-top:14px;">
             <div class="empty-card"><div class="big">🤖</div><strong>Monitoreo pendiente</strong>Ejecuta el workflow manualmente o espera la revisión programada.</div>
+          </div>
+        </div>
+
+
+
+        <div class="card" id="telegramCard">
+          <strong>Fase 12 · Alertas por Telegram</strong>
+          <span>Usa un bot nuevo de Telegram para avisar a tu grupo familiar o de amigos cuando el robot detecte una oferta.</span>
+          <div class="notice">
+            El token del bot debe guardarse como <b>TELEGRAM_BOT_TOKEN</b> y el chat del grupo como <b>TELEGRAM_CHAT_ID</b> en GitHub Secrets. No pegues el token en el HTML ni en archivos públicos.
+          </div>
+          <div class="form-actions" style="margin-top:16px;">
+            <button class="btn btn-primary" type="button" onclick="showTelegramHelp()">Ver pasos Telegram</button>
+            <button class="btn btn-soft" type="button" onclick="openGitHubActionsPage()">Probar desde Actions</button>
           </div>
         </div>
 
@@ -1232,6 +1246,20 @@
       }
     }
 
+
+    function showTelegramHelp() {
+      alert(
+        "Fase 12 Telegram:\n\n" +
+        "1. En Telegram abre @BotFather y usa /newbot.\n" +
+        "2. Crea el bot DealWatch MX y copia el token.\n" +
+        "3. Crea un grupo familiar/amigos y agrega el bot.\n" +
+        "4. Manda un mensaje al grupo.\n" +
+        "5. Obtén el chat_id con getUpdates.\n" +
+        "6. En GitHub Secrets agrega TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID.\n" +
+        "7. En Actions ejecuta el workflow con telegram_test activado."
+      );
+    }
+
     function openGitHubActionsPage() {
       const host = location.hostname || "";
       const parts = location.pathname.split("/").filter(Boolean);
@@ -1248,7 +1276,7 @@
     function recordSyncEvent(action, message, mode = currentUser ? "cloud" : "local") { const log = getSyncLog(); log.unshift({ id:generateId(), action, message, mode, date:new Date().toISOString() }); localStorage.setItem(SYNC_LOG_KEY, JSON.stringify(log.slice(0,80))); }
 
     function downloadJson(data, fileName) { const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"}); const url = URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
-    function exportProductsJson() { downloadJson({ app:"DealWatch MX", project:"Appcomercio", type:"dealwatch-products-backup", version:"11-monitoreo-actions", exportedAt:new Date().toISOString(), totalProducts:getProducts().length, products:getProducts() }, `dealwatch-mx-respaldo-${new Date().toISOString().slice(0,10)}.json`); }
+    function exportProductsJson() { downloadJson({ app:"DealWatch MX", project:"Appcomercio", type:"dealwatch-products-backup", version:"12-telegram-actions", exportedAt:new Date().toISOString(), totalProducts:getProducts().length, products:getProducts() }, `dealwatch-mx-respaldo-${new Date().toISOString().slice(0,10)}.json`); }
     function prepareImportJson(mode) { pendingImportMode=mode; const input=document.getElementById("importJsonInput"); input.value=""; input.click(); }
     function importProductsJson(event) { const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try { const parsed=JSON.parse(reader.result); const raw=Array.isArray(parsed) ? parsed : parsed.products; if(!Array.isArray(raw)) throw new Error("sin productos"); const clean=raw.map(migrateProduct); if(pendingImportMode==="replace") { if(!confirm("¿Reemplazar productos locales por el JSON?")) return; saveProducts(clean,"json_import_replace"); } else saveProducts([...clean.map(p=>({...p,id:generateId(),importedAt:new Date().toISOString()})), ...getProducts()],"json_import_merge"); alert("JSON importado correctamente."); } catch(e){ alert("JSON inválido para DealWatch MX."); } }; reader.readAsText(file); }
 

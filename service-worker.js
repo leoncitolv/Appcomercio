@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-pwa-v11-monitor";
+const CACHE_NAME = "dealwatch-mx-pwa-v12-telegram";
 const CORE_ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 self.addEventListener("install", event => {
   self.skipWaiting();
