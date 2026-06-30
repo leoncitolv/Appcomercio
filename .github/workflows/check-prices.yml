@@ -6,24 +6,21 @@ on:
       telegram_test:
         description: "Enviar mensaje de prueba a Telegram"
         required: false
-        type: boolean
-        default: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
   schedule:
-    # Cada 6 horas, minuto 17 UTC. Cambia este cron si quieres otro horario.
-    - cron: "17 */6 * * *"
-
-permissions:
-  contents: read
-
-concurrency:
-  group: dealwatch-price-monitor
-  cancel-in-progress: false
+    - cron: "0 */6 * * *"
 
 jobs:
   check-prices:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Descargar repo
+      - name: Descargar repositorio
         uses: actions/checkout@v4
 
       - name: Configurar Node.js
@@ -31,12 +28,11 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Revisar reglas de oferta y notificar Telegram
-        run: node scripts/check-prices.mjs
+      - name: Ejecutar revisión de ofertas
         env:
           SUPABASE_URL: "https://ltsrjxvisptbdhhkabhj.supabase.co"
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          TELEGRAM_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.telegram_test || false }}
-          DEALWATCH_MODE: "rules_only_telegram"
+          TELEGRAM_TEST: ${{ github.event.inputs.telegram_test }}
+        run: node scripts/check-prices.mjs
