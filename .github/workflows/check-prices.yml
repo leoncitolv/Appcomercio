@@ -36,7 +36,7 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Revisar Mercado Libre, Amazon seguro y Telegram
+      - name: Revisar ML, Amazon seguro, listas y Telegram
         run: node scripts/check-prices.mjs
         env:
           SUPABASE_URL: "https://ltsrjxvisptbdhhkabhj.supabase.co"
@@ -45,6 +45,6 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.telegram_test || false }}
           DEALWATCH_LIVE_PRICES: ${{ github.event_name == 'workflow_dispatch' && inputs.live_prices || true }}
-          DEALWATCH_MODE: "amazon_safe_mercadolibre_antispam"
+          DEALWATCH_MODE: "lists_amazon_safe_mercadolibre_antispam"
           DEALWATCH_ALERT_LOOKBACK_DAYS: "7"
           DEALWATCH_SIGNIFICANT_DROP_PERCENT: "1"
