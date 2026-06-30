@@ -5,6 +5,9 @@
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const MODE = process.env.DEALWATCH_MODE || "rules_only";
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
+const TELEGRAM_TEST = String(process.env.TELEGRAM_TEST || "false").toLowerCase() === "true";
 
 if (!SUPABASE_URL) {
   throw new Error("Falta SUPABASE_URL.");
@@ -107,6 +110,90 @@ function chunk(items, size = 100) {
   return chunks;
 }
 
+
+function escapeTelegramHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function formatMoney(value) {
+  const number = toNumber(value);
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    maximumFractionDigits: 0,
+  }).format(number);
+}
+
+function telegramIsConfigured() {
+  return Boolean(TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID);
+}
+
+async function sendTelegramMessage(text) {
+  if (!telegramIsConfigured()) {
+    return { skipped: true, reason: "Telegram no configurado" };
+  }
+
+  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: TELEGRAM_CHAT_ID,
+      text,
+      parse_mode: "HTML",
+      disable_web_page_preview: false,
+    }),
+  });
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok || !data?.ok) {
+    throw new Error(`Telegram API ${res.status}: ${JSON.stringify(data)}`);
+  }
+
+  return data;
+}
+
+function buildTelegramOfferMessage(alertEvent) {
+  const title = escapeTelegramHtml(alertEvent.title || "Oferta detectada");
+  const message = escapeTelegramHtml(alertEvent.message || "Regla de oferta cumplida.");
+  const current = formatMoney(alertEvent.current_price);
+  const target = formatMoney(alertEvent.target_price);
+  const discount = toNumber(alertEvent.discount_percent);
+  const productUrl = alertEvent.raw?.productUrl || "";
+  const linkLine = productUrl && String(productUrl).startsWith("http")
+    ? `\n\n🔗 <a href="${escapeTelegramHtml(productUrl)}">Abrir producto</a>`
+    : "";
+
+  return [
+    "🔥 <b>DealWatch MX · Oferta detectada</b>",
+    "",
+    `<b>${title}</b>`,
+    message,
+    "",
+    `💰 Precio actual: <b>${escapeTelegramHtml(current)}</b>`,
+    `🎯 Precio objetivo: <b>${escapeTelegramHtml(target)}</b>`,
+    `🏷️ Descuento: <b>${escapeTelegramHtml(discount)}%</b>`,
+    linkLine,
+  ].join("\n");
+}
+
+async function sendTelegramTestMessage() {
+  if (!telegramIsConfigured()) {
+    throw new Error("Faltan TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID en GitHub Secrets.");
+  }
+
+  return sendTelegramMessage([
+    "✅ <b>DealWatch MX · Telegram conectado</b>",
+    "",
+    "El bot ya puede enviar alertas al grupo familiar/amigos.",
+    `Fecha de prueba: ${escapeTelegramHtml(new Date().toLocaleString("es-MX"))}`,
+  ].join("\n"));
+}
+
 async function main() {
   const startedAt = new Date().toISOString();
   const runRows = await insert("monitor_runs", [{
@@ -121,6 +208,11 @@ async function main() {
   const runId = run.id;
 
   try {
+    if (TELEGRAM_TEST) {
+      await sendTelegramTestMessage();
+      console.log("Telegram: mensaje de prueba enviado correctamente.");
+    }
+
     const products = await rest(
       "products?select=id,workspace_id,user_id,name,store,product_url,normal_price,current_price,target_price,min_discount_percent,alerts_enabled,updated_at&alerts_enabled=eq.true&order=updated_at.desc&limit=1000"
     );
@@ -181,15 +273,37 @@ async function main() {
       if (group.length) await insert("alert_events", group);
     }
 
+    let telegramSent = 0;
+    let telegramErrors = 0;
+
+    if (telegramIsConfigured()) {
+      for (const alertEvent of alertEvents.slice(0, 20)) {
+        try {
+          await sendTelegramMessage(buildTelegramOfferMessage(alertEvent));
+          telegramSent += 1;
+        } catch (telegramError) {
+          telegramErrors += 1;
+          console.warn("No se pudo enviar Telegram:", telegramError.message);
+        }
+      }
+    } else if (alertEvents.length) {
+      console.log("Telegram no configurado: se omitió envío de alertas.");
+    }
+
+    const offerCount = results.filter(r => r.is_offer).length;
+    const telegramSummary = telegramIsConfigured()
+      ? ` Telegram: ${telegramSent} enviado(s)${telegramErrors ? `, ${telegramErrors} error(es)` : ""}.`
+      : " Telegram no configurado.";
+
     await patch(`monitor_runs`, `id=eq.${runId}`, {
       status: "success",
       checked_count: results.length,
-      offers_count: results.filter(r => r.is_offer).length,
-      message: `Revisión completada. ${results.length} producto(s), ${results.filter(r => r.is_offer).length} oferta(s).`,
+      offers_count: offerCount,
+      message: `Revisión completada. ${results.length} producto(s), ${offerCount} oferta(s).${telegramSummary}`,
       finished_at: new Date().toISOString(),
     });
 
-    console.log(`DealWatch MX OK: ${results.length} productos revisados, ${alertEvents.length} alerta(s) nueva(s).`);
+    console.log(`DealWatch MX OK: ${results.length} productos revisados, ${alertEvents.length} alerta(s) nueva(s), ${telegramSent} Telegram.`);
   } catch (error) {
     await patch(`monitor_runs`, `id=eq.${runId}`, {
       status: "error",
