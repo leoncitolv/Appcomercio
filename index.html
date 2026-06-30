@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 10.1 Cuentas e invitaciones</title>
+  <title>DealWatch MX | Fase 11 Monitoreo automático</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -177,7 +177,7 @@
 
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>👥 Fase 10.1 · Cuentas e invitaciones</small>
+        <small>👥 Fase 11 · Monitoreo automático</small>
         <h2>Tu app ya puede usar base de datos real.</h2>
         <p>Crea cuentas, acepta invitaciones y comparte productos del equipo en Supabase.</p>
         <div class="hero-actions">
@@ -410,6 +410,23 @@
           </div>
 
           <div class="product-list" id="workspaceMembersList" style="margin-top:14px;"></div>
+        </div>
+
+
+
+        <div class="card" id="monitorCard">
+          <strong>Fase 11 · Monitoreo automático</strong>
+          <span>GitHub Actions puede revisar tus productos cada cierto tiempo y guardar resultados en Supabase. En esta fase revisa las reglas ya guardadas: precio objetivo y descuento mínimo.</span>
+          <div class="notice">
+            Para activarlo debes ejecutar el SQL de Fase 11 y agregar el secreto <b>SUPABASE_SERVICE_ROLE_KEY</b> en GitHub Actions. La llave secreta no va en index.html.
+          </div>
+          <div class="form-actions" style="margin-top:16px;">
+            <button class="btn btn-primary" type="button" onclick="refreshMonitorStatus(true)">Actualizar monitoreo</button>
+            <button class="btn btn-soft" type="button" onclick="openGitHubActionsPage()">Abrir GitHub Actions</button>
+          </div>
+          <div class="product-list" id="monitorStatusList" style="margin-top:14px;">
+            <div class="empty-card"><div class="big">🤖</div><strong>Monitoreo pendiente</strong>Ejecuta el workflow manualmente o espera la revisión programada.</div>
+          </div>
         </div>
 
         <div class="card">
@@ -1121,11 +1138,117 @@
     async function migrateLocalToSupabase() { if(!currentUser) return alert("Primero inicia sesión en Supabase."); const products = getProducts(); if(!products.length) return alert("No hay productos locales para migrar."); if(!confirm(`Se subirán ${products.length} producto(s) locales a Supabase. ¿Continuar?`)) return; const migrated=[]; try { for(const p of products) { const inserted = await upsertRemoteProduct({...p, workspaceId: currentWorkspace?.id || p.workspaceId || "", id: isUuid(p.id) ? p.id : ""}); for(const h of (p.priceHistory||[]).slice().reverse()) await insertRemoteHistory(inserted.id, h); migrated.push(inserted); } saveProducts(migrated, "migrated_to_supabase"); alert("Migración completada. Tus productos ya están en Supabase."); await refreshRemoteProducts(false); } catch(e) { alert("Error al migrar: " + e.message); recordSyncEvent("migration_error", e.message, "error"); } }
     function downloadSupabasePayload() { const data = { app:"DealWatch MX", type:"supabase-payload", exportedAt:new Date().toISOString(), user: currentUser?.email || null, workspace: currentWorkspace, products:getProducts() }; downloadJson(data, `dealwatch-supabase-payload-${new Date().toISOString().slice(0,10)}.json`); }
 
+
+    async function refreshMonitorStatus(showAlert=false) {
+      const box = document.getElementById("monitorStatusList");
+      if (!box) return;
+      if (!supabaseClient || !currentUser) {
+        if (showAlert) alert("Primero inicia sesión en Supabase.");
+        box.innerHTML = `<div class="empty-card"><div class="big">☁️</div><strong>Inicia sesión</strong>El monitoreo se consulta desde Supabase.</div>`;
+        return;
+      }
+
+      box.innerHTML = `<div class="empty-card"><div class="big">⏳</div><strong>Consultando...</strong>Buscando últimas revisiones automáticas.</div>`;
+
+      try {
+        const { data: runs, error: runsError } = await supabaseClient
+          .from("monitor_runs")
+          .select("*")
+          .order("started_at", { ascending: false })
+          .limit(1);
+
+        if (runsError) throw runsError;
+
+        let resultQuery = supabaseClient
+          .from("monitor_results")
+          .select("*")
+          .order("checked_at", { ascending: false })
+          .limit(6);
+
+        let alertsQuery = supabaseClient
+          .from("alert_events")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(6);
+
+        if (currentWorkspace?.id) {
+          resultQuery = resultQuery.eq("workspace_id", currentWorkspace.id);
+          alertsQuery = alertsQuery.eq("workspace_id", currentWorkspace.id);
+        }
+
+        const [{ data: results, error: resultsError }, { data: events, error: eventsError }] = await Promise.all([
+          resultQuery,
+          alertsQuery
+        ]);
+
+        if (resultsError) throw resultsError;
+        if (eventsError) throw eventsError;
+
+        const latestRun = Array.isArray(runs) && runs.length ? runs[0] : null;
+        const latestResults = Array.isArray(results) ? results : [];
+        const latestEvents = Array.isArray(events) ? events : [];
+
+        if (!latestRun && latestResults.length === 0 && latestEvents.length === 0) {
+          box.innerHTML = `<div class="empty-card"><div class="big">🤖</div><strong>Sin revisiones todavía</strong>Sube el workflow de Fase 11 y ejecútalo desde GitHub Actions.</div>`;
+          return;
+        }
+
+        const runCard = latestRun ? `
+          <article class="product-card">
+            <div class="product-img">🤖</div>
+            <div class="product-info">
+              <div class="product-top"><div><div class="store">Última ejecución</div><div class="product-title">${escapeHTML(latestRun.status || "sin estado")}</div><div class="category-line">${escapeHTML(formatDate(latestRun.started_at))} · ${Number(latestRun.checked_count || 0)} producto(s) · ${Number(latestRun.offers_count || 0)} oferta(s)</div></div><span class="badge ${latestRun.status === "success" ? "offer" : "watch"}">${escapeHTML(latestRun.source || "actions")}</span></div>
+              <div class="product-notes">${escapeHTML(latestRun.message || latestRun.error_message || "Revisión registrada en Supabase.")}</div>
+            </div>
+          </article>` : "";
+
+        const eventCards = latestEvents.map(ev => `
+          <article class="product-card">
+            <div class="product-img">🔔</div>
+            <div class="product-info">
+              <div class="product-top"><div><div class="store">Alerta automática</div><div class="product-title">${escapeHTML(ev.title || "Oferta detectada")}</div><div class="category-line">${escapeHTML(formatDate(ev.created_at))} · ${escapeHTML(ev.status || "new")}</div></div><span class="badge offer">Oferta</span></div>
+              <div class="price-row"><div class="price">${formatMoney(ev.current_price)}</div><div class="target">Meta: ${formatMoney(ev.target_price)}</div></div>
+              <div class="product-notes">${escapeHTML(ev.message || "Evento generado por GitHub Actions.")}</div>
+            </div>
+          </article>
+        `).join("");
+
+        const resultCards = latestResults.map(r => `
+          <article class="product-card">
+            <div class="product-img">📡</div>
+            <div class="product-info">
+              <div class="product-top"><div><div class="store">${escapeHTML(r.store || "Tienda")}</div><div class="product-title">${escapeHTML(r.product_name || "Producto")}</div><div class="category-line">${escapeHTML(formatDate(r.checked_at))} · ${Number(r.discount_percent || 0)}% desc.</div></div><span class="badge ${r.is_offer ? "offer" : "watch"}">${r.is_offer ? "Oferta" : "Vigilando"}</span></div>
+              <div class="price-row"><div class="price">${formatMoney(r.current_price)}</div><div class="target">Meta: ${formatMoney(r.target_price)}</div></div>
+              <div class="product-notes">${escapeHTML(r.alert_reason || "Revisión automática registrada.")}</div>
+            </div>
+          </article>
+        `).join("");
+
+        box.innerHTML = runCard + eventCards + resultCards;
+        if (showAlert) alert("Estado de monitoreo actualizado.");
+      } catch (error) {
+        box.innerHTML = `<div class="empty-card"><div class="big">⚠️</div><strong>No se pudo consultar monitoreo</strong>${escapeHTML(error.message || "Ejecuta primero el SQL de Fase 11.")}</div>`;
+        if (showAlert) alert("No se pudo consultar monitoreo: " + error.message);
+      }
+    }
+
+    function openGitHubActionsPage() {
+      const host = location.hostname || "";
+      const parts = location.pathname.split("/").filter(Boolean);
+      if (host.endsWith(".github.io") && parts.length) {
+        const owner = host.replace(".github.io", "");
+        const repo = parts[0];
+        window.open(`https://github.com/${owner}/${repo}/actions`, "_blank", "noopener,noreferrer");
+        return;
+      }
+      alert("Abre tu repo en GitHub y entra a la pestaña Actions.");
+    }
+
     function getSyncLog() { try { return JSON.parse(localStorage.getItem(SYNC_LOG_KEY) || "[]"); } catch { return []; } }
     function recordSyncEvent(action, message, mode = currentUser ? "cloud" : "local") { const log = getSyncLog(); log.unshift({ id:generateId(), action, message, mode, date:new Date().toISOString() }); localStorage.setItem(SYNC_LOG_KEY, JSON.stringify(log.slice(0,80))); }
 
     function downloadJson(data, fileName) { const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"}); const url = URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
-    function exportProductsJson() { downloadJson({ app:"DealWatch MX", project:"Appcomercio", type:"dealwatch-products-backup", version:"10.1-cuentas-invitaciones", exportedAt:new Date().toISOString(), totalProducts:getProducts().length, products:getProducts() }, `dealwatch-mx-respaldo-${new Date().toISOString().slice(0,10)}.json`); }
+    function exportProductsJson() { downloadJson({ app:"DealWatch MX", project:"Appcomercio", type:"dealwatch-products-backup", version:"11-monitoreo-actions", exportedAt:new Date().toISOString(), totalProducts:getProducts().length, products:getProducts() }, `dealwatch-mx-respaldo-${new Date().toISOString().slice(0,10)}.json`); }
     function prepareImportJson(mode) { pendingImportMode=mode; const input=document.getElementById("importJsonInput"); input.value=""; input.click(); }
     function importProductsJson(event) { const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try { const parsed=JSON.parse(reader.result); const raw=Array.isArray(parsed) ? parsed : parsed.products; if(!Array.isArray(raw)) throw new Error("sin productos"); const clean=raw.map(migrateProduct); if(pendingImportMode==="replace") { if(!confirm("¿Reemplazar productos locales por el JSON?")) return; saveProducts(clean,"json_import_replace"); } else saveProducts([...clean.map(p=>({...p,id:generateId(),importedAt:new Date().toISOString()})), ...getProducts()],"json_import_merge"); alert("JSON importado correctamente."); } catch(e){ alert("JSON inválido para DealWatch MX."); } }; reader.readAsText(file); }
 
