@@ -16,17 +16,17 @@
   <style>
     :root {
       --bg: #f5f5f7;
-      --card: rgba(255, 255, 255, 0.82);
+      --card: rgba(255, 255, 255, 0.84);
       --card-solid: #ffffff;
       --text: #1d1d1f;
       --muted: #6e6e73;
       --border: rgba(0, 0, 0, 0.08);
       --primary: #007aff;
-      --primary-dark: #005ecb;
       --green: #34c759;
       --orange: #ff9500;
       --red: #ff3b30;
       --purple: #af52de;
+      --gray: #8e8e93;
       --shadow: 0 18px 45px rgba(0, 0, 0, 0.10);
       --radius-xl: 28px;
       --radius-lg: 22px;
@@ -36,7 +36,7 @@
 
     [data-theme="dark"] {
       --bg: #000000;
-      --card: rgba(28, 28, 30, 0.84);
+      --card: rgba(28, 28, 30, 0.86);
       --card-solid: #1c1c1e;
       --text: #f5f5f7;
       --muted: #a1a1a6;
@@ -62,11 +62,18 @@
         var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding-bottom: calc(92px + var(--safe-bottom));
+      padding-bottom: calc(98px + var(--safe-bottom));
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
     }
 
     .app {
-      width: min(100%, 520px);
+      width: min(100%, 540px);
       margin: 0 auto;
       padding: 18px 16px 0;
     }
@@ -103,7 +110,7 @@
       color: white;
       box-shadow: 0 12px 25px rgba(0, 122, 255, 0.32);
       font-size: 22px;
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .brand h1 {
@@ -116,6 +123,12 @@
       margin: 2px 0 0;
       font-size: 0.78rem;
       color: var(--muted);
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
 
     .icon-btn {
@@ -134,12 +147,26 @@
       -webkit-backdrop-filter: blur(18px);
     }
 
+    .admin-pill {
+      display: none;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(52, 199, 89, 0.16);
+      color: var(--green);
+      font-size: 0.72rem;
+      font-weight: 900;
+    }
+
+    .admin-pill.active {
+      display: inline-flex;
+    }
+
     .hero {
       margin-top: 14px;
       padding: 26px 22px;
       border-radius: var(--radius-xl);
       background:
-        linear-gradient(145deg, rgba(0, 122, 255, 0.95), rgba(90, 200, 250, 0.88)),
+        linear-gradient(145deg, rgba(0, 122, 255, 0.96), rgba(90, 200, 250, 0.88)),
         #007aff;
       color: white;
       box-shadow: var(--shadow);
@@ -165,7 +192,7 @@
       padding: 7px 11px;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.20);
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.76rem;
       position: relative;
       z-index: 1;
@@ -195,13 +222,14 @@
       margin-top: 20px;
       position: relative;
       z-index: 1;
+      flex-wrap: wrap;
     }
 
     .btn {
       border: 0;
       border-radius: 999px;
       padding: 13px 16px;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 0.9rem;
       cursor: pointer;
       transition: transform 0.15s ease, opacity 0.15s ease;
@@ -222,6 +250,22 @@
       border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 10px 22px rgba(0, 122, 255, 0.25);
+    }
+
+    .btn-danger {
+      background: rgba(255, 59, 48, 0.14);
+      color: var(--red);
+    }
+
+    .btn-soft {
+      background: rgba(120, 120, 128, 0.14);
+      color: var(--text);
+    }
+
     .section {
       margin-top: 24px;
     }
@@ -232,6 +276,7 @@
       justify-content: space-between;
       margin-bottom: 12px;
       padding: 0 2px;
+      gap: 10px;
     }
 
     .section-header h3 {
@@ -243,7 +288,8 @@
     .section-header span {
       font-size: 0.82rem;
       color: var(--muted);
-      font-weight: 600;
+      font-weight: 700;
+      text-align: right;
     }
 
     .stats-grid {
@@ -273,7 +319,7 @@
       margin-top: 4px;
       color: var(--muted);
       font-size: 0.76rem;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .product-list {
@@ -319,7 +365,7 @@
     .product-title {
       margin: 3px 0 2px;
       font-size: 0.99rem;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: -0.03em;
       line-height: 1.15;
     }
@@ -327,7 +373,7 @@
     .store {
       font-size: 0.75rem;
       color: var(--muted);
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .badge {
@@ -335,7 +381,7 @@
       border-radius: 999px;
       padding: 6px 9px;
       font-size: 0.68rem;
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .badge.offer {
@@ -348,23 +394,29 @@
       color: var(--orange);
     }
 
+    .badge.lock {
+      background: rgba(142, 142, 147, 0.15);
+      color: var(--gray);
+    }
+
     .price-row {
       display: flex;
       align-items: baseline;
       gap: 8px;
       margin-top: 12px;
+      flex-wrap: wrap;
     }
 
     .price {
       font-size: 1.25rem;
-      font-weight: 900;
+      font-weight: 950;
       letter-spacing: -0.05em;
     }
 
     .target {
       font-size: 0.76rem;
       color: var(--muted);
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .progress {
@@ -382,6 +434,32 @@
       background: var(--primary);
     }
 
+    .product-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .mini-btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 0.73rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .mini-blue {
+      background: rgba(0, 122, 255, 0.12);
+      color: var(--primary);
+    }
+
+    .mini-red {
+      background: rgba(255, 59, 48, 0.12);
+      color: var(--red);
+    }
+
     .quick-actions {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -397,6 +475,7 @@
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
+      cursor: pointer;
     }
 
     .action-icon {
@@ -426,6 +505,10 @@
       background: var(--purple);
     }
 
+    .red {
+      background: var(--red);
+    }
+
     .action-card strong {
       display: block;
       font-size: 0.98rem;
@@ -438,7 +521,7 @@
       color: var(--muted);
       font-size: 0.78rem;
       line-height: 1.35;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .screen {
@@ -482,31 +565,40 @@
       margin-bottom: 6px;
     }
 
-    .setting-card {
+    .setting-card,
+    .admin-card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
       padding: 18px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
+      margin-bottom: 12px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .setting-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 14px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
-      margin-bottom: 12px;
     }
 
-    .setting-card strong {
+    .setting-card strong,
+    .admin-card strong {
       display: block;
-      font-size: 0.96rem;
+      font-size: 0.98rem;
     }
 
-    .setting-card span {
+    .setting-card span,
+    .admin-card span,
+    .help-text {
       display: block;
-      margin-top: 4px;
+      margin-top: 5px;
       color: var(--muted);
-      font-size: 0.78rem;
-      line-height: 1.35;
-      font-weight: 600;
+      font-size: 0.80rem;
+      line-height: 1.4;
+      font-weight: 650;
     }
 
     .switch {
@@ -532,10 +624,104 @@
       background: white;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
       transition: 0.2s ease;
+      margin: 0;
     }
 
     .switch.active span {
       transform: translateX(22px);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 900;
+      padding-left: 3px;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: rgba(120, 120, 128, 0.10);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 13px 14px;
+      outline: none;
+      font-size: 0.94rem;
+      font-weight: 700;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: rgba(0, 122, 255, 0.55);
+      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.10);
+    }
+
+    .two-cols {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .admin-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 950;
+      margin-top: 10px;
+    }
+
+    .admin-status.on {
+      background: rgba(52, 199, 89, 0.15);
+      color: var(--green);
+    }
+
+    .admin-status.off {
+      background: rgba(142, 142, 147, 0.15);
+      color: var(--gray);
+    }
+
+    .notice {
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      background: rgba(0, 122, 255, 0.10);
+      color: var(--primary);
+      font-size: 0.84rem;
+      font-weight: 800;
+      line-height: 1.4;
+      margin-top: 14px;
+    }
+
+    .warning {
+      padding: 14px 16px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 149, 0, 0.12);
+      color: var(--orange);
+      font-size: 0.82rem;
+      font-weight: 800;
+      line-height: 1.4;
+      margin-top: 14px;
     }
 
     .bottom-nav {
@@ -543,14 +729,14 @@
       left: 50%;
       bottom: calc(12px + var(--safe-bottom));
       transform: translateX(-50%);
-      width: min(calc(100% - 24px), 500px);
+      width: min(calc(100% - 24px), 520px);
       z-index: 30;
       background: rgba(255, 255, 255, 0.78);
       border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 28px;
       padding: 8px;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 4px;
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
       backdrop-filter: blur(26px);
@@ -567,9 +753,9 @@
       background: transparent;
       color: var(--muted);
       border-radius: 21px;
-      padding: 9px 4px;
-      font-weight: 800;
-      font-size: 0.68rem;
+      padding: 9px 2px;
+      font-weight: 900;
+      font-size: 0.62rem;
       cursor: pointer;
       display: grid;
       gap: 3px;
@@ -577,24 +763,13 @@
     }
 
     .nav-btn .nav-icon {
-      font-size: 20px;
+      font-size: 19px;
       line-height: 1;
     }
 
     .nav-btn.active {
       background: rgba(0, 122, 255, 0.12);
       color: var(--primary);
-    }
-
-    .install-tip {
-      margin-top: 16px;
-      padding: 14px 16px;
-      border-radius: var(--radius-lg);
-      background: rgba(0, 122, 255, 0.10);
-      color: var(--primary);
-      font-size: 0.84rem;
-      font-weight: 700;
-      line-height: 1.4;
     }
 
     @media (min-width: 700px) {
@@ -621,51 +796,48 @@
           </div>
         </div>
 
-        <button class="icon-btn" id="themeButton" aria-label="Cambiar tema">
-          ☀️
-        </button>
+        <div class="top-actions">
+          <div class="admin-pill" id="adminPill">ADMIN</div>
+          <button class="icon-btn" id="themeButton" aria-label="Cambiar tema">☀️</button>
+        </div>
       </div>
     </header>
 
-    <!-- Pantalla Inicio -->
+    <!-- INICIO -->
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>🔥 Monitoreo visual de ofertas</small>
-        <h2>Compra cuando el precio baje.</h2>
+        <small>🔥 Fase 2 · Modo administrador</small>
+        <h2>Controla tus productos desde la app.</h2>
         <p>
-          Guarda tus productos favoritos de Amazon, Mercado Libre y PlayStation.
-          En esta fase dejamos lista la interfaz tipo iOS.
+          Ahora puedes entrar como administrador, agregar productos, guardar precios
+          y ver alertas visuales desde localStorage.
         </p>
 
         <div class="hero-actions">
-          <button class="btn btn-light" onclick="goToScreen('favorites')">
-            Ver favoritos
-          </button>
-          <button class="btn btn-ghost" onclick="goToScreen('alerts')">
-            Alertas
-          </button>
+          <button class="btn btn-light" onclick="goToScreen('favorites')">Ver favoritos</button>
+          <button class="btn btn-ghost" onclick="goToScreen('admin')">Entrar admin</button>
         </div>
       </div>
 
       <section class="section">
         <div class="section-header">
           <h3>Resumen</h3>
-          <span>Demo visual</span>
+          <span id="summaryLabel">Cargando...</span>
         </div>
 
         <div class="stats-grid">
           <div class="stat-card">
-            <strong>3</strong>
+            <strong id="statProducts">0</strong>
             <span>Productos</span>
           </div>
 
           <div class="stat-card">
-            <strong>1</strong>
-            <span>Oferta</span>
+            <strong id="statOffers">0</strong>
+            <span>Ofertas</span>
           </div>
 
           <div class="stat-card">
-            <strong>MX</strong>
+            <strong id="statStores">0</strong>
             <span>Tiendas</span>
           </div>
         </div>
@@ -674,152 +846,213 @@
       <section class="section">
         <div class="section-header">
           <h3>Accesos rápidos</h3>
-          <span>Fase 1</span>
+          <span>App local</span>
         </div>
 
         <div class="quick-actions">
           <article class="action-card" onclick="goToScreen('favorites')">
             <div class="action-icon blue">🛒</div>
             <strong>Favoritos</strong>
-            <p>Vista bonita para productos guardados.</p>
+            <p>Consulta productos guardados y precios objetivo.</p>
           </article>
 
           <article class="action-card" onclick="goToScreen('alerts')">
             <div class="action-icon green">🔔</div>
             <strong>Alertas</strong>
-            <p>Diseño para detectar precios bajos.</p>
+            <p>Detecta visualmente precios iguales o menores a la meta.</p>
           </article>
 
-          <article class="action-card">
-            <div class="action-icon orange">📈</div>
-            <strong>Historial</strong>
-            <p>Preparado para precios por fecha.</p>
+          <article class="action-card" onclick="goToScreen('admin')">
+            <div class="action-icon orange">🔐</div>
+            <strong>Administrador</strong>
+            <p>Agrega productos desde un panel protegido con clave local.</p>
           </article>
 
           <article class="action-card" onclick="goToScreen('settings')">
             <div class="action-icon purple">⚙️</div>
             <strong>Ajustes</strong>
-            <p>Modo oscuro e instalación PWA.</p>
+            <p>Modo oscuro e instalación como PWA.</p>
           </article>
         </div>
       </section>
     </section>
 
-    <!-- Pantalla Favoritos -->
+    <!-- FAVORITOS -->
     <section class="screen" id="screen-favorites">
       <section class="section">
         <div class="section-header">
           <h3>Favoritos</h3>
-          <span>Productos demo</span>
+          <span id="favoritesCount">0 productos</span>
         </div>
 
-        <div class="product-list">
-          <article class="product-card">
-            <div class="product-img">🎮</div>
-            <div class="product-info">
-              <div class="product-top">
-                <div>
-                  <div class="store">PlayStation Store</div>
-                  <div class="product-title">EA Sports FC 26</div>
-                </div>
-                <span class="badge offer">OFERTA</span>
-              </div>
-
-              <div class="price-row">
-                <div class="price">$699</div>
-                <div class="target">Meta: $799</div>
-              </div>
-
-              <div class="progress">
-                <span style="width: 84%;"></span>
-              </div>
-            </div>
-          </article>
-
-          <article class="product-card">
-            <div class="product-img">🎧</div>
-            <div class="product-info">
-              <div class="product-top">
-                <div>
-                  <div class="store">Amazon México</div>
-                  <div class="product-title">Audífonos Bluetooth Pro</div>
-                </div>
-                <span class="badge watch">Vigilando</span>
-              </div>
-
-              <div class="price-row">
-                <div class="price">$1,299</div>
-                <div class="target">Meta: $999</div>
-              </div>
-
-              <div class="progress">
-                <span style="width: 58%;"></span>
-              </div>
-            </div>
-          </article>
-
-          <article class="product-card">
-            <div class="product-img">📱</div>
-            <div class="product-info">
-              <div class="product-top">
-                <div>
-                  <div class="store">Mercado Libre</div>
-                  <div class="product-title">Smartphone gama media</div>
-                </div>
-                <span class="badge watch">Vigilando</span>
-              </div>
-
-              <div class="price-row">
-                <div class="price">$4,899</div>
-                <div class="target">Meta: $4,500</div>
-              </div>
-
-              <div class="progress">
-                <span style="width: 66%;"></span>
-              </div>
-            </div>
-          </article>
-        </div>
+        <div class="product-list" id="favoritesList"></div>
       </section>
     </section>
 
-    <!-- Pantalla Alertas -->
+    <!-- ALERTAS -->
     <section class="screen" id="screen-alerts">
       <section class="section">
         <div class="section-header">
           <h3>Alertas</h3>
-          <span>Diseño base</span>
+          <span id="alertsCount">0 activas</span>
         </div>
 
-        <article class="product-card">
-          <div class="product-img">🔥</div>
-          <div class="product-info">
-            <div class="product-top">
-              <div>
-                <div class="store">Alerta activa</div>
-                <div class="product-title">EA Sports FC 26 bajó de precio</div>
-              </div>
-              <span class="badge offer">Detectada</span>
-            </div>
+        <div class="product-list" id="alertsList"></div>
 
-            <div class="price-row">
-              <div class="price">$699</div>
-              <div class="target">Precio objetivo: $799</div>
-            </div>
-
-            <div class="progress">
-              <span style="width: 100%;"></span>
-            </div>
-          </div>
-        </article>
-
-        <div class="install-tip">
-          En la Fase 5 estas alertas podrán activarse cuando el precio actual sea menor o igual al precio objetivo.
+        <div class="notice">
+          Una alerta se activa cuando el precio actual es menor o igual al precio objetivo.
+          En esta fase todavía es visual y local; más adelante se puede automatizar con backend, cron o GitHub Actions.
         </div>
       </section>
     </section>
 
-    <!-- Pantalla Ajustes -->
+    <!-- ADMIN -->
+    <section class="screen" id="screen-admin">
+      <section class="section">
+        <div class="section-header">
+          <h3>Administrador</h3>
+          <span id="adminHeaderStatus">Bloqueado</span>
+        </div>
+
+        <div class="admin-card" id="loginCard">
+          <strong>Entrar al modo administrador</strong>
+          <span>
+            Ingresa la clave local para poder agregar y administrar productos.
+          </span>
+
+          <div class="warning">
+            Clave inicial de prueba: <b>admin123</b>.  
+            Esta clave no es seguridad real porque la app está en HTML público.
+          </div>
+
+          <form class="form-grid" id="loginForm">
+            <div class="field">
+              <label for="adminPassword">Clave de administrador</label>
+              <input
+                type="password"
+                id="adminPassword"
+                placeholder="Escribe la clave"
+                autocomplete="current-password"
+                required
+              />
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Entrar</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="adminPanel" style="display:none;">
+          <div class="admin-card">
+            <strong>Agregar producto favorito</strong>
+            <span>
+              Los productos se guardan en este navegador usando localStorage.
+            </span>
+
+            <form class="form-grid" id="productForm">
+              <div class="field">
+                <label for="productName">Nombre del producto</label>
+                <input
+                  type="text"
+                  id="productName"
+                  placeholder="Ej. Control DualSense PS5"
+                  required
+                />
+              </div>
+
+              <div class="two-cols">
+                <div class="field">
+                  <label for="productStore">Tienda</label>
+                  <select id="productStore" required>
+                    <option value="Amazon México">Amazon México</option>
+                    <option value="Mercado Libre">Mercado Libre</option>
+                    <option value="PlayStation Store">PlayStation Store</option>
+                    <option value="Otra tienda">Otra tienda</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="productIcon">Icono</label>
+                  <select id="productIcon" required>
+                    <option value="🛒">🛒 General</option>
+                    <option value="🎮">🎮 Videojuego</option>
+                    <option value="🎧">🎧 Audio</option>
+                    <option value="📱">📱 Celular</option>
+                    <option value="💻">💻 Tecnología</option>
+                    <option value="👟">👟 Ropa / tenis</option>
+                    <option value="🏠">🏠 Hogar</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="two-cols">
+                <div class="field">
+                  <label for="currentPrice">Precio actual</label>
+                  <input
+                    type="number"
+                    id="currentPrice"
+                    placeholder="1299"
+                    min="0"
+                    step="1"
+                    required
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="targetPrice">Precio objetivo</label>
+                  <input
+                    type="number"
+                    id="targetPrice"
+                    placeholder="999"
+                    min="0"
+                    step="1"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="productUrl">Link del producto</label>
+                <input
+                  type="url"
+                  id="productUrl"
+                  placeholder="https://..."
+                />
+              </div>
+
+              <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Guardar producto</button>
+                <button class="btn btn-soft" type="button" onclick="resetProductForm()">Limpiar</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="admin-card">
+            <strong>Productos guardados</strong>
+            <span>
+              Desde aquí puedes revisar y eliminar productos de prueba.
+            </span>
+
+            <div class="product-list" id="adminProductList" style="margin-top:14px;"></div>
+
+            <div class="form-actions" style="margin-top:16px;">
+              <button class="btn btn-soft" type="button" onclick="loadDemoProducts()">
+                Restaurar demo
+              </button>
+              <button class="btn btn-danger" type="button" onclick="clearAllProducts()">
+                Borrar todos
+              </button>
+              <button class="btn btn-danger" type="button" onclick="logoutAdmin()">
+                Salir admin
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- AJUSTES -->
     <section class="screen" id="screen-settings">
       <section class="section">
         <div class="section-header">
@@ -828,38 +1061,54 @@
         </div>
 
         <div class="setting-card">
-          <div>
-            <strong>Modo oscuro</strong>
-            <span>Cambia la apariencia visual tipo iPhone.</span>
-          </div>
+          <div class="setting-row">
+            <div>
+              <strong>Modo oscuro</strong>
+              <span>Cambia la apariencia visual tipo iPhone.</span>
+            </div>
 
-          <div class="switch" id="themeSwitch" onclick="toggleTheme()">
-            <span></span>
+            <div class="switch" id="themeSwitch" onclick="toggleTheme()">
+              <span></span>
+            </div>
           </div>
         </div>
 
         <div class="setting-card">
-          <div>
-            <strong>Modo administrador</strong>
-            <span>Disponible en la Fase 2 para agregar y editar productos.</span>
+          <div class="setting-row">
+            <div>
+              <strong>Modo administrador</strong>
+              <span id="adminSettingText">Actualmente bloqueado.</span>
+              <div class="admin-status off" id="adminStatusBadge">🔒 Admin OFF</div>
+            </div>
+
+            <div style="font-size: 24px;">🔐</div>
           </div>
-          <div style="font-size: 24px;">🔐</div>
+
+          <div class="form-actions" style="margin-top:16px;">
+            <button class="btn btn-primary" type="button" onclick="goToScreen('admin')">
+              Abrir administrador
+            </button>
+          </div>
         </div>
 
         <div class="setting-card">
-          <div>
-            <strong>Instalar en celular</strong>
-            <span>En iPhone: Safari → Compartir → Agregar a pantalla de inicio.</span>
+          <div class="setting-row">
+            <div>
+              <strong>Instalar en celular</strong>
+              <span>En iPhone: Safari → Compartir → Agregar a pantalla de inicio.</span>
+            </div>
+            <div style="font-size: 24px;">📲</div>
           </div>
-          <div style="font-size: 24px;">📲</div>
         </div>
 
         <div class="setting-card">
-          <div>
-            <strong>GitHub Pages</strong>
-            <span>Esta versión sigue siendo 100% HTML, CSS y JavaScript.</span>
+          <div class="setting-row">
+            <div>
+              <strong>GitHub Pages</strong>
+              <span>Esta versión sigue siendo 100% HTML, CSS y JavaScript.</span>
+            </div>
+            <div style="font-size: 24px;">🌐</div>
           </div>
-          <div style="font-size: 24px;">🌐</div>
         </div>
       </section>
     </section>
@@ -881,6 +1130,11 @@
       Alertas
     </button>
 
+    <button class="nav-btn" data-screen="admin" onclick="goToScreen('admin')">
+      <span class="nav-icon">🔐</span>
+      Admin
+    </button>
+
     <button class="nav-btn" data-screen="settings" onclick="goToScreen('settings')">
       <span class="nav-icon">⚙️</span>
       Ajustes
@@ -888,9 +1142,137 @@
   </nav>
 
   <script>
+    const ADMIN_PASSWORD = "admin123";
+
+    const PRODUCTS_KEY = "dealwatch_products_v2";
+    const ADMIN_KEY = "dealwatch_admin_active";
+    const THEME_KEY = "dealwatch_theme";
+
     const root = document.documentElement;
     const themeButton = document.getElementById("themeButton");
     const themeSwitch = document.getElementById("themeSwitch");
+
+    const defaultProducts = [
+      {
+        id: crypto.randomUUID(),
+        name: "EA Sports FC 26",
+        store: "PlayStation Store",
+        icon: "🎮",
+        currentPrice: 699,
+        targetPrice: 799,
+        url: "",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "Audífonos Bluetooth Pro",
+        store: "Amazon México",
+        icon: "🎧",
+        currentPrice: 1299,
+        targetPrice: 999,
+        url: "",
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: crypto.randomUUID(),
+        name: "Smartphone gama media",
+        store: "Mercado Libre",
+        icon: "📱",
+        currentPrice: 4899,
+        targetPrice: 4500,
+        url: "",
+        createdAt: new Date().toISOString()
+      }
+    ];
+
+    function escapeHTML(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function normalizeUrl(url) {
+      const cleanUrl = String(url || "").trim();
+
+      if (!cleanUrl) {
+        return "";
+      }
+
+      if (cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://")) {
+        return cleanUrl;
+      }
+
+      return "";
+    }
+
+    function formatMoney(value) {
+      const number = Number(value || 0);
+
+      return number.toLocaleString("es-MX", {
+        style: "currency",
+        currency: "MXN",
+        maximumFractionDigits: 0
+      });
+    }
+
+    function getProducts() {
+      const saved = localStorage.getItem(PRODUCTS_KEY);
+
+      if (!saved) {
+        localStorage.setItem(PRODUCTS_KEY, JSON.stringify(defaultProducts));
+        return defaultProducts;
+      }
+
+      try {
+        const parsed = JSON.parse(saved);
+
+        if (!Array.isArray(parsed)) {
+          throw new Error("Productos inválidos");
+        }
+
+        return parsed;
+      } catch (error) {
+        localStorage.setItem(PRODUCTS_KEY, JSON.stringify(defaultProducts));
+        return defaultProducts;
+      }
+    }
+
+    function saveProducts(products) {
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+      renderApp();
+    }
+
+    function productHasOffer(product) {
+      return Number(product.currentPrice) <= Number(product.targetPrice);
+    }
+
+    function getProgress(product) {
+      const current = Number(product.currentPrice || 0);
+      const target = Number(product.targetPrice || 0);
+
+      if (current <= 0 || target <= 0) {
+        return 15;
+      }
+
+      if (current <= target) {
+        return 100;
+      }
+
+      const percent = Math.round((target / current) * 100);
+      return Math.max(12, Math.min(percent, 92));
+    }
+
+    function isAdminActive() {
+      return localStorage.getItem(ADMIN_KEY) === "true";
+    }
+
+    function setAdminActive(status) {
+      localStorage.setItem(ADMIN_KEY, status ? "true" : "false");
+      renderApp();
+    }
 
     function goToScreen(screenName) {
       const screens = document.querySelectorAll(".screen");
@@ -911,6 +1293,8 @@
         top: 0,
         behavior: "smooth"
       });
+
+      renderApp();
     }
 
     function setTheme(theme) {
@@ -924,19 +1308,266 @@
         themeSwitch.classList.remove("active");
       }
 
-      localStorage.setItem("dealwatch_theme", theme);
+      localStorage.setItem(THEME_KEY, theme);
     }
 
     function toggleTheme() {
-      const currentTheme = localStorage.getItem("dealwatch_theme") || "light";
+      const currentTheme = localStorage.getItem(THEME_KEY) || "light";
       const nextTheme = currentTheme === "dark" ? "light" : "dark";
       setTheme(nextTheme);
     }
 
+    function createProductCard(product, options = {}) {
+      const isOffer = productHasOffer(product);
+      const badgeClass = isOffer ? "offer" : "watch";
+      const badgeText = isOffer ? "OFERTA" : "Vigilando";
+      const progress = getProgress(product);
+      const safeUrl = normalizeUrl(product.url);
+
+      const openButton = safeUrl
+        ? `<button class="mini-btn mini-blue" onclick="window.open('${escapeHTML(safeUrl)}', '_blank', 'noopener,noreferrer')">Abrir link</button>`
+        : "";
+
+      const deleteButton = options.showDelete
+        ? `<button class="mini-btn mini-red" onclick="deleteProduct('${escapeHTML(product.id)}')">Eliminar</button>`
+        : "";
+
+      return `
+        <article class="product-card">
+          <div class="product-img">${escapeHTML(product.icon || "🛒")}</div>
+
+          <div class="product-info">
+            <div class="product-top">
+              <div>
+                <div class="store">${escapeHTML(product.store)}</div>
+                <div class="product-title">${escapeHTML(product.name)}</div>
+              </div>
+
+              <span class="badge ${badgeClass}">${badgeText}</span>
+            </div>
+
+            <div class="price-row">
+              <div class="price">${formatMoney(product.currentPrice)}</div>
+              <div class="target">Meta: ${formatMoney(product.targetPrice)}</div>
+            </div>
+
+            <div class="progress">
+              <span style="width:${progress}%;"></span>
+            </div>
+
+            <div class="product-actions">
+              ${openButton}
+              ${deleteButton}
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderStats(products) {
+      const offers = products.filter(productHasOffer);
+      const stores = new Set(products.map(product => product.store));
+
+      document.getElementById("statProducts").textContent = products.length;
+      document.getElementById("statOffers").textContent = offers.length;
+      document.getElementById("statStores").textContent = stores.size;
+      document.getElementById("summaryLabel").textContent = isAdminActive()
+        ? "Admin activo"
+        : "Modo usuario";
+    }
+
+    function renderFavorites(products) {
+      const container = document.getElementById("favoritesList");
+      const count = document.getElementById("favoritesCount");
+
+      count.textContent = `${products.length} producto${products.length === 1 ? "" : "s"}`;
+
+      if (products.length === 0) {
+        container.innerHTML = `
+          <div class="empty-card">
+            <div class="big">🛒</div>
+            <strong>No hay productos todavía</strong>
+            Agrega productos desde el panel administrador.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = products
+        .map(product => createProductCard(product))
+        .join("");
+    }
+
+    function renderAlerts(products) {
+      const alerts = products.filter(productHasOffer);
+      const container = document.getElementById("alertsList");
+      const count = document.getElementById("alertsCount");
+
+      count.textContent = `${alerts.length} activa${alerts.length === 1 ? "" : "s"}`;
+
+      if (alerts.length === 0) {
+        container.innerHTML = `
+          <div class="empty-card">
+            <div class="big">🔔</div>
+            <strong>Sin alertas por ahora</strong>
+            Cuando un producto llegue a su precio objetivo aparecerá aquí.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = alerts
+        .map(product => createProductCard(product))
+        .join("");
+    }
+
+    function renderAdminPanel(products) {
+      const adminActive = isAdminActive();
+      const loginCard = document.getElementById("loginCard");
+      const adminPanel = document.getElementById("adminPanel");
+      const adminHeaderStatus = document.getElementById("adminHeaderStatus");
+      const adminPill = document.getElementById("adminPill");
+      const adminStatusBadge = document.getElementById("adminStatusBadge");
+      const adminSettingText = document.getElementById("adminSettingText");
+      const adminProductList = document.getElementById("adminProductList");
+
+      if (adminActive) {
+        loginCard.style.display = "none";
+        adminPanel.style.display = "block";
+        adminHeaderStatus.textContent = "Activo";
+        adminPill.classList.add("active");
+
+        adminStatusBadge.className = "admin-status on";
+        adminStatusBadge.textContent = "✅ Admin ON";
+        adminSettingText.textContent = "Actualmente tienes permisos locales de administrador.";
+
+        if (products.length === 0) {
+          adminProductList.innerHTML = `
+            <div class="empty-card">
+              <div class="big">📦</div>
+              <strong>No hay productos</strong>
+              Agrega uno usando el formulario superior.
+            </div>
+          `;
+        } else {
+          adminProductList.innerHTML = products
+            .map(product => createProductCard(product, { showDelete: true }))
+            .join("");
+        }
+      } else {
+        loginCard.style.display = "block";
+        adminPanel.style.display = "none";
+        adminHeaderStatus.textContent = "Bloqueado";
+        adminPill.classList.remove("active");
+
+        adminStatusBadge.className = "admin-status off";
+        adminStatusBadge.textContent = "🔒 Admin OFF";
+        adminSettingText.textContent = "Actualmente bloqueado. Entra con la clave desde el panel Admin.";
+      }
+    }
+
+    function renderApp() {
+      const products = getProducts();
+
+      renderStats(products);
+      renderFavorites(products);
+      renderAlerts(products);
+      renderAdminPanel(products);
+    }
+
+    function resetProductForm() {
+      document.getElementById("productForm").reset();
+    }
+
+    function deleteProduct(productId) {
+      const products = getProducts();
+      const filtered = products.filter(product => product.id !== productId);
+      saveProducts(filtered);
+    }
+
+    function clearAllProducts() {
+      const confirmDelete = confirm("¿Seguro que quieres borrar todos los productos?");
+
+      if (!confirmDelete) {
+        return;
+      }
+
+      saveProducts([]);
+    }
+
+    function loadDemoProducts() {
+      saveProducts(defaultProducts.map(product => ({
+        ...product,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString()
+      })));
+    }
+
+    function logoutAdmin() {
+      setAdminActive(false);
+      goToScreen("home");
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", event => {
+      event.preventDefault();
+
+      const password = document.getElementById("adminPassword").value;
+
+      if (password === ADMIN_PASSWORD) {
+        document.getElementById("adminPassword").value = "";
+        setAdminActive(true);
+        goToScreen("admin");
+      } else {
+        alert("Clave incorrecta. Intenta nuevamente.");
+      }
+    });
+
+    document.getElementById("productForm").addEventListener("submit", event => {
+      event.preventDefault();
+
+      if (!isAdminActive()) {
+        alert("Primero entra como administrador.");
+        return;
+      }
+
+      const name = document.getElementById("productName").value.trim();
+      const store = document.getElementById("productStore").value;
+      const icon = document.getElementById("productIcon").value;
+      const currentPrice = Number(document.getElementById("currentPrice").value);
+      const targetPrice = Number(document.getElementById("targetPrice").value);
+      const url = normalizeUrl(document.getElementById("productUrl").value);
+
+      if (!name || currentPrice < 0 || targetPrice < 0) {
+        alert("Revisa los datos del producto.");
+        return;
+      }
+
+      const products = getProducts();
+
+      const newProduct = {
+        id: crypto.randomUUID(),
+        name,
+        store,
+        icon,
+        currentPrice,
+        targetPrice,
+        url,
+        createdAt: new Date().toISOString()
+      };
+
+      products.unshift(newProduct);
+      saveProducts(products);
+      resetProductForm();
+
+      alert("Producto guardado correctamente.");
+    });
+
     themeButton.addEventListener("click", toggleTheme);
 
-    const savedTheme = localStorage.getItem("dealwatch_theme") || "light";
+    const savedTheme = localStorage.getItem(THEME_KEY) || "light";
     setTheme(savedTheme);
+
+    renderApp();
 
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
