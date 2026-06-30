@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 13.1 Mercado Libre</title>
+  <title>DealWatch MX | Fase 13.2 Mercado Libre estable</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -177,9 +177,9 @@
 
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>🛒 Fase 13.1 · Mercado Libre automático</small>
-        <h2>Tu app ya puede revisar precios de Mercado Libre.</h2>
-        <p>El robot de GitHub Actions intenta leer el precio real de links de Mercado Libre, actualiza Supabase y avisa por Telegram.</p>
+        <small>🛒 Fase 13.2 · Mercado Libre estable</small>
+        <h2>Tu app ya entiende links reales de Mercado Libre.</h2>
+        <p>El robot ahora detecta links de artículo y links de catálogo /p/ con wid o item_id, actualiza Supabase y avisa por Telegram.</p>
         <div class="hero-actions">
           <button class="btn btn-light" onclick="goToScreen('cloud')">Equipo y nube</button>
           <button class="btn btn-ghost" onclick="goToScreen('admin')">Administrar</button>
@@ -196,7 +196,7 @@
       </section>
 
       <section class="section">
-        <div class="section-header"><h3>Accesos rápidos</h3><span>Fase 13.1</span></div>
+        <div class="section-header"><h3>Accesos rápidos</h3><span>Fase 13.2</span></div>
         <div class="quick-actions">
           <article class="action-card" onclick="goToScreen('favorites')"><div class="action-icon blue">🛒</div><strong>Favoritos</strong><p>Busca, filtra y abre links de productos.</p></article>
           <article class="action-card" onclick="goToScreen('alerts')"><div class="action-icon green">🔔</div><strong>Alertas</strong><p>Detecta precio objetivo o descuento mínimo.</p></article>
@@ -415,8 +415,8 @@
 
 
         <div class="card" id="monitorCard">
-          <strong>Fase 13.1 · Mercado Libre automático</strong>
-          <span>GitHub Actions ahora intenta obtener el precio real de productos de Mercado Libre, actualiza Supabase, guarda historial y avisa por Telegram cuando detecta ofertas.</span>
+          <strong>Fase 13.2 · Mercado Libre estable</strong>
+          <span>GitHub Actions ahora obtiene precios de Mercado Libre con diagnóstico mejorado: artículos directos, links /p/ con wid, item_id y errores claros si el link no trae publicación real.</span>
           <div class="notice">
             Para activarlo debes tener <b>SUPABASE_SERVICE_ROLE_KEY</b>, <b>TELEGRAM_BOT_TOKEN</b> y <b>TELEGRAM_CHAT_ID</b> en GitHub Actions. En el workflow activa <b>live_prices</b> para revisar Mercado Libre. Ninguna llave secreta va en index.html.
           </div>
@@ -432,10 +432,10 @@
 
 
         <div class="card" id="mercadoLibreCard">
-          <strong>Fase 13.1 · Precios reales de Mercado Libre</strong>
-          <span>Para que el robot actualice precios automáticamente, cada producto de Mercado Libre debe tener el link exacto de la publicación.</span>
+          <strong>Fase 13.2 · Precios reales de Mercado Libre</strong>
+          <span>Para que el robot actualice precios automáticamente, pega el link completo del producto. Ahora también se aceptan links de catálogo /p/ si traen wid o item_id.</span>
           <div class="notice">
-            Ejemplo válido: <b>https://articulo.mercadolibre.com.mx/MLM-1234567890-producto</b>. No uses solo <b>mercadolibre.com.mx</b>; debe ser el enlace específico del producto.
+            Ejemplos válidos: <b>https://articulo.mercadolibre.com.mx/MLM-1234567890-producto</b> o links como <b>/p/MLM...</b> cuando incluyan <b>wid=MLM...</b> o <b>item_id=MLM...</b>. No uses solo <b>mercadolibre.com.mx</b>.
           </div>
           <div class="form-actions" style="margin-top:16px;">
             <button class="btn btn-primary" type="button" onclick="showMercadoLibreHelp()">Ver formato correcto</button>
@@ -1263,14 +1263,15 @@
 
     function showMercadoLibreHelp() {
       alert(
-        "Fase 13.1 Mercado Libre:\n\n" +
+        "Fase 13.2 Mercado Libre estable:\n\n" +
         "1. En el producto guarda la tienda como Mercado Libre.\n" +
-        "2. En Link del producto pega el link exacto de la publicación.\n" +
-        "3. El link debe contener un ID tipo MLM-1234567890 o MLM1234567890.\n" +
-        "4. El robot usará la API pública de Mercado Libre para leer el precio.\n" +
-        "5. Si el precio cambió, se actualiza Supabase y se guarda historial.\n" +
-        "6. Si cumple precio objetivo o descuento mínimo, se manda Telegram.\n\n" +
-        "Ojo: los links de catálogo /p/ pueden no regresar precio directo. Es mejor usar links de artículo que empiezan con MLM-."
+        "2. En Link del producto pega el link completo que te da Mercado Libre.\n" +
+        "3. El robot busca primero wid=MLM..., después item_id=MLM... y después links tipo MLM-1234567890.\n" +
+        "4. Los links /p/MLM... funcionan si traen wid o item_id en la URL.\n" +
+        "5. Si solo trae /p/MLM... sin wid/item_id, lo marca como catálogo sin publicación real.\n" +
+        "6. Si el precio cambió, se actualiza Supabase y se guarda historial.\n" +
+        "7. Si cumple precio objetivo o descuento mínimo, se manda Telegram.\n\n" +
+        "Ejemplo real compatible: mercadolibre.com.mx/.../p/MLM37117526?...&wid=MLM2071997505"
       );
     }
 
@@ -1284,7 +1285,7 @@
         "5. Obtén el chat_id con getUpdates.\n" +
         "6. En GitHub Secrets agrega TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID.\n" +
         "7. En Actions ejecuta el workflow con telegram_test activado.\n\n" +
-        "Fase 13.1: para Mercado Libre también activa live_prices."
+        "Fase 13.2: para Mercado Libre también activa live_prices."
       );
     }
 

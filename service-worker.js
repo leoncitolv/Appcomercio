@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-pwa-v13-1-mercadolibre-fix1";
+const CACHE_NAME = "dealwatch-mx-pwa-v13-2-mercadolibre-stable";
 
 self.addEventListener("install", event => {
   self.skipWaiting();
