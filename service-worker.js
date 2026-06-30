@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-pwa-v9-3-supabase-fix";
+const CACHE_NAME = "dealwatch-mx-pwa-v10-multiadmin";
 const CORE_ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 self.addEventListener("install", event => {
   self.skipWaiting();

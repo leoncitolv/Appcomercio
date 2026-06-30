@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 9.3 Supabase FIX</title>
+  <title>DealWatch MX | Fase 10 Multi-admin</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -165,7 +165,7 @@
           <div class="logo">D</div>
           <div>
             <h1>DealWatch MX</h1>
-            <p>Appcomercio · Supabase Free</p>
+            <p>Appcomercio · Equipo en Supabase</p>
           </div>
         </div>
         <div class="top-actions">
@@ -177,11 +177,11 @@
 
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>☁️ Fase 9.3 · Supabase corregido</small>
+        <small>👥 Fase 10 · Multi-admin y equipos</small>
         <h2>Tu app ya puede usar base de datos real.</h2>
-        <p>Inicia sesión, migra tus productos locales y sincroniza favoritos, historial y alertas con Supabase.</p>
+        <p>Crea un equipo, comparte productos con más administradores y usa Supabase como nube principal.</p>
         <div class="hero-actions">
-          <button class="btn btn-light" onclick="goToScreen('cloud')">Conectar Supabase</button>
+          <button class="btn btn-light" onclick="goToScreen('cloud')">Equipo y nube</button>
           <button class="btn btn-ghost" onclick="goToScreen('admin')">Administrar</button>
         </div>
       </div>
@@ -201,7 +201,7 @@
           <article class="action-card" onclick="goToScreen('favorites')"><div class="action-icon blue">🛒</div><strong>Favoritos</strong><p>Busca, filtra y abre links de productos.</p></article>
           <article class="action-card" onclick="goToScreen('alerts')"><div class="action-icon green">🔔</div><strong>Alertas</strong><p>Detecta precio objetivo o descuento mínimo.</p></article>
           <article class="action-card" onclick="goToScreen('history')"><div class="action-icon orange">📈</div><strong>Historial</strong><p>Consulta cambios de precio guardados.</p></article>
-          <article class="action-card" onclick="goToScreen('cloud')"><div class="action-icon purple">☁️</div><strong>Supabase</strong><p>Login, migración y sincronización.</p></article>
+          <article class="action-card" onclick="goToScreen('cloud')"><div class="action-icon purple">☁️</div><strong>Equipo</strong><p>Multi-admin, roles y sincronización.</p></article>
         </div>
       </section>
     </section>
@@ -363,6 +363,51 @@
           </div>
         </div>
 
+        <div class="card hidden" id="workspaceCard">
+          <strong>Equipo / multi-admin</strong>
+          <span id="workspaceSummary">Cargando equipo...</span>
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="workspaceSelector">Equipo actual</label>
+              <select id="workspaceSelector" onchange="changeWorkspace(this.value)"></select>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="button" onclick="createWorkspacePrompt()">Crear equipo</button>
+              <button class="btn btn-soft" type="button" onclick="loadWorkspaces(true)">Actualizar equipos</button>
+              <button class="btn btn-soft" type="button" onclick="acceptPendingInvites(true)">Aceptar invitaciones</button>
+            </div>
+          </div>
+
+          <div class="notice">
+            Roles: <b>owner</b> y <b>admin</b> pueden agregar/editar productos. <b>viewer</b> solo consulta.
+          </div>
+
+          <div class="form-grid" style="margin-top:16px;">
+            <strong>Agregar administrador o visor</strong>
+            <span>Escribe el correo exacto con el que esa persona iniciará sesión en Supabase.</span>
+            <div class="two-cols">
+              <div class="field">
+                <label for="memberEmail">Correo del miembro</label>
+                <input type="email" id="memberEmail" placeholder="persona@correo.com" />
+              </div>
+              <div class="field">
+                <label for="memberRole">Rol</label>
+                <select id="memberRole">
+                  <option value="admin">admin</option>
+                  <option value="viewer">viewer</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="button" onclick="inviteWorkspaceMember()">Agregar miembro</button>
+            </div>
+          </div>
+
+          <div class="product-list" id="workspaceMembersList" style="margin-top:14px;"></div>
+        </div>
+
         <div class="card">
           <strong>Estado de sincronización</strong>
           <span id="syncStatusText">Esperando acciones...</span>
@@ -376,7 +421,7 @@
         <div class="section-header"><h3>Ajustes</h3><span>PWA</span></div>
         <div class="setting-card"><div class="setting-row"><div><strong>Modo oscuro</strong><span>Cambia la apariencia visual tipo iPhone.</span></div><div class="switch" id="themeSwitch" onclick="toggleTheme()"><span></span></div></div></div>
         <div class="setting-card"><div class="setting-row"><div><strong>Instalación PWA</strong><span id="pwaStatusText">Revisando estado...</span></div><div style="font-size:24px;">📲</div></div><div class="form-actions" style="margin-top:16px;"><button class="btn btn-primary" onclick="installPwaApp()">Instalar app</button><button class="btn btn-soft" onclick="copyAppLink()">Copiar link</button><button class="btn btn-danger" onclick="clearAppCache()">Limpiar caché</button></div></div>
-        <div class="setting-card"><div class="setting-row"><div><strong>Datos</strong><span>Modo local + Supabase. Exporta JSON antes de hacer cambios grandes.</span></div><div style="font-size:24px;">💾</div></div><div class="form-actions" style="margin-top:16px;"><button class="btn btn-primary" onclick="exportProductsJson()">Exportar JSON</button><button class="btn btn-soft" onclick="goToScreen('cloud')">Ver Supabase</button></div></div>
+        <div class="setting-card"><div class="setting-row"><div><strong>Datos</strong><span>Modo local + Supabase. Exporta JSON antes de hacer cambios grandes.</span></div><div style="font-size:24px;">💾</div></div><div class="form-actions" style="margin-top:16px;"><button class="btn btn-primary" onclick="exportProductsJson()">Exportar JSON</button><button class="btn btn-soft" onclick="goToScreen('cloud')">Ver nube/equipo</button></div></div>
       </section>
     </section>
   </main>
@@ -394,14 +439,15 @@
     const SUPABASE_URL = "https://ltsrjxvisptbdhhkabhj.supabase.co";
     const SUPABASE_KEY = "sb_publishable_NLb1XKeqzT5H08iJBBOD4Q_HlrtyLgI";
     const ADMIN_PASSWORD = "admin123";
-    const PRODUCTS_KEY = "dealwatch_products_v9";
-    const OLD_PRODUCTS_KEYS = ["dealwatch_products_v5", "dealwatch_products_v4", "dealwatch_products_v3"];
+    const PRODUCTS_KEY = "dealwatch_products_v10";
+    const OLD_PRODUCTS_KEYS = ["dealwatch_products_v9", "dealwatch_products_v5", "dealwatch_products_v4", "dealwatch_products_v3"];
     const ADMIN_KEY = "dealwatch_admin_active";
     const THEME_KEY = "dealwatch_theme";
     const ALERT_LOG_KEY = "dealwatch_alert_log_v9";
     const NOTIFICATION_PREF_KEY = "dealwatch_notifications_pref_v9";
     const PWA_INSTALLED_KEY = "dealwatch_pwa_installed_v9";
-    const SYNC_LOG_KEY = "dealwatch_sync_log_v9";
+    const SYNC_LOG_KEY = "dealwatch_sync_log_v10";
+    const WORKSPACE_ID_KEY = "dealwatch_workspace_id_v10";
 
     let deferredInstallPrompt = null;
     let pendingImportMode = "merge";
@@ -409,6 +455,10 @@
     let currentSession = null;
     let currentUser = null;
     let isLoadingRemote = false;
+    let currentWorkspaces = [];
+    let currentWorkspace = null;
+    let currentMembers = [];
+    let isLoadingWorkspaces = false;
 
     const root = document.documentElement;
     const themeButton = document.getElementById("themeButton");
@@ -449,6 +499,7 @@
       const priceHistory = rawHistory.length ? rawHistory.map(item => migrateHistoryItem(item, currentPrice, createdAt)) : [createPriceHistoryEntry(currentPrice, null, product.store || "Registro inicial", "Precio inicial del producto", "initial")];
       return {
         id: product.id || generateId(),
+        workspaceId: product.workspaceId || product.workspace_id || "",
         name: product.name || "Producto sin nombre",
         store: product.store || "Otra tienda",
         category: product.category || "Otro",
@@ -594,9 +645,29 @@
       const box = document.getElementById("supabaseConnectionBox");
       const authCard = document.getElementById("authCard");
       const sessionCard = document.getElementById("sessionCard");
-      if(!supabaseClient) { status.textContent="Sin cliente"; box.textContent="No se pudo crear cliente Supabase. Revisa la librería CDN o conexión a internet."; box.className="warning"; }
-      else if(currentUser) { status.textContent="Sesión activa"; box.textContent="Conectado a Supabase. Productos en nube disponibles para este usuario."; box.className="success"; authCard.classList.add("hidden"); sessionCard.classList.remove("hidden"); document.getElementById("sessionEmail").textContent = currentUser.email || "Usuario conectado"; }
-      else { status.textContent="Sin sesión"; box.textContent="Proyecto configurado. Inicia sesión para leer y guardar productos en Supabase."; box.className="notice"; authCard.classList.remove("hidden"); sessionCard.classList.add("hidden"); }
+      const workspaceCard = document.getElementById("workspaceCard");
+      if(!supabaseClient) {
+        status.textContent="Sin cliente";
+        box.textContent="No se pudo crear cliente Supabase. Revisa la librería CDN o conexión a internet.";
+        box.className="warning";
+        workspaceCard.classList.add("hidden");
+      } else if(currentUser) {
+        status.textContent = currentWorkspace ? "Equipo activo" : "Sesión activa";
+        box.textContent = currentWorkspace ? `Conectado a Supabase · Equipo: ${currentWorkspace.name}` : "Conectado a Supabase. Crea o selecciona un equipo.";
+        box.className="success";
+        authCard.classList.add("hidden");
+        sessionCard.classList.remove("hidden");
+        workspaceCard.classList.remove("hidden");
+        document.getElementById("sessionEmail").textContent = currentUser.email || "Usuario conectado";
+      } else {
+        status.textContent="Sin sesión";
+        box.textContent="Proyecto configurado. Inicia sesión para leer y guardar productos compartidos en Supabase.";
+        box.className="notice";
+        authCard.classList.remove("hidden");
+        sessionCard.classList.add("hidden");
+        workspaceCard.classList.add("hidden");
+      }
+      renderWorkspacePanel();
       const logs = getSyncLog();
       document.getElementById("syncStatusText").textContent = logs[0] ? logs[0].message : "Sin acciones todavía.";
       document.getElementById("syncLogList").innerHTML = logs.length ? logs.slice(0,10).map(l=>`<div class="history-item"><div class="history-icon">☁️</div><div><div class="history-title">${escapeHTML(l.action)}</div><div class="history-meta">${formatDate(l.date)} · ${escapeHTML(l.message)}</div></div><div class="history-price">${escapeHTML(l.mode || "local")}</div></div>`).join("") : emptyCard("☁️", "Sin sincronización", "Inicia sesión o guarda productos.");
@@ -608,21 +679,245 @@
     function resetProductForm() { document.getElementById("productForm").reset(); document.getElementById("editingProductId").value=""; document.getElementById("productFormTitle").textContent="Agregar producto favorito"; document.getElementById("productFormSubtitle").textContent="Si estás conectado a Supabase, se guarda en la nube y también queda copia local."; document.getElementById("saveProductButton").textContent="Guardar producto"; document.getElementById("cancelEditButton").style.display="none"; document.getElementById("productPriority").value="Media"; document.getElementById("productAlertEnabled").checked=true; }
     function cancelEdit() { resetProductForm(); }
     function startEditProduct(id) { const p = getProducts().find(x=>x.id===id); if(!p) return alert("No encontré el producto."); document.getElementById("editingProductId").value=p.id; document.getElementById("productName").value=p.name; document.getElementById("productStore").value=p.store; document.getElementById("productCategory").value=p.category; document.getElementById("productIcon").value=p.icon; document.getElementById("productPriority").value=p.priority; document.getElementById("normalPrice").value=p.normalPrice; document.getElementById("currentPrice").value=p.currentPrice; document.getElementById("targetPrice").value=p.targetPrice; document.getElementById("minDiscountPercent").value=p.minDiscountPercent; document.getElementById("productAlertEnabled").checked=p.alertEnabled!==false; document.getElementById("productUrl").value=p.url; document.getElementById("productNotes").value=p.notes; document.getElementById("productFormTitle").textContent="Editar producto"; document.getElementById("productFormSubtitle").textContent="Modifica los datos y guarda. Si cambia precio se crea historial."; document.getElementById("saveProductButton").textContent="Actualizar producto"; document.getElementById("cancelEditButton").style.display="inline-flex"; goToScreen("admin"); }
-    async function deleteProduct(id) { if(!confirm("¿Seguro que quieres eliminar este producto?")) return; if(currentUser && isUuid(id)) await deleteRemoteProduct(id); saveProducts(getProducts().filter(p=>p.id!==id), "product_deleted"); }
-    async function toggleProductAlert(id) { const products = getProducts().map(p => p.id===id ? {...p, alertEnabled: !p.alertEnabled, updatedAt: new Date().toISOString()} : p); saveProducts(products, "alert_toggled"); const p=products.find(x=>x.id===id); if(currentUser && p && isUuid(p.id)) await upsertRemoteProduct(p); }
+    async function deleteProduct(id) { if(currentUser && !canWriteWorkspace()) return alert("Tu rol actual no permite eliminar productos."); if(!confirm("¿Seguro que quieres eliminar este producto?")) return; if(currentUser && isUuid(id)) await deleteRemoteProduct(id); saveProducts(getProducts().filter(p=>p.id!==id), "product_deleted"); }
+    async function toggleProductAlert(id) { if(currentUser && !canWriteWorkspace()) return alert("Tu rol actual no permite cambiar alertas."); const products = getProducts().map(p => p.id===id ? {...p, alertEnabled: !p.alertEnabled, updatedAt: new Date().toISOString()} : p); saveProducts(products, "alert_toggled"); const p=products.find(x=>x.id===id); if(currentUser && p && isUuid(p.id)) await upsertRemoteProduct(p); }
     function clearAllProducts() { if(confirm("¿Borrar todos los productos locales? Esto no borra Supabase.")) { saveProducts([], "local_products_cleared", false); resetProductForm(); } }
     function loadDemoProducts() { saveProducts(defaultProducts.map(p=>migrateProduct({...p,id:generateId(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()})), "demo_loaded"); resetProductForm(); }
     function logoutAdmin() { setAdminActive(false); resetProductForm(); goToScreen("home"); }
     function showProductHistory(id) { document.getElementById("historyProductId").value=id; goToScreen("history"); }
 
-    function toRemoteProduct(product) { return { name: product.name, store: product.store, category: product.category, icon: product.icon, priority: product.priority, product_url: product.url || null, normal_price: Number(product.normalPrice || 0), current_price: Number(product.currentPrice || 0), target_price: Number(product.targetPrice || 0), min_discount_percent: Number(product.minDiscountPercent || 0), alerts_enabled: product.alertEnabled !== false, notes: product.notes || null }; }
-    function fromRemoteProduct(row, histories=[]) { return migrateProduct({ id: row.id, name: row.name, store: row.store, category: row.category, icon: row.icon, priority: row.priority, product_url: row.product_url, normal_price: row.normal_price, current_price: row.current_price, target_price: row.target_price, min_discount_percent: row.min_discount_percent, alerts_enabled: row.alerts_enabled, notes: row.notes, created_at: row.created_at, updated_at: row.updated_at, priceHistory: histories.map(h=>({ id:h.id, date:h.created_at, price:h.new_price, previousPrice:h.previous_price, source:h.source, note:h.note, type:"supabase" })) }); }
-    async function initSupabase() { try { if(!window.supabase) { recordSyncEvent("supabase_cdn_missing", "No cargó librería Supabase", "error"); return; } supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); const { data } = await supabaseClient.auth.getSession(); currentSession = data.session; currentUser = data.session?.user || null; supabaseClient.auth.onAuthStateChange(async (_event, session) => { currentSession=session; currentUser=session?.user||null; if(currentUser) await refreshRemoteProducts(false); renderApp(); }); if(currentUser) await refreshRemoteProducts(false); recordSyncEvent("supabase_ready", currentUser ? "Sesión recuperada" : "Cliente listo sin sesión", currentUser ? "cloud" : "local"); } catch(e) { recordSyncEvent("supabase_error", e.message || "Error Supabase", "error"); } renderApp(); }
+
+    function getCurrentWorkspaceRole() {
+      if(!currentWorkspace || !currentUser) return "local";
+      const member = currentMembers.find(m => m.workspace_id === currentWorkspace.id && m.user_id === currentUser.id && m.status === "active");
+      return member?.role || "viewer";
+    }
+
+    function canWriteWorkspace() {
+      const role = getCurrentWorkspaceRole();
+      return !currentUser || role === "owner" || role === "admin";
+    }
+
+    async function ensureProfile() {
+      if(!supabaseClient || !currentUser) return;
+      const email = (currentUser.email || "").toLowerCase();
+      await supabaseClient.from("profiles").upsert({
+        user_id: currentUser.id,
+        email,
+        display_name: email.split("@")[0] || "Usuario"
+      }, { onConflict: "user_id" });
+    }
+
+    async function acceptPendingInvites(showAlert=false) {
+      if(!supabaseClient || !currentUser?.email) return;
+      const email = currentUser.email.toLowerCase();
+      try {
+        const { data: invites, error } = await supabaseClient
+          .from("workspace_members")
+          .select("id, workspace_id, invited_email, role, status")
+          .ilike("invited_email", email)
+          .is("user_id", null);
+        if(error) throw error;
+        if(!invites || !invites.length) { if(showAlert) alert("No hay invitaciones pendientes para este correo."); return; }
+        for(const invite of invites) {
+          const { error: updateError } = await supabaseClient
+            .from("workspace_members")
+            .update({ user_id: currentUser.id, status: "active" })
+            .eq("id", invite.id);
+          if(updateError) throw updateError;
+        }
+        recordSyncEvent("invite_accepted", `${invites.length} invitación(es) aceptada(s)`, "cloud");
+        if(showAlert) alert("Invitación aceptada. Ya puedes ver el equipo compartido.");
+        await loadWorkspaces(false);
+      } catch(e) {
+        recordSyncEvent("invite_error", e.message || "No se pudo aceptar invitación", "error");
+        if(showAlert) alert("No se pudo aceptar invitación: " + e.message);
+      }
+    }
+
+    async function createWorkspace(name = "DealWatch MX") {
+      if(!supabaseClient || !currentUser) throw new Error("Primero inicia sesión.");
+      const cleanName = String(name || "DealWatch MX").trim() || "DealWatch MX";
+      const { data: rows, error } = await supabaseClient
+        .from("workspaces")
+        .insert({ name: cleanName, owner_id: currentUser.id })
+        .select()
+        .limit(1);
+      if(error) throw error;
+      const workspace = rows?.[0];
+      if(!workspace) throw new Error("Supabase no devolvió el equipo creado.");
+      const { error: memberError } = await supabaseClient
+        .from("workspace_members")
+        .insert({ workspace_id: workspace.id, user_id: currentUser.id, invited_email: currentUser.email || null, role: "owner", status: "active" });
+      if(memberError) throw memberError;
+      localStorage.setItem(WORKSPACE_ID_KEY, workspace.id);
+      recordSyncEvent("workspace_created", cleanName, "cloud");
+      return workspace;
+    }
+
+    async function createWorkspacePrompt() {
+      if(!currentUser) return alert("Primero inicia sesión en Supabase.");
+      const name = prompt("Nombre del equipo:", currentWorkspace?.name || "DealWatch MX");
+      if(!name) return;
+      try { await createWorkspace(name); await loadWorkspaces(true); }
+      catch(e) { alert("No se pudo crear equipo: " + e.message); }
+    }
+
+    async function loadWorkspaces(showAlert=false) {
+      if(!supabaseClient || !currentUser || isLoadingWorkspaces) return;
+      isLoadingWorkspaces = true;
+      try {
+        await ensureProfile();
+        await acceptPendingInvites(false);
+        const { data: rows, error } = await supabaseClient
+          .from("workspaces")
+          .select("id, name, owner_id, created_at, updated_at")
+          .order("created_at", { ascending: true });
+        if(error) throw error;
+        currentWorkspaces = rows || [];
+        if(!currentWorkspaces.length) {
+          const created = await createWorkspace("DealWatch MX");
+          currentWorkspaces = [created];
+        }
+        const savedId = localStorage.getItem(WORKSPACE_ID_KEY);
+        currentWorkspace = currentWorkspaces.find(w => w.id === savedId) || currentWorkspaces[0] || null;
+        if(currentWorkspace) localStorage.setItem(WORKSPACE_ID_KEY, currentWorkspace.id);
+        await loadWorkspaceMembers();
+        recordSyncEvent("workspaces_loaded", `${currentWorkspaces.length} equipo(s) disponible(s)`, "cloud");
+        if(showAlert) alert("Equipos actualizados.");
+      } catch(e) {
+        recordSyncEvent("workspace_error", e.message || "Error de equipo", "error");
+        if(showAlert) alert("No se pudieron cargar equipos. Ejecuta primero el SQL de Fase 10. Detalle: " + e.message);
+      } finally {
+        isLoadingWorkspaces = false;
+        renderApp();
+      }
+    }
+
+    async function loadWorkspaceMembers() {
+      currentMembers = [];
+      if(!supabaseClient || !currentUser || !currentWorkspace) return;
+      const { data, error } = await supabaseClient
+        .from("workspace_members")
+        .select("id, workspace_id, user_id, invited_email, role, status, created_at")
+        .eq("workspace_id", currentWorkspace.id)
+        .order("created_at", { ascending: true });
+      if(error) throw error;
+      currentMembers = data || [];
+    }
+
+    async function changeWorkspace(workspaceId) {
+      const found = currentWorkspaces.find(w => w.id === workspaceId);
+      if(!found) return;
+      currentWorkspace = found;
+      localStorage.setItem(WORKSPACE_ID_KEY, found.id);
+      try { await loadWorkspaceMembers(); await refreshRemoteProducts(false); }
+      catch(e) { alert("No se pudo cambiar equipo: " + e.message); }
+      renderApp();
+    }
+
+    async function inviteWorkspaceMember() {
+      if(!currentUser || !currentWorkspace) return alert("Primero inicia sesión y selecciona un equipo.");
+      if(!canWriteWorkspace()) return alert("Tu rol actual es viewer. No puedes agregar miembros.");
+      const email = document.getElementById("memberEmail").value.trim().toLowerCase();
+      const role = document.getElementById("memberRole").value;
+      if(!email || !email.includes("@")) return alert("Escribe un correo válido.");
+      if(!["admin","viewer"].includes(role)) return alert("Rol inválido.");
+      try {
+        const { error } = await supabaseClient.from("workspace_members").insert({
+          workspace_id: currentWorkspace.id,
+          invited_email: email,
+          role,
+          status: "pending",
+          created_by: currentUser.id
+        });
+        if(error) throw error;
+        document.getElementById("memberEmail").value = "";
+        recordSyncEvent("member_invited", `${email} como ${role}`, "cloud");
+        await loadWorkspaceMembers();
+        alert("Miembro agregado como invitación pendiente. Cuando esa persona inicie sesión con ese correo y presione Aceptar invitaciones, entrará al equipo.");
+      } catch(e) { alert("No se pudo agregar miembro: " + e.message); }
+      renderApp();
+    }
+
+    async function removeWorkspaceMember(memberId) {
+      if(!currentUser || !currentWorkspace) return;
+      if(!canWriteWorkspace()) return alert("No tienes permiso para quitar miembros.");
+      if(!confirm("¿Quitar este miembro/invitación del equipo?")) return;
+      const { error } = await supabaseClient.from("workspace_members").delete().eq("id", memberId);
+      if(error) return alert("No se pudo quitar miembro: " + error.message);
+      await loadWorkspaceMembers();
+      renderApp();
+    }
+
+    function renderWorkspacePanel() {
+      const selector = document.getElementById("workspaceSelector");
+      const summary = document.getElementById("workspaceSummary");
+      const list = document.getElementById("workspaceMembersList");
+      if(!selector || !summary || !list) return;
+      if(!currentUser) { selector.innerHTML = ""; summary.textContent = "Inicia sesión para usar equipos."; list.innerHTML = ""; return; }
+      selector.innerHTML = currentWorkspaces.length
+        ? currentWorkspaces.map(w => `<option value="${escapeHTML(w.id)}">${escapeHTML(w.name)}</option>`).join("")
+        : `<option value="">Sin equipos</option>`;
+      if(currentWorkspace) selector.value = currentWorkspace.id;
+      const role = getCurrentWorkspaceRole();
+      summary.textContent = currentWorkspace ? `Equipo: ${currentWorkspace.name} · Tu rol: ${role}` : "Sin equipo seleccionado.";
+      if(!currentMembers.length) { list.innerHTML = emptyCard("👥", "Sin miembros visibles", "Actualiza equipos o revisa las políticas RLS."); return; }
+      list.innerHTML = currentMembers.map(m => {
+        const label = m.user_id === currentUser?.id ? "Tú" : (m.invited_email || m.user_id || "Miembro");
+        const status = m.status === "pending" ? "pendiente" : "activo";
+        const remove = canWriteWorkspace() && m.role !== "owner" ? `<button class="mini-btn mini-red" onclick="removeWorkspaceMember('${escapeHTML(m.id)}')">Quitar</button>` : "";
+        return `<div class="history-item"><div class="history-icon">👤</div><div><div class="history-title">${escapeHTML(label)}</div><div class="history-meta">Rol: ${escapeHTML(m.role)} · Estado: ${escapeHTML(status)}</div></div><div class="product-actions">${remove}</div></div>`;
+      }).join("");
+    }
+
+
+    async function claimLegacyRemoteProductsToWorkspace() {
+      if(!supabaseClient || !currentUser || !currentWorkspace) return;
+      try {
+        const { data: legacyProducts, error } = await supabaseClient
+          .from("products")
+          .select("id")
+          .is("workspace_id", null);
+        if(error) throw error;
+        if(!legacyProducts || !legacyProducts.length) return;
+        for(const item of legacyProducts) {
+          await supabaseClient.from("products").update({ workspace_id: currentWorkspace.id }).eq("id", item.id);
+          await supabaseClient.from("price_history").update({ workspace_id: currentWorkspace.id }).eq("product_id", item.id);
+        }
+        recordSyncEvent("legacy_claimed", `${legacyProducts.length} producto(s) anteriores asignados al equipo`, "cloud");
+      } catch(e) {
+        recordSyncEvent("legacy_claim_error", e.message || "No se pudieron asignar productos anteriores", "error");
+      }
+    }
+
+    function toRemoteProduct(product) {
+      return {
+        workspace_id: currentWorkspace?.id || product.workspaceId || null,
+        name: product.name,
+        store: product.store,
+        category: product.category,
+        icon: product.icon,
+        priority: product.priority,
+        product_url: product.url || null,
+        normal_price: Number(product.normalPrice || 0),
+        current_price: Number(product.currentPrice || 0),
+        target_price: Number(product.targetPrice || 0),
+        min_discount_percent: Number(product.minDiscountPercent || 0),
+        alerts_enabled: product.alertEnabled !== false,
+        notes: product.notes || null
+      };
+    }
+    function fromRemoteProduct(row, histories=[]) { return migrateProduct({ id: row.id, workspace_id: row.workspace_id, name: row.name, store: row.store, category: row.category, icon: row.icon, priority: row.priority, product_url: row.product_url, normal_price: row.normal_price, current_price: row.current_price, target_price: row.target_price, min_discount_percent: row.min_discount_percent, alerts_enabled: row.alerts_enabled, notes: row.notes, created_at: row.created_at, updated_at: row.updated_at, priceHistory: histories.map(h=>({ id:h.id, date:h.created_at, price:h.new_price, previousPrice:h.previous_price, source:h.source, note:h.note, type:"supabase" })) }); }
+    async function initSupabase() { try { if(!window.supabase) { recordSyncEvent("supabase_cdn_missing", "No cargó librería Supabase", "error"); return; } supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); const { data } = await supabaseClient.auth.getSession(); currentSession = data.session; currentUser = data.session?.user || null; supabaseClient.auth.onAuthStateChange(async (_event, session) => { currentSession=session; currentUser=session?.user||null; if(currentUser) { await loadWorkspaces(false); await claimLegacyRemoteProductsToWorkspace(); await refreshRemoteProducts(false); } renderApp(); }); if(currentUser) { await loadWorkspaces(false); await claimLegacyRemoteProductsToWorkspace(); await refreshRemoteProducts(false); } recordSyncEvent("supabase_ready", currentUser ? "Sesión recuperada" : "Cliente listo sin sesión", currentUser ? "cloud" : "local"); } catch(e) { recordSyncEvent("supabase_error", e.message || "Error Supabase", "error"); } renderApp(); }
     async function testSupabaseConnection() { if(!supabaseClient) return alert("No está disponible el cliente Supabase. Revisa internet/CDN."); const { data, error } = await supabaseClient.auth.getSession(); if(error) return alert("Error de conexión: " + error.message); alert(currentUser ? "Conexión OK. Sesión: " + (currentUser.email || "activa") : "Conexión OK. Falta iniciar sesión."); }
-    async function signInSupabase(email,password) { const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password }); if(error) throw error; currentSession=data.session; currentUser=data.user; recordSyncEvent("login", "Sesión iniciada en Supabase", "cloud"); await refreshRemoteProducts(false); }
+    async function signInSupabase(email,password) { const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password }); if(error) throw error; currentSession=data.session; currentUser=data.user; recordSyncEvent("login", "Sesión iniciada en Supabase", "cloud"); await loadWorkspaces(false); await claimLegacyRemoteProductsToWorkspace(); await refreshRemoteProducts(false); }
     async function signUpSupabaseUser() { const email=document.getElementById("supabaseEmail").value.trim(); const password=document.getElementById("supabasePassword").value; if(!email||!password) return alert("Escribe correo y contraseña."); try { const { data, error } = await supabaseClient.auth.signUp({ email, password }); if(error) throw error; alert("Usuario creado. Si Supabase pide confirmación, revisa tu correo. Si lo creaste desde Authentication con Auto Confirm, ya puedes iniciar sesión."); } catch(e) { alert("No se pudo crear usuario: " + e.message); } }
-    async function signOutSupabaseUser() { if(!supabaseClient) return; await supabaseClient.auth.signOut(); currentSession=null; currentUser=null; recordSyncEvent("logout", "Sesión cerrada", "local"); renderApp(); }
-    async function refreshRemoteProducts(showAlert = true) { if(!supabaseClient || !currentUser || isLoadingRemote) { if(showAlert) alert("Primero inicia sesión en Supabase."); return; } isLoadingRemote=true; try { const { data: rows, error } = await supabaseClient.from("products").select("*").order("created_at", { ascending:false }); if(error) throw error; const ids = (rows||[]).map(r=>r.id); let histories = []; if(ids.length) { const { data:hrows, error:herror } = await supabaseClient.from("price_history").select("*").in("product_id", ids).order("created_at", { ascending:false }); if(herror) throw herror; histories = hrows || []; }
+    async function signOutSupabaseUser() { if(!supabaseClient) return; await supabaseClient.auth.signOut(); currentSession=null; currentUser=null; currentWorkspaces=[]; currentWorkspace=null; currentMembers=[]; recordSyncEvent("logout", "Sesión cerrada", "local"); renderApp(); }
+    async function refreshRemoteProducts(showAlert = true) { if(!supabaseClient || !currentUser || isLoadingRemote) { if(showAlert) alert("Primero inicia sesión en Supabase."); return; } isLoadingRemote=true; try { let productQuery = supabaseClient.from("products").select("*").order("created_at", { ascending:false });
+      if(currentWorkspace?.id) productQuery = productQuery.eq("workspace_id", currentWorkspace.id);
+      const { data: rows, error } = await productQuery;
+      if(error) throw error; const ids = (rows||[]).map(r=>r.id); let histories = []; if(ids.length) { const { data:hrows, error:herror } = await supabaseClient.from("price_history").select("*").in("product_id", ids).order("created_at", { ascending:false }); if(herror) throw herror; histories = hrows || []; }
       const byProduct = histories.reduce((acc,h)=>{ (acc[h.product_id] ||= []).push(h); return acc; },{});
       const products = (rows||[]).map(r=>fromRemoteProduct(r, byProduct[r.id]||[]));
       localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
@@ -635,7 +930,7 @@
       if(!supabaseClient || !currentUser) return product;
       const payload = toRemoteProduct(product);
 
-      // Fase 9.3 FIX:
+      // Fase 9.3/10 FIX:
       // Un producto local puede tener formato UUID aunque todavía NO exista en Supabase.
       // Antes se intentaba update + .single(); si no había fila, Supabase devolvía:
       // "Cannot coerce the result to a single JSON object".
@@ -670,16 +965,16 @@
 
       return fromRemoteProduct(insertResult.data[0], product.priceHistory || []);
     }
-    async function insertRemoteHistory(productId, entry) { if(!supabaseClient || !currentUser || !isUuid(productId)) return; const payload = { product_id: productId, previous_price: entry.previousPrice, new_price: Number(entry.price || 0), source: entry.source || "manual", note: entry.note || null }; const { error } = await supabaseClient.from("price_history").insert(payload); if(error) throw error; }
+    async function insertRemoteHistory(productId, entry) { if(!supabaseClient || !currentUser || !isUuid(productId)) return; const payload = { product_id: productId, workspace_id: currentWorkspace?.id || null, previous_price: entry.previousPrice, new_price: Number(entry.price || 0), source: entry.source || "manual", note: entry.note || null }; const { error } = await supabaseClient.from("price_history").insert(payload); if(error) throw error; }
     async function deleteRemoteProduct(id) { if(!supabaseClient || !currentUser || !isUuid(id)) return; const { error } = await supabaseClient.from("products").delete().eq("id", id); if(error) alert("No se pudo borrar en Supabase: " + error.message); else recordSyncEvent("remote_deleted", "Producto borrado en Supabase", "cloud"); }
     async function migrateLocalToSupabase() { if(!currentUser) return alert("Primero inicia sesión en Supabase."); const products = getProducts(); if(!products.length) return alert("No hay productos locales para migrar."); if(!confirm(`Se subirán ${products.length} producto(s) locales a Supabase. ¿Continuar?`)) return; const migrated=[]; try { for(const p of products) { const inserted = await upsertRemoteProduct({...p, id: isUuid(p.id) ? p.id : ""}); for(const h of (p.priceHistory||[]).slice().reverse()) await insertRemoteHistory(inserted.id, h); migrated.push(inserted); } saveProducts(migrated, "migrated_to_supabase"); alert("Migración completada. Tus productos ya están en Supabase."); await refreshRemoteProducts(false); } catch(e) { alert("Error al migrar: " + e.message); recordSyncEvent("migration_error", e.message, "error"); } }
-    function downloadSupabasePayload() { const data = { app:"DealWatch MX", type:"supabase-payload", exportedAt:new Date().toISOString(), user: currentUser?.email || null, products:getProducts() }; downloadJson(data, `dealwatch-supabase-payload-${new Date().toISOString().slice(0,10)}.json`); }
+    function downloadSupabasePayload() { const data = { app:"DealWatch MX", type:"supabase-payload", exportedAt:new Date().toISOString(), user: currentUser?.email || null, workspace: currentWorkspace, products:getProducts() }; downloadJson(data, `dealwatch-supabase-payload-${new Date().toISOString().slice(0,10)}.json`); }
 
     function getSyncLog() { try { return JSON.parse(localStorage.getItem(SYNC_LOG_KEY) || "[]"); } catch { return []; } }
     function recordSyncEvent(action, message, mode = currentUser ? "cloud" : "local") { const log = getSyncLog(); log.unshift({ id:generateId(), action, message, mode, date:new Date().toISOString() }); localStorage.setItem(SYNC_LOG_KEY, JSON.stringify(log.slice(0,80))); }
 
     function downloadJson(data, fileName) { const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"}); const url = URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
-    function exportProductsJson() { downloadJson({ app:"DealWatch MX", project:"Appcomercio", type:"dealwatch-products-backup", version:"9.3-supabase-fix", exportedAt:new Date().toISOString(), totalProducts:getProducts().length, products:getProducts() }, `dealwatch-mx-respaldo-${new Date().toISOString().slice(0,10)}.json`); }
+    function exportProductsJson() { downloadJson({ app:"DealWatch MX", project:"Appcomercio", type:"dealwatch-products-backup", version:"10-multi-admin", exportedAt:new Date().toISOString(), totalProducts:getProducts().length, products:getProducts() }, `dealwatch-mx-respaldo-${new Date().toISOString().slice(0,10)}.json`); }
     function prepareImportJson(mode) { pendingImportMode=mode; const input=document.getElementById("importJsonInput"); input.value=""; input.click(); }
     function importProductsJson(event) { const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try { const parsed=JSON.parse(reader.result); const raw=Array.isArray(parsed) ? parsed : parsed.products; if(!Array.isArray(raw)) throw new Error("sin productos"); const clean=raw.map(migrateProduct); if(pendingImportMode==="replace") { if(!confirm("¿Reemplazar productos locales por el JSON?")) return; saveProducts(clean,"json_import_replace"); } else saveProducts([...clean.map(p=>({...p,id:generateId(),importedAt:new Date().toISOString()})), ...getProducts()],"json_import_merge"); alert("JSON importado correctamente."); } catch(e){ alert("JSON inválido para DealWatch MX."); } }; reader.readAsText(file); }
 
@@ -697,7 +992,7 @@
 
     document.getElementById("loginForm").addEventListener("submit", e => { e.preventDefault(); if(document.getElementById("adminPassword").value === ADMIN_PASSWORD) { document.getElementById("adminPassword").value=""; setAdminActive(true); goToScreen("admin"); } else alert("Clave incorrecta."); });
     document.getElementById("supabaseLoginForm").addEventListener("submit", async e => { e.preventDefault(); try { await signInSupabase(document.getElementById("supabaseEmail").value.trim(), document.getElementById("supabasePassword").value); document.getElementById("supabasePassword").value=""; alert("Sesión iniciada."); goToScreen("cloud"); } catch(err) { alert("No se pudo iniciar sesión: " + err.message); } });
-    document.getElementById("productForm").addEventListener("submit", async e => { e.preventDefault(); if(!isAdminActive()) return alert("Primero entra como administrador o inicia sesión en Supabase."); const editingId=document.getElementById("editingProductId").value; const products=getProducts(); const old=products.find(p=>p.id===editingId); const p=migrateProduct({ id: editingId || generateId(), name:document.getElementById("productName").value.trim(), store:document.getElementById("productStore").value, category:document.getElementById("productCategory").value, icon:document.getElementById("productIcon").value, priority:document.getElementById("productPriority").value, normalPrice:Number(document.getElementById("normalPrice").value||0), currentPrice:Number(document.getElementById("currentPrice").value||0), targetPrice:Number(document.getElementById("targetPrice").value||0), minDiscountPercent:Number(document.getElementById("minDiscountPercent").value||0), alertEnabled:document.getElementById("productAlertEnabled").checked, url:normalizeUrl(document.getElementById("productUrl").value), notes:document.getElementById("productNotes").value.trim(), createdAt: old?.createdAt || new Date().toISOString(), updatedAt:new Date().toISOString(), priceHistory: old?.priceHistory || [] }); if(!p.name || p.currentPrice<0 || p.targetPrice<0 || p.minDiscountPercent<0 || p.minDiscountPercent>100) return alert("Revisa los datos."); const priceChanged = old && Number(old.currentPrice)!==Number(p.currentPrice); if(!old) p.priceHistory=[createPriceHistoryEntry(p.currentPrice,null,p.store,"Precio inicial","initial")]; if(priceChanged) p.priceHistory=[createPriceHistoryEntry(p.currentPrice, old.currentPrice, p.store, "Precio actualizado desde edición", "edit_update"), ...p.priceHistory]; try { let saved = p; if(currentUser) { saved = await upsertRemoteProduct(p); if(priceChanged) await insertRemoteHistory(saved.id, p.priceHistory[0]); if(!old && p.priceHistory[0]) await insertRemoteHistory(saved.id, p.priceHistory[0]); recordSyncEvent(editingId?"remote_product_updated":"remote_product_inserted", saved.name, "cloud"); } const updated = editingId ? products.map(x=>x.id===editingId ? saved : x) : [saved, ...products]; saveProducts(updated, editingId ? "product_updated" : "product_created"); resetProductForm(); alert(editingId ? "Producto actualizado." : "Producto guardado."); } catch(err) { alert("No se pudo guardar en Supabase: " + err.message + "\nSe guardará localmente."); const updated = editingId ? products.map(x=>x.id===editingId ? p : x) : [p, ...products]; saveProducts(updated, "product_saved_local_fallback"); } });
+    document.getElementById("productForm").addEventListener("submit", async e => { e.preventDefault(); if(!isAdminActive()) return alert("Primero entra como administrador o inicia sesión en Supabase."); if(currentUser && !canWriteWorkspace()) return alert("Tu rol actual es viewer. Puedes consultar, pero no editar productos."); const editingId=document.getElementById("editingProductId").value; const products=getProducts(); const old=products.find(p=>p.id===editingId); const p=migrateProduct({ id: editingId || generateId(), name:document.getElementById("productName").value.trim(), store:document.getElementById("productStore").value, category:document.getElementById("productCategory").value, icon:document.getElementById("productIcon").value, priority:document.getElementById("productPriority").value, normalPrice:Number(document.getElementById("normalPrice").value||0), currentPrice:Number(document.getElementById("currentPrice").value||0), targetPrice:Number(document.getElementById("targetPrice").value||0), minDiscountPercent:Number(document.getElementById("minDiscountPercent").value||0), alertEnabled:document.getElementById("productAlertEnabled").checked, url:normalizeUrl(document.getElementById("productUrl").value), notes:document.getElementById("productNotes").value.trim(), createdAt: old?.createdAt || new Date().toISOString(), updatedAt:new Date().toISOString(), priceHistory: old?.priceHistory || [] }); if(!p.name || p.currentPrice<0 || p.targetPrice<0 || p.minDiscountPercent<0 || p.minDiscountPercent>100) return alert("Revisa los datos."); const priceChanged = old && Number(old.currentPrice)!==Number(p.currentPrice); if(!old) p.priceHistory=[createPriceHistoryEntry(p.currentPrice,null,p.store,"Precio inicial","initial")]; if(priceChanged) p.priceHistory=[createPriceHistoryEntry(p.currentPrice, old.currentPrice, p.store, "Precio actualizado desde edición", "edit_update"), ...p.priceHistory]; try { let saved = p; if(currentUser) { saved = await upsertRemoteProduct(p); if(priceChanged) await insertRemoteHistory(saved.id, p.priceHistory[0]); if(!old && p.priceHistory[0]) await insertRemoteHistory(saved.id, p.priceHistory[0]); recordSyncEvent(editingId?"remote_product_updated":"remote_product_inserted", saved.name, "cloud"); } const updated = editingId ? products.map(x=>x.id===editingId ? saved : x) : [saved, ...products]; saveProducts(updated, editingId ? "product_updated" : "product_created"); resetProductForm(); alert(editingId ? "Producto actualizado." : "Producto guardado."); } catch(err) { alert("No se pudo guardar en Supabase: " + err.message + "\nSe guardará localmente."); const updated = editingId ? products.map(x=>x.id===editingId ? p : x) : [p, ...products]; saveProducts(updated, "product_saved_local_fallback"); } });
     document.getElementById("priceForm").addEventListener("submit", async e => { e.preventDefault(); const id=document.getElementById("historyProductId").value; const newPrice=Number(document.getElementById("historyNewPrice").value); const source=document.getElementById("historySource").value.trim() || "Registro manual"; const note=document.getElementById("historyNote").value.trim(); let entry=null; const products=getProducts().map(p=>{ if(p.id!==id) return p; entry=createPriceHistoryEntry(newPrice,p.currentPrice,source,note,"manual_history"); return {...p,currentPrice:newPrice,updatedAt:new Date().toISOString(),priceHistory:[entry,...(p.priceHistory||[])]}; }); const product=products.find(p=>p.id===id); try { if(currentUser && product) { await upsertRemoteProduct(product); await insertRemoteHistory(product.id, entry); recordSyncEvent("remote_price_history", product.name, "cloud"); } saveProducts(products,"price_history_added"); document.getElementById("priceForm").reset(); alert("Precio registrado."); } catch(err) { alert("Se guardó localmente, pero falló Supabase: " + err.message); saveProducts(products,"price_history_local_fallback"); } });
     ["searchInput","storeFilter","categoryFilter","onlyOffersFilter"].forEach(id=>document.getElementById(id).addEventListener(id==="searchInput"?"input":"change", renderApp));
     themeButton.addEventListener("click", toggleTheme);
