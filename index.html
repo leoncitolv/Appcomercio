@@ -7,19 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 16 Listas familiares FIX</title>
+  <title>DealWatch MX | Fase 16 Listas familiares FIX 2</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    window.addEventListener("error", function(event) {
-      if (event.target && event.target.src && event.target.src.includes("supabase-js")) {
-        var fallback = document.createElement("script");
-        fallback.src = "https://unpkg.com/@supabase/supabase-js@2";
-        document.head.appendChild(fallback);
-      }
-    }, true);
-  </script>
   <style>
     :root {
       --bg: #f5f5f7;
@@ -527,6 +517,8 @@
     let deferredInstallPrompt = null;
     let pendingImportMode = "merge";
     let supabaseClient = null;
+    let supabaseLoadingPromise = null;
+    let supabaseAuthListenerReady = false;
     let currentSession = null;
     let currentUser = null;
     let isLoadingRemote = false;
@@ -1006,21 +998,84 @@
       };
     }
     function fromRemoteProduct(row, histories=[]) { return migrateProduct({ id: row.id, workspace_id: row.workspace_id, name: row.name, store: row.store, category: row.category, deal_list: row.deal_list, icon: row.icon, priority: row.priority, product_url: row.product_url, normal_price: row.normal_price, current_price: row.current_price, target_price: row.target_price, min_discount_percent: row.min_discount_percent, alerts_enabled: row.alerts_enabled, notes: row.notes, created_at: row.created_at, updated_at: row.updated_at, priceHistory: histories.map(h=>({ id:h.id, date:h.created_at, price:h.new_price, previousPrice:h.previous_price, source:h.source, note:h.note, type:"supabase" })) }); }
+    function loadScriptOnce(src) {
+      return new Promise((resolve, reject) => {
+        const existing = Array.from(document.scripts).find(script => script.src === src);
+        if (existing) {
+          if (window.supabase && window.supabase.createClient) return resolve();
+          existing.addEventListener("load", () => resolve(), { once: true });
+          existing.addEventListener("error", () => reject(new Error("No cargó " + src)), { once: true });
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = src;
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error("No cargó " + src));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function waitForSupabaseGlobal(timeoutMs = 2500) {
+      const startedAt = Date.now();
+      while (Date.now() - startedAt < timeoutMs) {
+        if (window.supabase && window.supabase.createClient) return window.supabase;
+        await new Promise(resolve => setTimeout(resolve, 120));
+      }
+      return null;
+    }
+
+    async function loadSupabaseLibrary() {
+      if (window.supabase && window.supabase.createClient) return window.supabase;
+      if (supabaseLoadingPromise) return supabaseLoadingPromise;
+
+      const urls = [
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
+        "https://unpkg.com/@supabase/supabase-js@2",
+        "https://esm.sh/@supabase/supabase-js@2?bundle"
+      ];
+
+      supabaseLoadingPromise = (async () => {
+        for (const url of urls) {
+          try {
+            await loadScriptOnce(url);
+            const lib = await waitForSupabaseGlobal(2500);
+            if (lib && lib.createClient) return lib;
+          } catch (error) {
+            console.warn("Supabase CDN falló:", url, error);
+          }
+        }
+        throw new Error("No cargó la librería de Supabase. Revisa internet, recarga la página o limpia caché PWA.");
+      })();
+
+      return supabaseLoadingPromise;
+    }
+
     async function ensureSupabaseReady() {
       if (supabaseClient && supabaseClient.auth) return supabaseClient;
 
-      if (!window.supabase) {
-        await new Promise(resolve => setTimeout(resolve, 700));
-      }
+      const supabaseLib = await loadSupabaseLibrary();
+      supabaseClient = supabaseLib.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      if (!window.supabase) {
-        throw new Error("No cargó la librería de Supabase. Revisa internet, recarga la página o limpia caché PWA.");
+      if (!supabaseAuthListenerReady) {
+        supabaseAuthListenerReady = true;
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+          currentSession = session;
+          currentUser = session?.user || null;
+          if (event === "PASSWORD_RECOVERY") {
+            await handlePasswordRecoveryEvent();
+          }
+          if (currentUser) {
+            await finishAuthBootstrap(false);
+          }
+          renderApp();
+        });
       }
-
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
       try {
-        const { data } = await supabaseClient.auth.getSession();
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (error) throw error;
         currentSession = data.session;
         currentUser = data.session?.user || null;
       } catch (e) {
@@ -1032,32 +1087,15 @@
 
     async function initSupabase() {
       try {
-        if(!window.supabase) {
-          await new Promise(resolve => setTimeout(resolve, 700));
-        }
-        if(!window.supabase) { recordSyncEvent("supabase_cdn_missing", "No cargó librería Supabase", "error"); return; }
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const { data } = await supabaseClient.auth.getSession();
-        currentSession = data.session;
-        currentUser = data.session?.user || null;
-
-        supabaseClient.auth.onAuthStateChange(async (event, session) => {
-          currentSession=session;
-          currentUser=session?.user||null;
-          if(event === "PASSWORD_RECOVERY") {
-            await handlePasswordRecoveryEvent();
-          }
-          if(currentUser) {
-            await finishAuthBootstrap(false);
-          }
-          renderApp();
-        });
-
-        if(currentUser) {
+        await ensureSupabaseReady();
+        if (currentUser) {
           await finishAuthBootstrap(false);
         }
         recordSyncEvent("supabase_ready", currentUser ? "Sesión recuperada" : "Cliente listo sin sesión", currentUser ? "cloud" : "local");
-      } catch(e) { recordSyncEvent("supabase_error", e.message || "Error Supabase", "error"); }
+      } catch(e) {
+        recordSyncEvent("supabase_error", e.message || "Error Supabase", "error");
+        console.error("Supabase init error:", e);
+      }
       renderApp();
     }
     async function testSupabaseConnection() { const client = await ensureSupabaseReady(); const { data, error } = await client.auth.getSession(); if(error) return alert("Error de conexión: " + error.message); alert(currentUser ? "Conexión OK. Sesión: " + (currentUser.email || "activa") : "Conexión OK. Falta iniciar sesión."); }
@@ -1113,7 +1151,6 @@
     }
 
     async function resetSupabasePassword() {
-      if(!supabaseClient) return alert("Supabase no está listo.");
       const email=document.getElementById("supabaseEmail").value.trim().toLowerCase();
       if(!email || !email.includes("@")) return alert("Escribe primero el correo en el campo de login.");
       try {
