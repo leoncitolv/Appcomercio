@@ -7,10 +7,19 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 16 Listas familiares</title>
+  <title>DealWatch MX | Fase 16 Listas familiares FIX</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    window.addEventListener("error", function(event) {
+      if (event.target && event.target.src && event.target.src.includes("supabase-js")) {
+        var fallback = document.createElement("script");
+        fallback.src = "https://unpkg.com/@supabase/supabase-js@2";
+        document.head.appendChild(fallback);
+      }
+    }, true);
+  </script>
   <style>
     :root {
       --bg: #f5f5f7;
@@ -997,8 +1006,35 @@
       };
     }
     function fromRemoteProduct(row, histories=[]) { return migrateProduct({ id: row.id, workspace_id: row.workspace_id, name: row.name, store: row.store, category: row.category, deal_list: row.deal_list, icon: row.icon, priority: row.priority, product_url: row.product_url, normal_price: row.normal_price, current_price: row.current_price, target_price: row.target_price, min_discount_percent: row.min_discount_percent, alerts_enabled: row.alerts_enabled, notes: row.notes, created_at: row.created_at, updated_at: row.updated_at, priceHistory: histories.map(h=>({ id:h.id, date:h.created_at, price:h.new_price, previousPrice:h.previous_price, source:h.source, note:h.note, type:"supabase" })) }); }
+    async function ensureSupabaseReady() {
+      if (supabaseClient && supabaseClient.auth) return supabaseClient;
+
+      if (!window.supabase) {
+        await new Promise(resolve => setTimeout(resolve, 700));
+      }
+
+      if (!window.supabase) {
+        throw new Error("No cargó la librería de Supabase. Revisa internet, recarga la página o limpia caché PWA.");
+      }
+
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      try {
+        const { data } = await supabaseClient.auth.getSession();
+        currentSession = data.session;
+        currentUser = data.session?.user || null;
+      } catch (e) {
+        recordSyncEvent("supabase_session_error", e.message || "No se pudo recuperar sesión", "error");
+      }
+
+      return supabaseClient;
+    }
+
     async function initSupabase() {
       try {
+        if(!window.supabase) {
+          await new Promise(resolve => setTimeout(resolve, 700));
+        }
         if(!window.supabase) { recordSyncEvent("supabase_cdn_missing", "No cargó librería Supabase", "error"); return; }
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const { data } = await supabaseClient.auth.getSession();
@@ -1024,7 +1060,7 @@
       } catch(e) { recordSyncEvent("supabase_error", e.message || "Error Supabase", "error"); }
       renderApp();
     }
-    async function testSupabaseConnection() { if(!supabaseClient) return alert("No está disponible el cliente Supabase. Revisa internet/CDN."); const { data, error } = await supabaseClient.auth.getSession(); if(error) return alert("Error de conexión: " + error.message); alert(currentUser ? "Conexión OK. Sesión: " + (currentUser.email || "activa") : "Conexión OK. Falta iniciar sesión."); }
+    async function testSupabaseConnection() { const client = await ensureSupabaseReady(); const { data, error } = await client.auth.getSession(); if(error) return alert("Error de conexión: " + error.message); alert(currentUser ? "Conexión OK. Sesión: " + (currentUser.email || "activa") : "Conexión OK. Falta iniciar sesión."); }
 
     function getAuthRedirectUrl() {
       return location.origin + location.pathname;
@@ -1041,7 +1077,8 @@
     }
 
     async function signInSupabase(email,password) {
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      const client = await ensureSupabaseReady();
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
       if(error) throw error;
       currentSession=data.session;
       currentUser=data.user;
@@ -1055,7 +1092,8 @@
       if(!email||!password) return alert("Escribe correo y contraseña para crear la cuenta.");
       if(password.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
       try {
-        const { data, error } = await supabaseClient.auth.signUp({
+        const client = await ensureSupabaseReady();
+        const { data, error } = await client.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: getAuthRedirectUrl() }
@@ -1079,7 +1117,8 @@
       const email=document.getElementById("supabaseEmail").value.trim().toLowerCase();
       if(!email || !email.includes("@")) return alert("Escribe primero el correo en el campo de login.");
       try {
-        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        const client = await ensureSupabaseReady();
+        const { error } = await client.auth.resetPasswordForEmail(email, {
           redirectTo: getAuthRedirectUrl()
         });
         if(error) throw error;
@@ -1091,7 +1130,8 @@
       const newPassword = prompt("Escribe tu nueva contraseña para DealWatch MX:");
       if(!newPassword) return;
       if(newPassword.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
-      const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+      const client = await ensureSupabaseReady();
+      const { error } = await client.auth.updateUser({ password: newPassword });
       if(error) return alert("No se pudo cambiar contraseña: " + error.message);
       alert("Contraseña actualizada. Ya puedes iniciar sesión normalmente.");
     }
