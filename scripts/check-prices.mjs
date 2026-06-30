@@ -1,11 +1,12 @@
 // DealWatch MX / Appcomercio
-// Fase 13.3: Mercado Libre producción estable + anti-spam + Telegram mejorado.
-// Lee productos desde Supabase, intenta obtener precio real para links de Mercado Libre,
-// actualiza current_price, guarda historial, evalúa alertas y manda Telegram.
+// Fase 14: Amazon seguro + Mercado Libre producción estable + anti-spam.
+// Mercado Libre: obtiene precio real por API pública de items.
+// Amazon: NO hace scraping; detecta Amazon/ASIN y aplica reglas con precio manual guardado.
+// La integración de precio real Amazon queda lista para API oficial futura.
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const MODE = process.env.DEALWATCH_MODE || "mercadolibre_production_antispam";
+const MODE = process.env.DEALWATCH_MODE || "amazon_safe_mercadolibre_antispam";
 const ALERT_LOOKBACK_DAYS = Number(process.env.DEALWATCH_ALERT_LOOKBACK_DAYS || 7);
 const SIGNIFICANT_DROP_PERCENT = Number(process.env.DEALWATCH_SIGNIFICANT_DROP_PERCENT || 1);
 const LIVE_PRICES = String(process.env.DEALWATCH_LIVE_PRICES ?? "true").toLowerCase() === "true";
@@ -174,8 +175,9 @@ function buildTelegramOfferMessage(alertEvent) {
   const antiSpam = alertEvent.raw?.antiSpamReason
     ? `\n🛡️ Anti-spam: ${escapeTelegramHtml(alertEvent.raw.antiSpamReason)}`
     : "";
+  const sourceId = alertEvent.raw?.mercadoLibreItemId || alertEvent.raw?.amazonAsin || "";
   const liveLine = alertEvent.raw?.livePriceSource
-    ? `\n🔎 Fuente: <b>${escapeTelegramHtml(alertEvent.raw.livePriceSource)}</b>${alertEvent.raw?.mercadoLibreItemId ? ` · ${escapeTelegramHtml(alertEvent.raw.mercadoLibreItemId)}` : ""}`
+    ? `\n🔎 Fuente: <b>${escapeTelegramHtml(alertEvent.raw.livePriceSource)}</b>${sourceId ? ` · ${escapeTelegramHtml(sourceId)}` : ""}`
     : "";
   const linkLine = productUrl && String(productUrl).startsWith("http")
     ? `\n\n🔗 <a href="${escapeTelegramHtml(productUrl)}">Abrir producto</a>`
@@ -202,7 +204,7 @@ async function sendTelegramTestMessage() {
   return sendTelegramMessage([
     "✅ <b>DealWatch MX · Telegram conectado</b>",
     "",
-    "Fase 13.3 lista: el robot revisa Mercado Libre, evita alertas repetidas y avisa solo ofertas nuevas o bajadas relevantes.",
+    "Fase 14 lista: Mercado Libre usa precio real; Amazon queda en modo seguro sin scraping, con detección de ASIN y reglas manuales.",
     `Fecha de prueba: ${escapeTelegramHtml(new Date().toLocaleString("es-MX"))}`,
   ].join("\n"));
 }
@@ -212,6 +214,54 @@ function isMercadoLibreProduct(product) {
   const url = String(product.product_url || "").toLowerCase();
 
   return store.includes("mercado") || url.includes("mercadolibre") || url.includes("mercadolivre");
+}
+
+function isAmazonProduct(product) {
+  const store = String(product.store || "").toLowerCase();
+  const url = String(product.product_url || "").toLowerCase();
+
+  return store.includes("amazon") || url.includes("amazon.") || url.includes("amzn.to");
+}
+
+function extractAmazonAsin(url) {
+  const rawUrl = String(url || "").trim();
+  if (!rawUrl) return null;
+
+  const decodedUrl = decodeURIComponent(rawUrl);
+
+  // ASIN clásico de Amazon: 10 caracteres alfanuméricos.
+  // Formatos comunes:
+  // /dp/B0XXXXXXX, /gp/product/B0XXXXXXX, /product/B0XXXXXXX, asin=B0XXXXXXX
+  const patterns = [
+    /\/(?:dp|gp\/product|product)\/([A-Z0-9]{10})(?:[/?#]|$)/i,
+    /[?&](?:asin|ASIN)=([A-Z0-9]{10})(?:[&#]|$)/i,
+    /\b(B0[A-Z0-9]{8})\b/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = decodedUrl.match(pattern);
+    if (match?.[1]) return match[1].toUpperCase();
+  }
+
+  return null;
+}
+
+function analyzeAmazonSafe(product) {
+  if (!isAmazonProduct(product)) {
+    return null;
+  }
+
+  const asin = extractAmazonAsin(product.product_url);
+
+  return {
+    ok: Boolean(asin),
+    source: "amazon_safe_manual",
+    asin,
+    status: asin ? "asin_detected" : "asin_not_found",
+    reason: asin
+      ? "Amazon detectado. Modo seguro: no se hace scraping; se aplican reglas usando el precio manual guardado."
+      : "Amazon detectado, pero no se encontró ASIN en el link. Usa links tipo /dp/ASIN o /gp/product/ASIN.",
+  };
 }
 
 function normalizeMercadoLibreId(value) {
@@ -539,7 +589,7 @@ async function main() {
     status: "running",
     started_at: startedAt,
     message: LIVE_PRICES
-      ? "Iniciando revisión automática con Mercado Libre + reglas guardadas."
+      ? "Iniciando revisión automática con Mercado Libre real + Amazon seguro + reglas guardadas."
       : "Iniciando revisión automática solo con reglas guardadas.",
   }]);
 
@@ -581,10 +631,14 @@ async function main() {
     let mercadoLibreErrors = 0;
     let mercadoLibreCatalogOnly = 0;
     let mercadoLibreInvalidLinks = 0;
+    let amazonDetected = 0;
+    let amazonAsinDetected = 0;
+    let amazonInvalidLinks = 0;
 
     for (const originalProduct of products || []) {
       let product = originalProduct;
       let liveUpdate = null;
+      let amazonSafe = null;
 
       try {
         liveUpdate = await maybeUpdateLivePrice(originalProduct);
@@ -624,6 +678,16 @@ async function main() {
         console.warn(`No se pudo actualizar precio real para ${originalProduct.name}:`, liveError.message);
       }
 
+      amazonSafe = analyzeAmazonSafe(originalProduct);
+      if (amazonSafe) {
+        amazonDetected += 1;
+        if (amazonSafe.asin) {
+          amazonAsinDetected += 1;
+        } else {
+          amazonInvalidLinks += 1;
+        }
+      }
+
       const analysis = analyzeProduct(product);
 
       results.push({
@@ -657,6 +721,10 @@ async function main() {
           mercadoLibreReason: liveUpdate?.live?.reason || null,
           mercadoLibreStatus: liveUpdate?.live?.status || null,
           mercadoLibreCurrency: liveUpdate?.live?.currencyId || null,
+          amazonSafeMode: Boolean(amazonSafe),
+          amazonAsin: amazonSafe?.asin || null,
+          amazonStatus: amazonSafe?.status || null,
+          amazonReason: amazonSafe?.reason || null,
         },
         checked_at: new Date().toISOString(),
       });
@@ -687,6 +755,10 @@ async function main() {
             mercadoLibreItemId: liveUpdate?.live?.itemId || null,
             mercadoLibreCatalogId: liveUpdate?.live?.catalogId || null,
             mercadoLibreExtractorSource: liveUpdate?.live?.extractorSource || null,
+            amazonSafeMode: Boolean(amazonSafe),
+            amazonAsin: amazonSafe?.asin || null,
+            amazonStatus: amazonSafe?.status || null,
+            amazonReason: amazonSafe?.reason || null,
           },
         });
       }
@@ -724,16 +796,17 @@ async function main() {
     const mercadoLibreSummary = LIVE_PRICES
       ? ` Mercado Libre: ${mercadoLibreDetected} detectado(s), ${mercadoLibreChecked} con item real, ${mercadoLibreUpdated} actualizado(s), ${mercadoLibreCatalogOnly} catálogo(s) sin wid/item_id, ${mercadoLibreInvalidLinks} link(s) inválido(s)${mercadoLibreErrors ? `, ${mercadoLibreErrors} error(es)` : ""}. Anti-spam: ${ALERT_LOOKBACK_DAYS} día(s), bajada relevante ${SIGNIFICANT_DROP_PERCENT}%.`
       : " Precios reales desactivados.";
+    const amazonSummary = ` Amazon seguro: ${amazonDetected} detectado(s), ${amazonAsinDetected} con ASIN, ${amazonInvalidLinks} sin ASIN. Sin scraping; reglas con precio manual.`;
 
     await patch("monitor_runs", `id=eq.${runId}`, {
       status: "success",
       checked_count: results.length,
       offers_count: offerCount,
-      message: `Revisión completada. ${results.length} producto(s), ${offerCount} oferta(s).${mercadoLibreSummary}${telegramSummary}`,
+      message: `Revisión completada. ${results.length} producto(s), ${offerCount} oferta(s).${mercadoLibreSummary}${amazonSummary}${telegramSummary}`,
       finished_at: new Date().toISOString(),
     });
 
-    console.log(`DealWatch MX OK: ${results.length} productos revisados, ${alertEvents.length} alerta(s) nueva(s), ${mercadoLibreUpdated} precio(s) ML actualizado(s), ${telegramSent} Telegram. ML: ${mercadoLibreDetected} detectado(s), ${mercadoLibreChecked} con item real, ${mercadoLibreCatalogOnly} catálogo(s), ${mercadoLibreInvalidLinks} inválido(s). Anti-spam: ${ALERT_LOOKBACK_DAYS}d / ${SIGNIFICANT_DROP_PERCENT}%.`);
+    console.log(`DealWatch MX OK: ${results.length} productos revisados, ${alertEvents.length} alerta(s) nueva(s), ${mercadoLibreUpdated} precio(s) ML actualizado(s), ${telegramSent} Telegram. ML: ${mercadoLibreDetected} detectado(s), ${mercadoLibreChecked} con item real, ${mercadoLibreCatalogOnly} catálogo(s), ${mercadoLibreInvalidLinks} inválido(s). Amazon: ${amazonDetected} detectado(s), ${amazonAsinDetected} con ASIN, ${amazonInvalidLinks} sin ASIN. Anti-spam: ${ALERT_LOOKBACK_DAYS}d / ${SIGNIFICANT_DROP_PERCENT}%.`);
   } catch (error) {
     await patch("monitor_runs", `id=eq.${runId}`, {
       status: "error",
