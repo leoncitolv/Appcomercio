@@ -137,6 +137,20 @@
       align-items: center;
     }
 
+    .top-mini-btn {
+      min-width: 82px;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--text);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      font-weight: 900;
+      cursor: pointer;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
     .icon-btn {
       width: 44px;
       height: 44px;
@@ -966,6 +980,64 @@
       }
     }
 
+    .pwa-status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .pwa-status-item {
+      border-radius: 18px;
+      padding: 13px;
+      background: rgba(120, 120, 128, 0.10);
+      border: 1px solid var(--border);
+    }
+
+    .pwa-status-item b {
+      display: block;
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .pwa-status-item span {
+      display: block;
+      margin: 0;
+      color: var(--text);
+      font-size: 0.92rem;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .device-steps {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .device-step {
+      border-radius: 18px;
+      padding: 14px;
+      background: rgba(0, 122, 255, 0.08);
+      border: 1px solid rgba(0, 122, 255, 0.18);
+    }
+
+    .device-step strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .device-step span {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
     .bottom-nav {
       position: fixed;
       left: 50%;
@@ -1025,8 +1097,13 @@
     }
 
     @media (max-width: 420px) {
+      .top-mini-btn {
+        display: none;
+      }
+
       .two-cols,
-      .three-cols {
+      .three-cols,
+      .pwa-status-grid {
         grid-template-columns: 1fr;
       }
 
@@ -1056,6 +1133,7 @@
 
         <div class="top-actions">
           <div class="admin-pill" id="adminPill">ADMIN</div>
+          <button class="top-mini-btn" id="installTopButton" onclick="installPwa()">Instalar</button>
           <button class="icon-btn" id="themeButton" aria-label="Cambiar tema">☀️</button>
         </div>
       </div>
@@ -1064,16 +1142,16 @@
     <!-- INICIO -->
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>🔔 Fase 5 · Alertas inteligentes</small>
-        <h2>Recibe avisos cuando sí conviene comprar.</h2>
+        <small>📲 Fase 6 · Instalación PWA</small>
+        <h2>Instala DealWatch MX como app.</h2>
         <p>
-          La app marca ofertas cuando el precio llega a tu meta o cumple el descuento mínimo.
-          También puede mostrar notificaciones locales si das permiso.
+          Ahora la app está preparada para instalarse en celular, funcionar offline,
+          limpiar caché vieja y verificar el estado de GitHub Pages como PWA.
         </p>
 
         <div class="hero-actions">
-          <button class="btn btn-light" onclick="goToScreen('favorites')">Ver favoritos</button>
-          <button class="btn btn-ghost" onclick="goToScreen('history')">Ver historial</button>
+          <button class="btn btn-light" onclick="installPwa()">Instalar app</button>
+          <button class="btn btn-ghost" onclick="goToScreen('settings')">Ver estado PWA</button>
         </div>
       </div>
 
@@ -1104,7 +1182,7 @@
       <section class="section">
         <div class="section-header">
           <h3>Accesos rápidos</h3>
-          <span>Fase 5</span>
+          <span>Fase 6</span>
         </div>
 
         <div class="quick-actions">
@@ -1129,7 +1207,7 @@
           <article class="action-card" onclick="goToScreen('settings')">
             <div class="action-icon purple">⚙️</div>
             <strong>Ajustes</strong>
-            <p>Modo oscuro, PWA y estado administrador.</p>
+            <p>Instalación, offline, caché y estado administrador.</p>
           </article>
         </div>
       </section>
@@ -1591,10 +1669,58 @@
         <div class="setting-card">
           <div class="setting-row">
             <div>
-              <strong>Instalar en celular</strong>
-              <span>En iPhone: Safari → Compartir → Agregar a pantalla de inicio.</span>
+              <strong>Instalación PWA</strong>
+              <span>
+                Instala la app en Android, iPhone o computadora. También puedes limpiar caché si GitHub Pages muestra una versión anterior.
+              </span>
             </div>
             <div style="font-size: 24px;">📲</div>
+          </div>
+
+          <div class="pwa-status-grid">
+            <div class="pwa-status-item">
+              <b>Instalación</b>
+              <span id="pwaInstallStatus">Revisando...</span>
+            </div>
+            <div class="pwa-status-item">
+              <b>Modo</b>
+              <span id="pwaModeText">Navegador</span>
+            </div>
+            <div class="pwa-status-item">
+              <b>Conexión</b>
+              <span id="pwaNetworkStatus">Revisando...</span>
+            </div>
+            <div class="pwa-status-item">
+              <b>Service worker</b>
+              <span id="pwaSwStatus">Revisando...</span>
+            </div>
+          </div>
+
+          <div class="form-actions" style="margin-top:16px;">
+            <button class="btn btn-primary" id="pwaInstallButton" type="button" onclick="installPwa()">
+              Instalar app
+            </button>
+            <button class="btn btn-soft" type="button" onclick="copyAppLink()">
+              Copiar link
+            </button>
+            <button class="btn btn-danger" type="button" onclick="clearAppCacheAndReload()">
+              Limpiar caché
+            </button>
+          </div>
+
+          <div class="device-steps">
+            <div class="device-step">
+              <strong>Android / Chrome</strong>
+              <span>Abre la página → toca Instalar app o menú ⋮ → Agregar a pantalla principal.</span>
+            </div>
+            <div class="device-step">
+              <strong>iPhone / Safari</strong>
+              <span>Abre la página en Safari → Compartir → Agregar a pantalla de inicio.</span>
+            </div>
+            <div class="device-step">
+              <strong>PC / Chrome o Edge</strong>
+              <span>Busca el icono de instalación en la barra de dirección o usa el botón Instalar app.</span>
+            </div>
           </div>
         </div>
 
@@ -1673,6 +1799,9 @@
     const THEME_KEY = "dealwatch_theme";
     const ALERT_LOG_KEY = "dealwatch_alert_log_v5";
     const NOTIFICATION_PREF_KEY = "dealwatch_notifications_pref";
+    const PWA_INSTALLED_KEY = "dealwatch_pwa_installed_v6";
+
+    let deferredInstallPrompt = null;
 
     let pendingImportMode = "merge";
 
@@ -2020,6 +2149,122 @@
       const currentTheme = localStorage.getItem(THEME_KEY) || "light";
       const nextTheme = currentTheme === "dark" ? "light" : "dark";
       setTheme(nextTheme);
+    }
+
+
+    function isRunningStandalone() {
+      return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    }
+
+    function getPwaInstallLabel() {
+      if (isRunningStandalone()) {
+        return "Instalada";
+      }
+
+      if (deferredInstallPrompt) {
+        return "Lista para instalar";
+      }
+
+      if (localStorage.getItem(PWA_INSTALLED_KEY) === "true") {
+        return "Instalada antes";
+      }
+
+      return "Instalación manual";
+    }
+
+    function renderPwaStatus() {
+      const installStatus = document.getElementById("pwaInstallStatus");
+      const modeText = document.getElementById("pwaModeText");
+      const networkStatus = document.getElementById("pwaNetworkStatus");
+      const swStatus = document.getElementById("pwaSwStatus");
+      const installButton = document.getElementById("pwaInstallButton");
+      const installTopButton = document.getElementById("installTopButton");
+
+      const installed = isRunningStandalone();
+      const label = getPwaInstallLabel();
+
+      if (installStatus) {
+        installStatus.textContent = label;
+      }
+
+      if (modeText) {
+        modeText.textContent = installed ? "App instalada" : "Navegador";
+      }
+
+      if (networkStatus) {
+        networkStatus.textContent = navigator.onLine ? "En línea" : "Offline";
+      }
+
+      if (swStatus) {
+        swStatus.textContent = "serviceWorker" in navigator ? "Compatible" : "No compatible";
+      }
+
+      if (installButton) {
+        installButton.textContent = installed ? "App instalada" : "Instalar app";
+        installButton.disabled = installed;
+        installButton.style.opacity = installed ? "0.65" : "1";
+      }
+
+      if (installTopButton) {
+        installTopButton.textContent = installed ? "Instalada" : "Instalar";
+        installTopButton.disabled = installed;
+        installTopButton.style.opacity = installed ? "0.65" : "1";
+      }
+    }
+
+    async function installPwa() {
+      if (isRunningStandalone()) {
+        alert("DealWatch MX ya está abierta como app instalada.");
+        renderPwaStatus();
+        return;
+      }
+
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+
+        if (choice.outcome === "accepted") {
+          localStorage.setItem(PWA_INSTALLED_KEY, "true");
+        }
+
+        deferredInstallPrompt = null;
+        renderPwaStatus();
+        return;
+      }
+
+      goToScreen("settings");
+      alert("Si no aparece el instalador automático: en Android usa menú ⋮ → Agregar a pantalla principal. En iPhone usa Safari → Compartir → Agregar a pantalla de inicio.");
+    }
+
+    async function copyAppLink() {
+      const appUrl = window.location.href.split("#")[0];
+
+      try {
+        await navigator.clipboard.writeText(appUrl);
+        alert("Link de la app copiado.");
+      } catch (error) {
+        prompt("Copia este link:", appUrl);
+      }
+    }
+
+    async function clearAppCacheAndReload() {
+      const confirmClear = confirm("Esto limpiará caché PWA y recargará la app para tomar la versión más nueva de GitHub Pages. ¿Continuar?");
+
+      if (!confirmClear) {
+        return;
+      }
+
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(registration => registration.unregister()));
+      }
+
+      if ("caches" in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+      }
+
+      window.location.reload();
     }
 
     function getFilteredProducts(products) {
@@ -2752,8 +2997,8 @@
       const backupData = {
         app: "DealWatch MX",
         project: "Appcomercio",
-        type: "dealwatch-products-backup-with-price-history-alerts",
-        version: "5.0",
+        type: "dealwatch-products-backup-with-price-history-alerts-pwa",
+        version: "6.0",
         exportedAt: new Date().toISOString(),
         totalProducts: products.length,
         products: products
@@ -3020,6 +3265,22 @@
     document.getElementById("categoryFilter").addEventListener("change", renderApp);
     document.getElementById("onlyOffersFilter").addEventListener("change", renderApp);
 
+
+    window.addEventListener("beforeinstallprompt", event => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      renderPwaStatus();
+    });
+
+    window.addEventListener("appinstalled", () => {
+      localStorage.setItem(PWA_INSTALLED_KEY, "true");
+      deferredInstallPrompt = null;
+      renderPwaStatus();
+    });
+
+    window.addEventListener("online", renderPwaStatus);
+    window.addEventListener("offline", renderPwaStatus);
+
     themeButton.addEventListener("click", toggleTheme);
 
     const savedTheme = localStorage.getItem(THEME_KEY) || "light";
@@ -3031,8 +3292,10 @@
       window.addEventListener("load", () => {
         navigator.serviceWorker
           .register("service-worker.js")
+          .then(() => renderPwaStatus())
           .catch(error => {
             console.log("Service Worker no registrado:", error);
+            renderPwaStatus();
           });
       });
     }
