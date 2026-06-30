@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 14 Amazon seguro</title>
+  <title>DealWatch MX | Fase 16 Listas familiares</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -165,7 +165,7 @@
           <div class="logo">D</div>
           <div>
             <h1>DealWatch MX</h1>
-            <p>Appcomercio · ML + Amazon seguro</p>
+            <p>Appcomercio · Listas familiares</p>
           </div>
         </div>
         <div class="top-actions">
@@ -177,9 +177,9 @@
 
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>🛒 Fase 14 · Amazon seguro</small>
-        <h2>Amazon entra en modo seguro.</h2>
-        <p>Mercado Libre mantiene precios reales; Amazon se agrega sin scraping: detecta ASIN y aplica reglas con precios manuales guardados.</p>
+        <small>👨‍👩‍👧‍👦 Fase 16 · Listas familiares</small>
+        <h2>Organiza ofertas por familia y amigos.</h2>
+        <p>Separa tus productos en listas: Familia, Amigos gaming y Compras personales, manteniendo un solo grupo de Telegram para avisos.</p>
         <div class="hero-actions">
           <button class="btn btn-light" onclick="goToScreen('cloud')">Equipo y nube</button>
           <button class="btn btn-ghost" onclick="goToScreen('admin')">Administrar</button>
@@ -196,12 +196,12 @@
       </section>
 
       <section class="section">
-        <div class="section-header"><h3>Accesos rápidos</h3><span>Fase 14</span></div>
+        <div class="section-header"><h3>Accesos rápidos</h3><span>Fase 16</span></div>
         <div class="quick-actions">
           <article class="action-card" onclick="goToScreen('favorites')"><div class="action-icon blue">🛒</div><strong>Favoritos</strong><p>Busca, filtra y abre links de productos.</p></article>
           <article class="action-card" onclick="goToScreen('alerts')"><div class="action-icon green">🔔</div><strong>Alertas</strong><p>Detecta precio objetivo o descuento mínimo.</p></article>
           <article class="action-card" onclick="goToScreen('history')"><div class="action-icon orange">📈</div><strong>Historial</strong><p>Consulta cambios de precio guardados.</p></article>
-          <article class="action-card" onclick="goToScreen('cloud')"><div class="action-icon purple">☁️</div><strong>Equipo</strong><p>Multi-admin, roles y sincronización.</p></article>
+          <article class="action-card" onclick="goToScreen('cloud')"><div class="action-icon purple">👥</div><strong>Listas</strong><p>Familia, amigos gaming y compras personales.</p></article>
         </div>
       </section>
     </section>
@@ -213,9 +213,10 @@
           <div class="filters-grid">
             <div class="field"><label for="searchInput">Buscar producto</label><input type="search" id="searchInput" placeholder="Ej. control, audífonos, celular..." /></div>
             <div class="two-cols">
+              <div class="field"><label for="listFilter">Lista</label><select id="listFilter"><option value="">Todas</option></select></div>
               <div class="field"><label for="storeFilter">Tienda</label><select id="storeFilter"><option value="">Todas</option></select></div>
-              <div class="field"><label for="categoryFilter">Categoría</label><select id="categoryFilter"><option value="">Todas</option></select></div>
             </div>
+            <div class="field"><label for="categoryFilter">Categoría</label><select id="categoryFilter"><option value="">Todas</option></select></div>
             <label class="filter-toggle"><input type="checkbox" id="onlyOffersFilter" /> Mostrar solo ofertas activas</label>
             <div class="form-actions"><button class="btn btn-soft" onclick="clearFilters()">Limpiar filtros</button><button class="btn btn-primary" onclick="goToScreen('admin')">Agregar producto</button></div>
           </div>
@@ -276,9 +277,25 @@
             <form class="form-grid" id="productForm">
               <input type="hidden" id="editingProductId" />
               <div class="field"><label for="productName">Nombre del producto</label><input type="text" id="productName" placeholder="Ej. Control DualSense PS5" required /></div>
+              <div class="field"><label for="productDealList">Lista familiar / amigos</label><select id="productDealList" required>
+                <option value="Familia · Despensa">Familia · Despensa</option>
+                <option value="Familia · Hogar">Familia · Hogar</option>
+                <option value="Familia · Tecnología">Familia · Tecnología</option>
+                <option value="Familia · Salud">Familia · Salud</option>
+                <option value="Familia · Regalos">Familia · Regalos</option>
+                <option value="Amigos gaming · PlayStation">Amigos gaming · PlayStation</option>
+                <option value="Amigos gaming · Controles">Amigos gaming · Controles</option>
+                <option value="Amigos gaming · Juegos">Amigos gaming · Juegos</option>
+                <option value="Amigos gaming · Audífonos">Amigos gaming · Audífonos</option>
+                <option value="Amigos gaming · Monitores">Amigos gaming · Monitores</option>
+                <option value="Compras personales · Ropa">Compras personales · Ropa</option>
+                <option value="Compras personales · Celulares">Compras personales · Celulares</option>
+                <option value="Compras personales · Herramientas">Compras personales · Herramientas</option>
+                <option value="Compras personales · Ofertas especiales" selected>Compras personales · Ofertas especiales</option>
+              </select></div>
               <div class="two-cols">
                 <div class="field"><label for="productStore">Tienda</label><select id="productStore" required><option>Amazon México</option><option>Mercado Libre</option><option>PlayStation Store</option><option>Walmart</option><option>Liverpool</option><option>Otra tienda</option></select></div>
-                <div class="field"><label for="productCategory">Categoría</label><select id="productCategory" required><option>Videojuegos</option><option>Tecnología</option><option>Celulares</option><option>Audio</option><option>Hogar</option><option>Ropa y calzado</option><option>Otro</option></select></div>
+                <div class="field"><label for="productCategory">Categoría</label><select id="productCategory" required><option>Despensa</option><option>Hogar</option><option>Tecnología</option><option>Salud</option><option>Regalos</option><option>Videojuegos</option><option>PlayStation</option><option>Controles</option><option>Juegos</option><option>Audio</option><option>Monitores</option><option>Ropa y calzado</option><option>Celulares</option><option>Herramientas</option><option>Otro</option></select></div>
               </div>
               <div class="two-cols">
                 <div class="field"><label for="productIcon">Icono</label><select id="productIcon" required><option value="🛒">🛒 General</option><option value="🎮">🎮 Videojuego</option><option value="🎧">🎧 Audio</option><option value="📱">📱 Celular</option><option value="💻">💻 Tecnología</option><option value="👟">👟 Ropa / tenis</option><option value="🏠">🏠 Hogar</option><option value="📺">📺 Pantallas</option><option value="⌚">⌚ Wearables</option></select></div>
@@ -415,10 +432,10 @@
 
 
         <div class="card" id="monitorCard">
-          <strong>Fase 14 · Amazon seguro</strong>
-          <span>GitHub Actions mantiene Mercado Libre con precio real y agrega Amazon en modo seguro: sin scraping, detectando ASIN y usando el precio manual guardado.</span>
+          <strong>Fase 16 · Listas familiares</strong>
+          <span>GitHub Actions mantiene Mercado Libre real, Amazon seguro y ahora etiqueta cada alerta con la lista familiar o de amigos.</span>
           <div class="notice">
-            Para activarlo debes tener <b>SUPABASE_SERVICE_ROLE_KEY</b>, <b>TELEGRAM_BOT_TOKEN</b> y <b>TELEGRAM_CHAT_ID</b> en GitHub Actions. Amazon queda en modo seguro: por ahora no extrae precio real automáticamente; usa precio manual y reglas de alerta.
+            Para activarlo debes tener <b>SUPABASE_SERVICE_ROLE_KEY</b>, <b>TELEGRAM_BOT_TOKEN</b> y <b>TELEGRAM_CHAT_ID</b> en GitHub Actions. Usaremos un solo grupo de Telegram; cada alerta indicará la lista correspondiente: Familia, Amigos gaming o Compras personales.
           </div>
           <div class="form-actions" style="margin-top:16px;">
             <button class="btn btn-primary" type="button" onclick="refreshMonitorStatus(true)">Actualizar monitoreo</button>
@@ -432,8 +449,8 @@
 
 
         <div class="card" id="mercadoLibreCard">
-          <strong>Fase 13.3 + 14 · ML real y Amazon seguro</strong>
-          <span>Para que el robot actualice precios automáticamente, pega el link completo del producto. Se aceptan links directos, links /p/ con wid o item_id, y se muestra diagnóstico del último monitoreo.</span>
+          <strong>Fase 16 · Listas familiares y amigos</strong>
+          <span>Ahora cada producto puede pertenecer a una lista: Familia, Amigos gaming o Compras personales. Seguimos usando un solo grupo de Telegram, pero el mensaje indica la lista para que todos sepan a qué interés pertenece.</span>
           <div class="notice">
             Ejemplos válidos: <b>https://articulo.mercadolibre.com.mx/MLM-1234567890-producto</b> o links como <b>/p/MLM...</b> cuando incluyan <b>wid=MLM...</b> o <b>item_id=MLM...</b>. El panel mostrará si se actualizó precio, item ML y último error.
           </div>
@@ -523,9 +540,9 @@
     }
 
     const defaultProducts = [
-      { id: generateId(), name: "EA Sports FC 26", store: "PlayStation Store", category: "Videojuegos", icon: "🎮", priority: "Alta", normalPrice: 1299, currentPrice: 699, targetPrice: 799, minDiscountPercent: 30, alertEnabled: true, url: "", notes: "Oferta detectada. Buen candidato para compra.", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: generateId(), name: "Audífonos Bluetooth Pro", store: "Amazon México", category: "Audio", icon: "🎧", priority: "Media", normalPrice: 1799, currentPrice: 1299, targetPrice: 999, minDiscountPercent: 35, alertEnabled: true, url: "", notes: "Esperar promoción o descuento bancario.", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: generateId(), name: "Smartphone gama media", store: "Mercado Libre", category: "Celulares", icon: "📱", priority: "Media", normalPrice: 5499, currentPrice: 4899, targetPrice: 4500, minDiscountPercent: 15, alertEnabled: true, url: "", notes: "Revisar reputación del vendedor antes de comprar.", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+      { id: generateId(), dealList: "Amigos gaming · Juegos", name: "EA Sports FC 26", store: "PlayStation Store", category: "Juegos", icon: "🎮", priority: "Alta", normalPrice: 1299, currentPrice: 699, targetPrice: 799, minDiscountPercent: 30, alertEnabled: true, url: "", notes: "Oferta detectada. Buen candidato para compra.", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: generateId(), dealList: "Amigos gaming · Audífonos", name: "Audífonos Bluetooth Pro", store: "Amazon México", category: "Audio", icon: "🎧", priority: "Media", normalPrice: 1799, currentPrice: 1299, targetPrice: 999, minDiscountPercent: 35, alertEnabled: true, url: "", notes: "Esperar promoción o descuento bancario.", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      { id: generateId(), dealList: "Compras personales · Celulares", name: "Smartphone gama media", store: "Mercado Libre", category: "Celulares", icon: "📱", priority: "Media", normalPrice: 5499, currentPrice: 4899, targetPrice: 4500, minDiscountPercent: 15, alertEnabled: true, url: "", notes: "Revisar reputación del vendedor antes de comprar.", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
     ];
 
     function escapeHTML(value) {
@@ -541,6 +558,26 @@
     function migrateHistoryItem(item, fallbackPrice = 0, fallbackDate = new Date().toISOString()) {
       return { id: item.id || generateId(), date: item.date || item.created_at || fallbackDate, price: Number(item.price ?? item.new_price ?? fallbackPrice ?? 0), previousPrice: item.previousPrice === null || item.previousPrice === undefined ? (item.previous_price === undefined ? null : Number(item.previous_price)) : Number(item.previousPrice), source: item.source || "Registro manual", type: item.type || "manual_update", note: item.note || "" };
     }
+    function guessDealList(product) {
+      const category = String(product.category || "").toLowerCase();
+      const store = String(product.store || "").toLowerCase();
+      const name = String(product.name || "").toLowerCase();
+      const text = `${category} ${store} ${name}`;
+      if (text.includes("despensa")) return "Familia · Despensa";
+      if (text.includes("hogar")) return "Familia · Hogar";
+      if (text.includes("salud") || text.includes("proteína") || text.includes("proteina")) return "Familia · Salud";
+      if (text.includes("regalo")) return "Familia · Regalos";
+      if (text.includes("playstation") || text.includes("ps5")) return "Amigos gaming · PlayStation";
+      if (text.includes("control")) return "Amigos gaming · Controles";
+      if (text.includes("juego") || text.includes("gaming")) return "Amigos gaming · Juegos";
+      if (text.includes("audífono") || text.includes("audifono") || text.includes("audio")) return "Amigos gaming · Audífonos";
+      if (text.includes("monitor")) return "Amigos gaming · Monitores";
+      if (text.includes("ropa") || text.includes("tenis") || text.includes("calzado")) return "Compras personales · Ropa";
+      if (text.includes("celular") || text.includes("smartphone")) return "Compras personales · Celulares";
+      if (text.includes("herramienta")) return "Compras personales · Herramientas";
+      return "Compras personales · Ofertas especiales";
+    }
+
     function migrateProduct(product) {
       const createdAt = product.createdAt || product.created_at || new Date().toISOString();
       const currentPrice = Number(product.currentPrice ?? product.current_price ?? 0);
@@ -552,6 +589,7 @@
         name: product.name || "Producto sin nombre",
         store: product.store || "Otra tienda",
         category: product.category || "Otro",
+        dealList: product.dealList || product.deal_list || guessDealList(product),
         icon: product.icon || "🛒",
         priority: ["Alta","Media","Baja"].includes(product.priority) ? product.priority : "Media",
         normalPrice: Number(product.normalPrice ?? product.normal_price ?? 0),
@@ -616,7 +654,7 @@
       const onlyOffers = document.getElementById("onlyOffersFilter").checked;
       return products.filter(p => {
         const text = [p.name,p.store,p.category,p.priority,p.notes].join(" ").toLowerCase();
-        return (!search || text.includes(search)) && (!store || p.store===store) && (!category || p.category===category) && (!onlyOffers || productHasActiveAlert(p));
+        return (!search || text.includes(search)) && (!list || p.dealList===list) && (!store || p.store===store) && (!category || p.category===category) && (!onlyOffers || productHasActiveAlert(p));
       });
     }
     function updateFilterOptions(products) {
@@ -629,7 +667,7 @@
       storeFilter.value = stores.includes(oldStore) ? oldStore : "";
       categoryFilter.value = cats.includes(oldCat) ? oldCat : "";
     }
-    function clearFilters() { document.getElementById("searchInput").value=""; document.getElementById("storeFilter").value=""; document.getElementById("categoryFilter").value=""; document.getElementById("onlyOffersFilter").checked=false; renderApp(); }
+    function clearFilters() { document.getElementById("searchInput").value=""; document.getElementById("listFilter").value=""; document.getElementById("storeFilter").value=""; document.getElementById("categoryFilter").value=""; document.getElementById("onlyOffersFilter").checked=false; renderApp(); }
 
     function createProductCard(product, options = {}) {
       const isOffer = productHasOffer(product), active = productHasActiveAlert(product);
@@ -643,7 +681,7 @@
         <button class="mini-btn mini-red" onclick="deleteProduct('${escapeHTML(product.id)}')">Eliminar</button>` : "";
       const historyButton = `<button class="mini-btn mini-gray" onclick="showProductHistory('${escapeHTML(product.id)}')">Historial</button>`;
       const notes = product.notes ? `<div class="product-notes">${escapeHTML(product.notes)}</div>` : "";
-      return `<article class="product-card"><div class="product-img">${escapeHTML(product.icon)}</div><div class="product-info"><div class="product-top"><div><div class="store">${escapeHTML(product.store)}</div><div class="product-title">${escapeHTML(product.name)}</div><div class="category-line">${escapeHTML(product.category)} · Prioridad ${escapeHTML(product.priority)} · ${getDiscountPercent(product)}% desc.</div></div><span class="badge ${badgeClass}">${badgeText}</span></div><div class="price-row"><div class="price">${formatMoney(product.currentPrice)}</div><div class="target">Meta: ${formatMoney(product.targetPrice)} · Normal: ${formatMoney(product.normalPrice)}</div></div><div class="savings">${escapeHTML(getOfferReason(product))}</div><div class="progress"><span style="width:${getProgress(product)}%;"></span></div>${notes}<div class="product-actions">${openButton}${historyButton}${adminButtons}</div></div></article>`;
+      return `<article class="product-card"><div class="product-img">${escapeHTML(product.icon)}</div><div class="product-info"><div class="product-top"><div><div class="store">${escapeHTML(product.store)}</div><div class="product-title">${escapeHTML(product.name)}</div><div class="category-line">${escapeHTML(product.dealList)} · ${escapeHTML(product.category)} · Prioridad ${escapeHTML(product.priority)} · ${getDiscountPercent(product)}% desc.</div></div><span class="badge ${badgeClass}">${badgeText}</span></div><div class="price-row"><div class="price">${formatMoney(product.currentPrice)}</div><div class="target">Meta: ${formatMoney(product.targetPrice)} · Normal: ${formatMoney(product.normalPrice)}</div></div><div class="savings">${escapeHTML(getOfferReason(product))}</div><div class="progress"><span style="width:${getProgress(product)}%;"></span></div>${notes}<div class="product-actions">${openButton}${historyButton}${adminButtons}</div></div></article>`;
     }
 
     function renderStats(products) {
@@ -725,9 +763,9 @@
     function emptyCard(icon,title,text) { return `<div class="empty-card"><div class="big">${icon}</div><strong>${escapeHTML(title)}</strong>${escapeHTML(text)}</div>`; }
     function renderApp() { const products = getProducts(); renderStats(products); renderFavorites(products); renderAlerts(products); renderHistory(products); renderAdminPanel(products); renderCloudPanel(products); renderSettings(); }
 
-    function resetProductForm() { document.getElementById("productForm").reset(); document.getElementById("editingProductId").value=""; document.getElementById("productFormTitle").textContent="Agregar producto favorito"; document.getElementById("productFormSubtitle").textContent="Si estás conectado a Supabase, se guarda en la nube y también queda copia local."; document.getElementById("saveProductButton").textContent="Guardar producto"; document.getElementById("cancelEditButton").style.display="none"; document.getElementById("productPriority").value="Media"; document.getElementById("productAlertEnabled").checked=true; }
+    function resetProductForm() { document.getElementById("productForm").reset(); document.getElementById("editingProductId").value=""; document.getElementById("productFormTitle").textContent="Agregar producto favorito"; document.getElementById("productFormSubtitle").textContent="Si estás conectado a Supabase, se guarda en la nube y también queda copia local."; document.getElementById("saveProductButton").textContent="Guardar producto"; document.getElementById("cancelEditButton").style.display="none"; document.getElementById("productPriority").value="Media"; document.getElementById("productDealList").value="Compras personales · Ofertas especiales"; document.getElementById("productAlertEnabled").checked=true; }
     function cancelEdit() { resetProductForm(); }
-    function startEditProduct(id) { const p = getProducts().find(x=>x.id===id); if(!p) return alert("No encontré el producto."); document.getElementById("editingProductId").value=p.id; document.getElementById("productName").value=p.name; document.getElementById("productStore").value=p.store; document.getElementById("productCategory").value=p.category; document.getElementById("productIcon").value=p.icon; document.getElementById("productPriority").value=p.priority; document.getElementById("normalPrice").value=p.normalPrice; document.getElementById("currentPrice").value=p.currentPrice; document.getElementById("targetPrice").value=p.targetPrice; document.getElementById("minDiscountPercent").value=p.minDiscountPercent; document.getElementById("productAlertEnabled").checked=p.alertEnabled!==false; document.getElementById("productUrl").value=p.url; document.getElementById("productNotes").value=p.notes; document.getElementById("productFormTitle").textContent="Editar producto"; document.getElementById("productFormSubtitle").textContent="Modifica los datos y guarda. Si cambia precio se crea historial."; document.getElementById("saveProductButton").textContent="Actualizar producto"; document.getElementById("cancelEditButton").style.display="inline-flex"; goToScreen("admin"); }
+    function startEditProduct(id) { const p = getProducts().find(x=>x.id===id); if(!p) return alert("No encontré el producto."); document.getElementById("editingProductId").value=p.id; document.getElementById("productName").value=p.name; document.getElementById("productDealList").value=p.dealList || guessDealList(p); document.getElementById("productStore").value=p.store; document.getElementById("productCategory").value=p.category; document.getElementById("productIcon").value=p.icon; document.getElementById("productPriority").value=p.priority; document.getElementById("normalPrice").value=p.normalPrice; document.getElementById("currentPrice").value=p.currentPrice; document.getElementById("targetPrice").value=p.targetPrice; document.getElementById("minDiscountPercent").value=p.minDiscountPercent; document.getElementById("productAlertEnabled").checked=p.alertEnabled!==false; document.getElementById("productUrl").value=p.url; document.getElementById("productNotes").value=p.notes; document.getElementById("productFormTitle").textContent="Editar producto"; document.getElementById("productFormSubtitle").textContent="Modifica los datos y guarda. Si cambia precio se crea historial."; document.getElementById("saveProductButton").textContent="Actualizar producto"; document.getElementById("cancelEditButton").style.display="inline-flex"; goToScreen("admin"); }
     async function deleteProduct(id) { if(currentUser && !canWriteWorkspace()) return alert("Tu rol actual no permite eliminar productos."); if(!confirm("¿Seguro que quieres eliminar este producto?")) return; if(currentUser && isUuid(id)) await deleteRemoteProduct(id); saveProducts(getProducts().filter(p=>p.id!==id), "product_deleted"); }
     async function toggleProductAlert(id) { if(currentUser && !canWriteWorkspace()) return alert("Tu rol actual no permite cambiar alertas."); const products = getProducts().map(p => p.id===id ? {...p, alertEnabled: !p.alertEnabled, updatedAt: new Date().toISOString()} : p); saveProducts(products, "alert_toggled"); const p=products.find(x=>x.id===id); if(currentUser && p && isUuid(p.id)) await upsertRemoteProduct(p); }
     function clearAllProducts() { if(confirm("¿Borrar todos los productos locales? Esto no borra Supabase.")) { saveProducts([], "local_products_cleared", false); resetProductForm(); } }
@@ -946,6 +984,7 @@
         name: product.name,
         store: product.store,
         category: product.category,
+        deal_list: product.dealList || guessDealList(product),
         icon: product.icon,
         priority: product.priority,
         product_url: product.url || null,
@@ -957,7 +996,7 @@
         notes: product.notes || null
       };
     }
-    function fromRemoteProduct(row, histories=[]) { return migrateProduct({ id: row.id, workspace_id: row.workspace_id, name: row.name, store: row.store, category: row.category, icon: row.icon, priority: row.priority, product_url: row.product_url, normal_price: row.normal_price, current_price: row.current_price, target_price: row.target_price, min_discount_percent: row.min_discount_percent, alerts_enabled: row.alerts_enabled, notes: row.notes, created_at: row.created_at, updated_at: row.updated_at, priceHistory: histories.map(h=>({ id:h.id, date:h.created_at, price:h.new_price, previousPrice:h.previous_price, source:h.source, note:h.note, type:"supabase" })) }); }
+    function fromRemoteProduct(row, histories=[]) { return migrateProduct({ id: row.id, workspace_id: row.workspace_id, name: row.name, store: row.store, category: row.category, deal_list: row.deal_list, icon: row.icon, priority: row.priority, product_url: row.product_url, normal_price: row.normal_price, current_price: row.current_price, target_price: row.target_price, min_discount_percent: row.min_discount_percent, alerts_enabled: row.alerts_enabled, notes: row.notes, created_at: row.created_at, updated_at: row.updated_at, priceHistory: histories.map(h=>({ id:h.id, date:h.created_at, price:h.new_price, previousPrice:h.previous_price, source:h.source, note:h.note, type:"supabase" })) }); }
     async function initSupabase() {
       try {
         if(!window.supabase) { recordSyncEvent("supabase_cdn_missing", "No cargó librería Supabase", "error"); return; }
@@ -1238,7 +1277,7 @@
           <article class="product-card">
             <div class="product-img">🔔</div>
             <div class="product-info">
-              <div class="product-top"><div><div class="store">Alerta automática${escapeHTML(itemId)}</div><div class="product-title">${escapeHTML(ev.title || "Oferta detectada")}</div><div class="category-line">${escapeHTML(formatDate(ev.created_at))} · ${escapeHTML(ev.status || "new")}</div></div><span class="badge offer">Oferta</span></div>
+              <div class="product-top"><div><div class="store">Alerta automática${escapeHTML(itemId)}</div><div class="product-title">${escapeHTML(ev.title || "Oferta detectada")}</div><div class="category-line">${escapeHTML(ev.deal_list || ev.raw?.dealList || "Lista general")} · ${escapeHTML(formatDate(ev.created_at))} · ${escapeHTML(ev.status || "new")}</div></div><span class="badge offer">Oferta</span></div>
               <div class="price-row"><div class="price">${formatMoney(ev.current_price)}</div><div class="target">Meta: ${formatMoney(ev.target_price)}</div></div>
               <div class="product-notes">${escapeHTML(ev.message || "Evento generado por GitHub Actions.")}</div>
               <div class="product-notes">${escapeHTML(antiSpam)}</div>
@@ -1265,7 +1304,7 @@
           <article class="product-card">
             <div class="product-img">📡</div>
             <div class="product-info">
-              <div class="product-top"><div><div class="store">${escapeHTML(r.store || "Tienda")}</div><div class="product-title">${escapeHTML(r.product_name || "Producto")}</div><div class="category-line">${escapeHTML(formatDate(r.checked_at))} · ${Number(r.discount_percent || 0)}% desc.</div></div><span class="badge ${r.is_offer ? "offer" : "watch"}">${r.is_offer ? "Oferta" : "Vigilando"}</span></div>
+              <div class="product-top"><div><div class="store">${escapeHTML(r.store || "Tienda")}</div><div class="product-title">${escapeHTML(r.product_name || "Producto")}</div><div class="category-line">${escapeHTML(r.deal_list || r.raw?.dealList || "Lista general")} · ${escapeHTML(formatDate(r.checked_at))} · ${Number(r.discount_percent || 0)}% desc.</div></div><span class="badge ${r.is_offer ? "offer" : "watch"}">${r.is_offer ? "Oferta" : "Vigilando"}</span></div>
               <div class="price-row"><div class="price">${formatMoney(r.current_price)}</div><div class="target">Meta: ${formatMoney(r.target_price)}</div></div>
               <div class="product-notes">${escapeHTML(r.alert_reason || "Revisión automática registrada.")}</div>
               <div class="product-notes"><b>Monitoreo:</b> ${escapeHTML(extraLines || liveMessage)}</div>
@@ -1358,9 +1397,9 @@
 
     document.getElementById("loginForm").addEventListener("submit", e => { e.preventDefault(); if(document.getElementById("adminPassword").value === ADMIN_PASSWORD) { document.getElementById("adminPassword").value=""; setAdminActive(true); goToScreen("admin"); } else alert("Clave incorrecta."); });
     document.getElementById("supabaseLoginForm").addEventListener("submit", async e => { e.preventDefault(); try { await signInSupabase(document.getElementById("supabaseEmail").value.trim(), document.getElementById("supabasePassword").value); document.getElementById("supabasePassword").value=""; alert("Sesión iniciada."); goToScreen("cloud"); } catch(err) { alert("No se pudo iniciar sesión: " + err.message); } });
-    document.getElementById("productForm").addEventListener("submit", async e => { e.preventDefault(); if(!isAdminActive()) return alert("Primero entra como administrador o inicia sesión en Supabase."); if(currentUser && !canWriteWorkspace()) return alert("Tu rol actual es viewer. Puedes consultar, pero no editar productos."); const editingId=document.getElementById("editingProductId").value; const products=getProducts(); const old=products.find(p=>p.id===editingId); const p=migrateProduct({ id: editingId || generateId(), name:document.getElementById("productName").value.trim(), store:document.getElementById("productStore").value, category:document.getElementById("productCategory").value, icon:document.getElementById("productIcon").value, priority:document.getElementById("productPriority").value, normalPrice:Number(document.getElementById("normalPrice").value||0), currentPrice:Number(document.getElementById("currentPrice").value||0), targetPrice:Number(document.getElementById("targetPrice").value||0), minDiscountPercent:Number(document.getElementById("minDiscountPercent").value||0), alertEnabled:document.getElementById("productAlertEnabled").checked, url:normalizeUrl(document.getElementById("productUrl").value), notes:document.getElementById("productNotes").value.trim(), createdAt: old?.createdAt || new Date().toISOString(), updatedAt:new Date().toISOString(), priceHistory: old?.priceHistory || [] }); if(!p.name || p.currentPrice<0 || p.targetPrice<0 || p.minDiscountPercent<0 || p.minDiscountPercent>100) return alert("Revisa los datos."); const priceChanged = old && Number(old.currentPrice)!==Number(p.currentPrice); if(!old) p.priceHistory=[createPriceHistoryEntry(p.currentPrice,null,p.store,"Precio inicial","initial")]; if(priceChanged) p.priceHistory=[createPriceHistoryEntry(p.currentPrice, old.currentPrice, p.store, "Precio actualizado desde edición", "edit_update"), ...p.priceHistory]; try { let saved = p; if(currentUser) { saved = await upsertRemoteProduct(p); if(priceChanged) await insertRemoteHistory(saved.id, p.priceHistory[0]); if(!old && p.priceHistory[0]) await insertRemoteHistory(saved.id, p.priceHistory[0]); recordSyncEvent(editingId?"remote_product_updated":"remote_product_inserted", saved.name, "cloud"); } const updated = editingId ? products.map(x=>x.id===editingId ? saved : x) : [saved, ...products]; saveProducts(updated, editingId ? "product_updated" : "product_created"); resetProductForm(); alert(editingId ? "Producto actualizado." : "Producto guardado."); } catch(err) { alert("No se pudo guardar en Supabase: " + err.message + "\nSe guardará localmente."); const updated = editingId ? products.map(x=>x.id===editingId ? p : x) : [p, ...products]; saveProducts(updated, "product_saved_local_fallback"); } });
+    document.getElementById("productForm").addEventListener("submit", async e => { e.preventDefault(); if(!isAdminActive()) return alert("Primero entra como administrador o inicia sesión en Supabase."); if(currentUser && !canWriteWorkspace()) return alert("Tu rol actual es viewer. Puedes consultar, pero no editar productos."); const editingId=document.getElementById("editingProductId").value; const products=getProducts(); const old=products.find(p=>p.id===editingId); const p=migrateProduct({ id: editingId || generateId(), name:document.getElementById("productName").value.trim(), store:document.getElementById("productStore").value, category:document.getElementById("productCategory").value, dealList:document.getElementById("productDealList").value, icon:document.getElementById("productIcon").value, priority:document.getElementById("productPriority").value, normalPrice:Number(document.getElementById("normalPrice").value||0), currentPrice:Number(document.getElementById("currentPrice").value||0), targetPrice:Number(document.getElementById("targetPrice").value||0), minDiscountPercent:Number(document.getElementById("minDiscountPercent").value||0), alertEnabled:document.getElementById("productAlertEnabled").checked, url:normalizeUrl(document.getElementById("productUrl").value), notes:document.getElementById("productNotes").value.trim(), createdAt: old?.createdAt || new Date().toISOString(), updatedAt:new Date().toISOString(), priceHistory: old?.priceHistory || [] }); if(!p.name || p.currentPrice<0 || p.targetPrice<0 || p.minDiscountPercent<0 || p.minDiscountPercent>100) return alert("Revisa los datos."); const priceChanged = old && Number(old.currentPrice)!==Number(p.currentPrice); if(!old) p.priceHistory=[createPriceHistoryEntry(p.currentPrice,null,p.store,"Precio inicial","initial")]; if(priceChanged) p.priceHistory=[createPriceHistoryEntry(p.currentPrice, old.currentPrice, p.store, "Precio actualizado desde edición", "edit_update"), ...p.priceHistory]; try { let saved = p; if(currentUser) { saved = await upsertRemoteProduct(p); if(priceChanged) await insertRemoteHistory(saved.id, p.priceHistory[0]); if(!old && p.priceHistory[0]) await insertRemoteHistory(saved.id, p.priceHistory[0]); recordSyncEvent(editingId?"remote_product_updated":"remote_product_inserted", saved.name, "cloud"); } const updated = editingId ? products.map(x=>x.id===editingId ? saved : x) : [saved, ...products]; saveProducts(updated, editingId ? "product_updated" : "product_created"); resetProductForm(); alert(editingId ? "Producto actualizado." : "Producto guardado."); } catch(err) { alert("No se pudo guardar en Supabase: " + err.message + "\nSe guardará localmente."); const updated = editingId ? products.map(x=>x.id===editingId ? p : x) : [p, ...products]; saveProducts(updated, "product_saved_local_fallback"); } });
     document.getElementById("priceForm").addEventListener("submit", async e => { e.preventDefault(); const id=document.getElementById("historyProductId").value; const newPrice=Number(document.getElementById("historyNewPrice").value); const source=document.getElementById("historySource").value.trim() || "Registro manual"; const note=document.getElementById("historyNote").value.trim(); let entry=null; const products=getProducts().map(p=>{ if(p.id!==id) return p; entry=createPriceHistoryEntry(newPrice,p.currentPrice,source,note,"manual_history"); return {...p,currentPrice:newPrice,updatedAt:new Date().toISOString(),priceHistory:[entry,...(p.priceHistory||[])]}; }); const product=products.find(p=>p.id===id); try { if(currentUser && product) { await upsertRemoteProduct(product); await insertRemoteHistory(product.id, entry); recordSyncEvent("remote_price_history", product.name, "cloud"); } saveProducts(products,"price_history_added"); document.getElementById("priceForm").reset(); alert("Precio registrado."); } catch(err) { alert("Se guardó localmente, pero falló Supabase: " + err.message); saveProducts(products,"price_history_local_fallback"); } });
-    ["searchInput","storeFilter","categoryFilter","onlyOffersFilter"].forEach(id=>document.getElementById(id).addEventListener(id==="searchInput"?"input":"change", renderApp));
+    ["searchInput","listFilter","storeFilter","categoryFilter","onlyOffersFilter"].forEach(id=>document.getElementById(id).addEventListener(id==="searchInput"?"input":"change", renderApp));
     themeButton.addEventListener("click", toggleTheme);
     window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstallPrompt=e; });
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-pwa-v14-amazon-safe";
+const CACHE_NAME = "dealwatch-mx-pwa-v16-listas";
 
 self.addEventListener("install", event => {
   self.skipWaiting();
