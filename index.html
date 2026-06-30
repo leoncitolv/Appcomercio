@@ -878,6 +878,94 @@
       color: var(--gray);
     }
 
+
+
+    .alert-panel {
+      display: grid;
+      gap: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.07);
+      margin-bottom: 14px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .alert-panel strong {
+      display: block;
+      font-size: 1rem;
+      letter-spacing: -0.03em;
+    }
+
+    .alert-panel span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.80rem;
+      line-height: 1.4;
+      font-weight: 650;
+    }
+
+    .alert-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .alert-mini {
+      border-radius: 18px;
+      padding: 12px;
+      background: rgba(120, 120, 128, 0.10);
+      border: 1px solid var(--border);
+    }
+
+    .alert-mini b {
+      display: block;
+      font-size: 1.08rem;
+      letter-spacing: -0.04em;
+    }
+
+    .alert-mini small {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .alert-reason {
+      margin-top: 7px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(52, 199, 89, 0.13);
+      color: var(--green);
+      font-size: 0.75rem;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .alert-muted {
+      margin-top: 7px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(142, 142, 147, 0.14);
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    .badge.muted {
+      background: rgba(142, 142, 147, 0.15);
+      color: var(--gray);
+    }
+
+    @media (max-width: 420px) {
+      .alert-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .bottom-nav {
       position: fixed;
       left: 50%;
@@ -976,11 +1064,11 @@
     <!-- INICIO -->
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>🛒 Fase 3.1 · Favoritos + JSON</small>
-        <h2>Organiza y respalda tus productos.</h2>
+        <small>🔔 Fase 5 · Alertas inteligentes</small>
+        <h2>Recibe avisos cuando sí conviene comprar.</h2>
         <p>
-          Busca, filtra, edita y administra productos. Además, exporta o importa
-          respaldos JSON para no perder tu información.
+          La app marca ofertas cuando el precio llega a tu meta o cumple el descuento mínimo.
+          También puede mostrar notificaciones locales si das permiso.
         </p>
 
         <div class="hero-actions">
@@ -1016,7 +1104,7 @@
       <section class="section">
         <div class="section-header">
           <h3>Accesos rápidos</h3>
-          <span>Fase 3.1</span>
+          <span>Fase 5</span>
         </div>
 
         <div class="quick-actions">
@@ -1029,13 +1117,13 @@
           <article class="action-card" onclick="goToScreen('alerts')">
             <div class="action-icon green">🔔</div>
             <strong>Alertas</strong>
-            <p>Ve productos que ya alcanzaron su precio objetivo.</p>
+            <p>Ve productos que alcanzaron meta o descuento mínimo.</p>
           </article>
 
           <article class="action-card" onclick="goToScreen('history')">
             <div class="action-icon orange">📈</div>
             <strong>Historial</strong>
-            <p>Revisa y registra cambios de precio por producto.</p>
+            <p>Registra precios y dispara alertas locales.</p>
           </article>
 
           <article class="action-card" onclick="goToScreen('settings')">
@@ -1106,11 +1194,46 @@
           <span id="alertsCount">0 activas</span>
         </div>
 
+        <div class="alert-panel">
+          <div>
+            <strong>Centro de alertas locales</strong>
+            <span>
+              Una alerta se activa si el precio actual llega al precio objetivo o si el descuento calculado cumple el porcentaje mínimo.
+            </span>
+          </div>
+
+          <div class="alert-grid">
+            <div class="alert-mini">
+              <b id="alertStatActive">0</b>
+              <small>activas</small>
+            </div>
+            <div class="alert-mini">
+              <b id="alertStatMuted">0</b>
+              <small>silenciadas</small>
+            </div>
+            <div class="alert-mini">
+              <b id="notificationStatusText">OFF</b>
+              <small>notificaciones</small>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn-primary" type="button" onclick="requestOfferNotifications()">
+              Activar notificaciones
+            </button>
+            <button class="btn btn-soft" type="button" onclick="testOfferNotification()">
+              Probar aviso
+            </button>
+            <button class="btn btn-soft" type="button" onclick="checkAndNotifyOffers(getProducts(), true)">
+              Revisar ahora
+            </button>
+          </div>
+        </div>
+
         <div class="product-list" id="alertsList"></div>
 
         <div class="notice">
-          Una alerta se activa cuando el precio actual es menor o igual al precio objetivo.
-          En esta fase sigue siendo local; el monitoreo automático real llegará después con backend o cron.
+          Estas notificaciones son locales: funcionan cuando la app está abierta o instalada y el navegador permite avisos. El monitoreo automático real se agregará después con backend, cron o GitHub Actions.
         </div>
       </section>
     </section>
@@ -1284,6 +1407,31 @@
 
               <div class="two-cols">
                 <div class="field">
+                  <label for="normalPrice">Precio normal</label>
+                  <input
+                    type="number"
+                    id="normalPrice"
+                    placeholder="1499"
+                    min="0"
+                    step="1"
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="minDiscountPercent">Descuento mínimo %</label>
+                  <input
+                    type="number"
+                    id="minDiscountPercent"
+                    placeholder="25"
+                    min="0"
+                    max="100"
+                    step="1"
+                  />
+                </div>
+              </div>
+
+              <div class="two-cols">
+                <div class="field">
                   <label for="currentPrice">Precio actual</label>
                   <input
                     type="number"
@@ -1324,6 +1472,11 @@
                   placeholder="Ej. Esperar Hot Sale, Buen Fin, descuento con tarjeta..."
                 ></textarea>
               </div>
+
+              <label class="filter-toggle">
+                <input type="checkbox" id="productAlertEnabled" checked />
+                Activar alertas para este producto
+              </label>
 
               <div class="form-actions">
                 <button class="btn btn-primary" id="saveProductButton" type="submit">
@@ -1448,6 +1601,25 @@
         <div class="setting-card">
           <div class="setting-row">
             <div>
+              <strong>Notificaciones de ofertas</strong>
+              <span>Permite avisos locales cuando un producto cumpla tu precio objetivo o descuento mínimo.</span>
+            </div>
+            <div style="font-size: 24px;">🔔</div>
+          </div>
+
+          <div class="form-actions" style="margin-top:16px;">
+            <button class="btn btn-primary" type="button" onclick="requestOfferNotifications()">
+              Activar notificaciones
+            </button>
+            <button class="btn btn-soft" type="button" onclick="testOfferNotification()">
+              Probar
+            </button>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-row">
+            <div>
               <strong>Datos locales</strong>
               <span>Los productos se guardan en el navegador con localStorage. Puedes respaldarlos desde Admin → Respaldo JSON.</span>
             </div>
@@ -1494,11 +1666,13 @@
   <script>
     const ADMIN_PASSWORD = "admin123";
 
-    const PRODUCTS_KEY = "dealwatch_products_v4";
-    const OLD_PRODUCTS_KEY = "dealwatch_products_v3";
-    const LEGACY_PRODUCTS_KEY = "dealwatch_products_v2";
+    const PRODUCTS_KEY = "dealwatch_products_v5";
+    const OLD_PRODUCTS_KEY = "dealwatch_products_v4";
+    const LEGACY_PRODUCTS_KEY = "dealwatch_products_v3";
     const ADMIN_KEY = "dealwatch_admin_active";
     const THEME_KEY = "dealwatch_theme";
+    const ALERT_LOG_KEY = "dealwatch_alert_log_v5";
+    const NOTIFICATION_PREF_KEY = "dealwatch_notifications_pref";
 
     let pendingImportMode = "merge";
 
@@ -1634,7 +1808,14 @@
         icon: product.icon || "🛒",
         priority: product.priority || "Media",
         currentPrice,
+        normalPrice: Number(product.normalPrice || 0),
         targetPrice: Number(product.targetPrice || 0),
+        minDiscountPercent: Number(product.minDiscountPercent || 0),
+        alertEnabled: product.alertEnabled !== false,
+        lastAlertAt: product.lastAlertAt || "",
+        lastAlertPrice: product.lastAlertPrice === null || product.lastAlertPrice === undefined
+          ? null
+          : Number(product.lastAlertPrice),
         url: normalizeUrl(product.url || ""),
         notes: product.notes || "",
         priceHistory,
@@ -1688,10 +1869,42 @@
       const cleanProducts = products.map(migrateProduct);
       localStorage.setItem(PRODUCTS_KEY, JSON.stringify(cleanProducts));
       renderApp();
+      checkAndNotifyOffers(cleanProducts);
+    }
+
+    function getDiscountPercent(product) {
+      const normal = Number(product.normalPrice || 0);
+      const current = Number(product.currentPrice || 0);
+
+      if (normal <= 0 || current <= 0 || current >= normal) {
+        return 0;
+      }
+
+      return Math.round(((normal - current) / normal) * 100);
+    }
+
+    function productMeetsTarget(product) {
+      const current = Number(product.currentPrice || 0);
+      const target = Number(product.targetPrice || 0);
+      return current > 0 && target > 0 && current <= target;
+    }
+
+    function productMeetsDiscount(product) {
+      const minimum = Number(product.minDiscountPercent || 0);
+
+      if (minimum <= 0) {
+        return false;
+      }
+
+      return getDiscountPercent(product) >= minimum;
     }
 
     function productHasOffer(product) {
-      return Number(product.currentPrice) <= Number(product.targetPrice);
+      return productMeetsTarget(product) || productMeetsDiscount(product);
+    }
+
+    function productHasActiveAlert(product) {
+      return product.alertEnabled !== false && productHasOffer(product);
     }
 
     function getProgress(product) {
@@ -1710,21 +1923,51 @@
       return Math.max(12, Math.min(percent, 92));
     }
 
+    function getOfferReason(product) {
+      const reasons = [];
+      const discount = getDiscountPercent(product);
+      const minimum = Number(product.minDiscountPercent || 0);
+
+      if (productMeetsTarget(product)) {
+        reasons.push(`llegó a tu meta de ${formatMoney(product.targetPrice)}`);
+      }
+
+      if (productMeetsDiscount(product)) {
+        reasons.push(`cumple ${discount}% de descuento mínimo`);
+      }
+
+      if (reasons.length === 0) {
+        return "Aún no alcanza tus reglas de compra.";
+      }
+
+      return `Oferta activa: ${reasons.join(" y ")}.`;
+    }
+
     function getSavingsText(product) {
       const current = Number(product.currentPrice || 0);
       const target = Number(product.targetPrice || 0);
+      const normal = Number(product.normalPrice || 0);
+      const discount = getDiscountPercent(product);
 
-      if (current <= 0 || target <= 0) {
-        return "";
+      if (current <= 0) {
+        return "Agrega un precio actual para evaluar la oferta.";
       }
 
-      if (current <= target) {
-        const saved = target - current;
-        return `Está ${formatMoney(saved)} abajo de tu meta.`;
+      if (productHasOffer(product)) {
+        return getOfferReason(product);
       }
 
-      const missing = current - target;
-      return `Faltan ${formatMoney(missing)} para llegar a tu meta.`;
+      const parts = [];
+
+      if (target > 0) {
+        parts.push(`faltan ${formatMoney(current - target)} para tu meta`);
+      }
+
+      if (normal > 0) {
+        parts.push(`descuento actual: ${discount}%`);
+      }
+
+      return parts.length ? parts.join(" · ") : "Sin reglas suficientes para evaluar.";
     }
 
     function isAdminActive() {
@@ -1838,11 +2081,16 @@
 
     function createProductCard(product, options = {}) {
       const isOffer = productHasOffer(product);
-      const badgeClass = isOffer ? "offer" : "watch";
-      const badgeText = isOffer ? "OFERTA" : "Vigilando";
+      const alertsMuted = product.alertEnabled === false;
+      const badgeClass = alertsMuted ? "muted" : (isOffer ? "offer" : "watch");
+      const badgeText = alertsMuted ? "Silenciado" : (isOffer ? "OFERTA" : "Vigilando");
       const progress = getProgress(product);
       const safeUrl = normalizeUrl(product.url);
       const savingsText = getSavingsText(product);
+      const discount = getDiscountPercent(product);
+      const normalText = Number(product.normalPrice || 0) > 0
+        ? `Normal: ${formatMoney(product.normalPrice)} · ${discount}% dto.`
+        : "Precio normal no definido";
 
       const openButton = safeUrl
         ? `<a class="mini-btn mini-blue" href="${escapeHTML(safeUrl)}" target="_blank" rel="noopener noreferrer">Abrir link</a>`
@@ -1856,11 +2104,19 @@
         ? `<button class="mini-btn mini-red" onclick="deleteProduct('${escapeHTML(product.id)}')">Eliminar</button>`
         : "";
 
+      const alertToggleButton = options.showAdminActions
+        ? `<button class="mini-btn mini-gray" onclick="toggleProductAlerts('${escapeHTML(product.id)}')">${alertsMuted ? "Activar alertas" : "Silenciar"}</button>`
+        : "";
+
       const historyButton = `<button class="mini-btn mini-blue" onclick="openProductHistory('${escapeHTML(product.id)}')">Historial</button>`;
 
       const notes = product.notes
         ? `<div class="product-notes">${escapeHTML(product.notes)}</div>`
         : "";
+
+      const alertBox = alertsMuted
+        ? `<div class="alert-muted">Alertas apagadas para este producto.</div>`
+        : (isOffer ? `<div class="alert-reason">${escapeHTML(getOfferReason(product))}</div>` : "");
 
       return `
         <article class="product-card">
@@ -1884,18 +2140,21 @@
               <div class="target">Meta: ${formatMoney(product.targetPrice)}</div>
             </div>
 
+            <div class="category-line">${escapeHTML(normalText)} · Mínimo: ${Number(product.minDiscountPercent || 0)}%</div>
             <div class="savings">${escapeHTML(savingsText)}</div>
 
             <div class="progress">
               <span style="width:${progress}%;"></span>
             </div>
 
+            ${alertBox}
             ${notes}
 
             <div class="product-actions">
               ${openButton}
               ${historyButton}
               ${editButton}
+              ${alertToggleButton}
               ${deleteButton}
             </div>
           </div>
@@ -1952,27 +2211,194 @@
         .join("");
     }
 
+    function getAlertLog() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(ALERT_LOG_KEY) || "{}");
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function saveAlertLog(log) {
+      localStorage.setItem(ALERT_LOG_KEY, JSON.stringify(log));
+    }
+
+    function getAlertSignature(product) {
+      return `${product.id}:${product.currentPrice}:${product.targetPrice}:${product.minDiscountPercent}:${product.alertEnabled}`;
+    }
+
+    function getNotificationStatusLabel() {
+      if (!("Notification" in window)) {
+        return "NO";
+      }
+
+      if (Notification.permission === "granted") {
+        return "ON";
+      }
+
+      if (Notification.permission === "denied") {
+        return "BLOQ";
+      }
+
+      return "OFF";
+    }
+
+    function renderNotificationStatus(products = getProducts()) {
+      const activeAlerts = products.filter(productHasActiveAlert);
+      const mutedOffers = products.filter(product => product.alertEnabled === false && productHasOffer(product));
+
+      const activeEl = document.getElementById("alertStatActive");
+      const mutedEl = document.getElementById("alertStatMuted");
+      const statusEl = document.getElementById("notificationStatusText");
+
+      if (activeEl) {
+        activeEl.textContent = activeAlerts.length;
+      }
+
+      if (mutedEl) {
+        mutedEl.textContent = mutedOffers.length;
+      }
+
+      if (statusEl) {
+        statusEl.textContent = getNotificationStatusLabel();
+      }
+    }
+
+    async function requestOfferNotifications() {
+      if (!("Notification" in window)) {
+        alert("Este navegador no soporta notificaciones locales.");
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      localStorage.setItem(NOTIFICATION_PREF_KEY, permission === "granted" ? "enabled" : "disabled");
+
+      if (permission === "granted") {
+        alert("Notificaciones activadas. La app avisará cuando detecte una oferta activa mientras esté abierta o instalada.");
+        checkAndNotifyOffers(getProducts(), true);
+      } else {
+        alert("No se activaron las notificaciones. Puedes permitirlas desde los ajustes del navegador.");
+      }
+
+      renderApp();
+    }
+
+    function testOfferNotification() {
+      if (!("Notification" in window)) {
+        alert("Este navegador no soporta notificaciones locales.");
+        return;
+      }
+
+      if (Notification.permission !== "granted") {
+        alert("Primero activa las notificaciones.");
+        return;
+      }
+
+      new Notification("DealWatch MX", {
+        body: "Prueba lista: así se verá una alerta de oferta.",
+        icon: "icons/icon-192.png"
+      });
+    }
+
+    function notifyOffer(product, force = false) {
+      if (!("Notification" in window) || Notification.permission !== "granted") {
+        return;
+      }
+
+      if (product.alertEnabled === false || !productHasOffer(product)) {
+        return;
+      }
+
+      const log = getAlertLog();
+      const signature = getAlertSignature(product);
+
+      if (!force && log[product.id] === signature) {
+        return;
+      }
+
+      new Notification(`Oferta en ${product.store}`, {
+        body: `${product.name}: ${formatMoney(product.currentPrice)}. ${getOfferReason(product)}`,
+        icon: "icons/icon-192.png"
+      });
+
+      log[product.id] = signature;
+      saveAlertLog(log);
+    }
+
+    function checkAndNotifyOffers(products = getProducts(), force = false) {
+      const activeAlerts = products.filter(productHasActiveAlert);
+
+      activeAlerts.forEach(product => {
+        notifyOffer(product, force);
+      });
+
+      renderNotificationStatus(products);
+    }
+
+    function toggleProductAlerts(productId) {
+      if (!isAdminActive()) {
+        alert("Primero entra como administrador.");
+        return;
+      }
+
+      const products = getProducts();
+      const updatedProducts = products.map(product => {
+        if (product.id !== productId) {
+          return product;
+        }
+
+        return {
+          ...product,
+          alertEnabled: product.alertEnabled === false,
+          updatedAt: new Date().toISOString()
+        };
+      });
+
+      saveProducts(updatedProducts);
+    }
+
     function renderAlerts(products) {
-      const alerts = products.filter(productHasOffer);
+      const alerts = products.filter(productHasActiveAlert);
+      const mutedOffers = products.filter(product => product.alertEnabled === false && productHasOffer(product));
       const container = document.getElementById("alertsList");
       const count = document.getElementById("alertsCount");
 
+      renderNotificationStatus(products);
+
       count.textContent = `${alerts.length} activa${alerts.length === 1 ? "" : "s"}`;
 
-      if (alerts.length === 0) {
+      if (alerts.length === 0 && mutedOffers.length === 0) {
         container.innerHTML = `
           <div class="empty-card">
             <div class="big">🔔</div>
             <strong>Sin alertas por ahora</strong>
-            Cuando un producto llegue a su precio objetivo aparecerá aquí.
+            Cuando un producto llegue a su precio objetivo o cumpla su descuento mínimo aparecerá aquí.
           </div>
         `;
         return;
       }
 
-      container.innerHTML = alerts
-        .map(product => createProductCard(product))
-        .join("");
+      const activeHtml = alerts.length > 0
+        ? alerts.map(product => createProductCard(product, { showAdminActions: isAdminActive() })).join("")
+        : `
+          <div class="empty-card">
+            <div class="big">✅</div>
+            <strong>No hay alertas activas</strong>
+            Hay ofertas silenciadas o todavía no se cumplen tus reglas.
+          </div>
+        `;
+
+      const mutedHtml = mutedOffers.length > 0
+        ? `
+          <div class="notice">
+            También tienes ${mutedOffers.length} oferta${mutedOffers.length === 1 ? "" : "s"} silenciada${mutedOffers.length === 1 ? "" : "s"}. Entra como admin para reactivar sus alertas.
+          </div>
+          ${mutedOffers.map(product => createProductCard(product, { showAdminActions: isAdminActive() })).join("")}
+        `
+        : "";
+
+      container.innerHTML = activeHtml + mutedHtml;
     }
 
     function formatDateTime(value) {
@@ -2229,6 +2655,9 @@
       document.getElementById("saveProductButton").textContent = "Guardar producto";
       document.getElementById("cancelEditButton").style.display = "none";
       document.getElementById("productPriority").value = "Media";
+      document.getElementById("normalPrice").value = "";
+      document.getElementById("minDiscountPercent").value = "";
+      document.getElementById("productAlertEnabled").checked = true;
     }
 
     function cancelEdit() {
@@ -2255,8 +2684,11 @@
       document.getElementById("productCategory").value = product.category;
       document.getElementById("productIcon").value = product.icon;
       document.getElementById("productPriority").value = product.priority;
+      document.getElementById("normalPrice").value = product.normalPrice || "";
       document.getElementById("currentPrice").value = product.currentPrice;
       document.getElementById("targetPrice").value = product.targetPrice;
+      document.getElementById("minDiscountPercent").value = product.minDiscountPercent || "";
+      document.getElementById("productAlertEnabled").checked = product.alertEnabled !== false;
       document.getElementById("productUrl").value = product.url;
       document.getElementById("productNotes").value = product.notes;
 
@@ -2320,8 +2752,8 @@
       const backupData = {
         app: "DealWatch MX",
         project: "Appcomercio",
-        type: "dealwatch-products-backup-with-price-history",
-        version: "4.0",
+        type: "dealwatch-products-backup-with-price-history-alerts",
+        version: "5.0",
         exportedAt: new Date().toISOString(),
         totalProducts: products.length,
         products: products
@@ -2469,12 +2901,15 @@
       const category = document.getElementById("productCategory").value;
       const icon = document.getElementById("productIcon").value;
       const priority = document.getElementById("productPriority").value;
+      const normalPrice = Number(document.getElementById("normalPrice").value || 0);
       const currentPrice = Number(document.getElementById("currentPrice").value);
       const targetPrice = Number(document.getElementById("targetPrice").value);
+      const minDiscountPercent = Number(document.getElementById("minDiscountPercent").value || 0);
+      const alertEnabled = document.getElementById("productAlertEnabled").checked;
       const url = normalizeUrl(document.getElementById("productUrl").value);
       const notes = document.getElementById("productNotes").value.trim();
 
-      if (!name || currentPrice < 0 || targetPrice < 0) {
+      if (!name || normalPrice < 0 || currentPrice < 0 || targetPrice < 0 || minDiscountPercent < 0 || minDiscountPercent > 100) {
         alert("Revisa los datos del producto.");
         return;
       }
@@ -2498,8 +2933,11 @@
             category,
             icon,
             priority,
+            normalPrice,
             currentPrice,
             targetPrice,
+            minDiscountPercent,
+            alertEnabled,
             url,
             notes,
             priceHistory: priceChanged
@@ -2531,8 +2969,11 @@
         category,
         icon,
         priority,
+        normalPrice,
         currentPrice,
         targetPrice,
+        minDiscountPercent,
+        alertEnabled,
         url,
         notes,
         priceHistory: [

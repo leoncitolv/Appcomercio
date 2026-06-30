@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-pwa-v4-historial";
+const CACHE_NAME = "dealwatch-mx-pwa-v5-alertas";
 
 self.addEventListener("install", event => {
   self.skipWaiting();
@@ -49,5 +49,23 @@ self.addEventListener("fetch", event => {
           return cachedResponse || caches.match("./index.html");
         });
       })
+  );
+});
+
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
+      for (const client of clientList) {
+        if ("focus" in client) {
+          return client.focus();
+        }
+      }
+
+      if (clients.openWindow) {
+        return clients.openWindow("./");
+      }
+    })
   );
 });
