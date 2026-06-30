@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-pwa-v4-clean";
+const CACHE_NAME = "dealwatch-mx-pwa-v4-historial";
 
 self.addEventListener("install", event => {
   self.skipWaiting();
@@ -24,9 +24,7 @@ self.addEventListener("activate", event => {
           }
         })
       );
-    }).then(() => {
-      return self.clients.claim();
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
