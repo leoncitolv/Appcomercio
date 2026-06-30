@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 12 Telegram</title>
+  <title>DealWatch MX | Fase 13.1 Mercado Libre</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -165,7 +165,7 @@
           <div class="logo">D</div>
           <div>
             <h1>DealWatch MX</h1>
-            <p>Appcomercio · Equipo en Supabase</p>
+            <p>Appcomercio · Mercado Libre + Telegram</p>
           </div>
         </div>
         <div class="top-actions">
@@ -177,9 +177,9 @@
 
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>👥 Fase 12 · Telegram + monitoreo</small>
-        <h2>Tu app ya puede usar base de datos real.</h2>
-        <p>Crea cuentas, acepta invitaciones y comparte productos del equipo en Supabase.</p>
+        <small>🛒 Fase 13.1 · Mercado Libre automático</small>
+        <h2>Tu app ya puede revisar precios de Mercado Libre.</h2>
+        <p>El robot de GitHub Actions intenta leer el precio real de links de Mercado Libre, actualiza Supabase y avisa por Telegram.</p>
         <div class="hero-actions">
           <button class="btn btn-light" onclick="goToScreen('cloud')">Equipo y nube</button>
           <button class="btn btn-ghost" onclick="goToScreen('admin')">Administrar</button>
@@ -196,7 +196,7 @@
       </section>
 
       <section class="section">
-        <div class="section-header"><h3>Accesos rápidos</h3><span>Fase 9</span></div>
+        <div class="section-header"><h3>Accesos rápidos</h3><span>Fase 13.1</span></div>
         <div class="quick-actions">
           <article class="action-card" onclick="goToScreen('favorites')"><div class="action-icon blue">🛒</div><strong>Favoritos</strong><p>Busca, filtra y abre links de productos.</p></article>
           <article class="action-card" onclick="goToScreen('alerts')"><div class="action-icon green">🔔</div><strong>Alertas</strong><p>Detecta precio objetivo o descuento mínimo.</p></article>
@@ -415,17 +415,31 @@
 
 
         <div class="card" id="monitorCard">
-          <strong>Fase 12 · Telegram + monitoreo</strong>
-          <span>GitHub Actions puede revisar tus productos cada cierto tiempo, guardar resultados en Supabase y avisar por Telegram cuando detecte ofertas nuevas.</span>
+          <strong>Fase 13.1 · Mercado Libre automático</strong>
+          <span>GitHub Actions ahora intenta obtener el precio real de productos de Mercado Libre, actualiza Supabase, guarda historial y avisa por Telegram cuando detecta ofertas.</span>
           <div class="notice">
-            Para activarlo debes tener el SQL de Fase 11, <b>SUPABASE_SERVICE_ROLE_KEY</b>, <b>TELEGRAM_BOT_TOKEN</b> y <b>TELEGRAM_CHAT_ID</b> en GitHub Actions. Ninguna llave secreta va en index.html.
+            Para activarlo debes tener <b>SUPABASE_SERVICE_ROLE_KEY</b>, <b>TELEGRAM_BOT_TOKEN</b> y <b>TELEGRAM_CHAT_ID</b> en GitHub Actions. En el workflow activa <b>live_prices</b> para revisar Mercado Libre. Ninguna llave secreta va en index.html.
           </div>
           <div class="form-actions" style="margin-top:16px;">
             <button class="btn btn-primary" type="button" onclick="refreshMonitorStatus(true)">Actualizar monitoreo</button>
-            <button class="btn btn-soft" type="button" onclick="openGitHubActionsPage()">Abrir GitHub Actions</button><button class="btn btn-soft" type="button" onclick="showTelegramHelp()">Configurar Telegram</button>
+            <button class="btn btn-soft" type="button" onclick="openGitHubActionsPage()">Abrir GitHub Actions</button><button class="btn btn-soft" type="button" onclick="showMercadoLibreHelp()">Links Mercado Libre</button><button class="btn btn-soft" type="button" onclick="showTelegramHelp()">Configurar Telegram</button>
           </div>
           <div class="product-list" id="monitorStatusList" style="margin-top:14px;">
-            <div class="empty-card"><div class="big">🤖</div><strong>Monitoreo pendiente</strong>Ejecuta el workflow manualmente o espera la revisión programada.</div>
+            <div class="empty-card"><div class="big">🤖</div><strong>Monitoreo pendiente</strong>Ejecuta el workflow con live_prices activado o espera la revisión programada.</div>
+          </div>
+        </div>
+
+
+
+        <div class="card" id="mercadoLibreCard">
+          <strong>Fase 13.1 · Precios reales de Mercado Libre</strong>
+          <span>Para que el robot actualice precios automáticamente, cada producto de Mercado Libre debe tener el link exacto de la publicación.</span>
+          <div class="notice">
+            Ejemplo válido: <b>https://articulo.mercadolibre.com.mx/MLM-1234567890-producto</b>. No uses solo <b>mercadolibre.com.mx</b>; debe ser el enlace específico del producto.
+          </div>
+          <div class="form-actions" style="margin-top:16px;">
+            <button class="btn btn-primary" type="button" onclick="showMercadoLibreHelp()">Ver formato correcto</button>
+            <button class="btn btn-soft" type="button" onclick="openGitHubActionsPage()">Ejecutar robot</button>
           </div>
         </div>
 
@@ -1247,6 +1261,19 @@
     }
 
 
+    function showMercadoLibreHelp() {
+      alert(
+        "Fase 13.1 Mercado Libre:\n\n" +
+        "1. En el producto guarda la tienda como Mercado Libre.\n" +
+        "2. En Link del producto pega el link exacto de la publicación.\n" +
+        "3. El link debe contener un ID tipo MLM-1234567890 o MLM1234567890.\n" +
+        "4. El robot usará la API pública de Mercado Libre para leer el precio.\n" +
+        "5. Si el precio cambió, se actualiza Supabase y se guarda historial.\n" +
+        "6. Si cumple precio objetivo o descuento mínimo, se manda Telegram.\n\n" +
+        "Ojo: los links de catálogo /p/ pueden no regresar precio directo. Es mejor usar links de artículo que empiezan con MLM-."
+      );
+    }
+
     function showTelegramHelp() {
       alert(
         "Fase 12 Telegram:\n\n" +
@@ -1256,7 +1283,9 @@
         "4. Manda un mensaje al grupo.\n" +
         "5. Obtén el chat_id con getUpdates.\n" +
         "6. En GitHub Secrets agrega TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID.\n" +
-        "7. En Actions ejecuta el workflow con telegram_test activado."
+        "7. En Actions ejecuta el workflow con telegram_test activado.
+
+Fase 13.1: para Mercado Libre también activa live_prices."
       );
     }
 

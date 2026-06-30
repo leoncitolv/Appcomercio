@@ -1,14 +1,19 @@
 {
-  "name": "DealWatch MX",
-  "short_name": "DealWatch",
-  "description": "DealWatch MX / Appcomercio: favoritos, alertas, historial, PWA, multi-admin y monitoreo automático con GitHub Actions, Supabase y alertas por Telegram.",
+  "name": "DealWatch MX - Appcomercio",
+  "short_name": "DealWatch MX",
+  "description": "DealWatch MX: PWA para productos favoritos, Supabase, multi-admin, Telegram y monitoreo automático de Mercado Libre.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f5f5f7",
+  "orientation": "portrait",
+  "background_color": "#0b1220",
   "theme_color": "#007aff",
-  "orientation": "portrait-primary",
   "lang": "es-MX",
+  "categories": [
+    "shopping",
+    "productivity",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "icons/icon-192.png",
