@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 9 Supabase</title>
+  <title>DealWatch MX | Fase 9.3 Supabase FIX</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -177,7 +177,7 @@
 
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>☁️ Fase 9 · Supabase conectado</small>
+        <small>☁️ Fase 9.3 · Supabase corregido</small>
         <h2>Tu app ya puede usar base de datos real.</h2>
         <p>Inicia sesión, migra tus productos locales y sincroniza favoritos, historial y alertas con Supabase.</p>
         <div class="hero-actions">
@@ -631,7 +631,45 @@
     } catch(e) { recordSyncEvent("remote_error", e.message || "Error al leer nube", "error"); if(showAlert) alert("No se pudo leer Supabase: " + e.message); }
     finally { isLoadingRemote=false; renderApp(); }
     }
-    async function upsertRemoteProduct(product) { if(!supabaseClient || !currentUser) return product; const payload = toRemoteProduct(product); let result; if(isUuid(product.id)) result = await supabaseClient.from("products").update(payload).eq("id", product.id).select().single(); else result = await supabaseClient.from("products").insert(payload).select().single(); if(result.error) throw result.error; return fromRemoteProduct(result.data, product.priceHistory || []); }
+    async function upsertRemoteProduct(product) {
+      if(!supabaseClient || !currentUser) return product;
+      const payload = toRemoteProduct(product);
+
+      // Fase 9.3 FIX:
+      // Un producto local puede tener formato UUID aunque todavía NO exista en Supabase.
+      // Antes se intentaba update + .single(); si no había fila, Supabase devolvía:
+      // "Cannot coerce the result to a single JSON object".
+      // Ahora intentamos actualizar, revisamos si realmente regresó una fila y, si no existe,
+      // hacemos insert. También evitamos .single() para no romper cuando el resultado está vacío.
+      if(isUuid(product.id)) {
+        const updateResult = await supabaseClient
+          .from("products")
+          .update(payload)
+          .eq("id", product.id)
+          .select()
+          .limit(1);
+
+        if(updateResult.error) throw updateResult.error;
+
+        if(Array.isArray(updateResult.data) && updateResult.data.length > 0) {
+          return fromRemoteProduct(updateResult.data[0], product.priceHistory || []);
+        }
+      }
+
+      const insertResult = await supabaseClient
+        .from("products")
+        .insert(payload)
+        .select()
+        .limit(1);
+
+      if(insertResult.error) throw insertResult.error;
+
+      if(!Array.isArray(insertResult.data) || insertResult.data.length === 0) {
+        throw new Error("Supabase no devolvió el producto guardado.");
+      }
+
+      return fromRemoteProduct(insertResult.data[0], product.priceHistory || []);
+    }
     async function insertRemoteHistory(productId, entry) { if(!supabaseClient || !currentUser || !isUuid(productId)) return; const payload = { product_id: productId, previous_price: entry.previousPrice, new_price: Number(entry.price || 0), source: entry.source || "manual", note: entry.note || null }; const { error } = await supabaseClient.from("price_history").insert(payload); if(error) throw error; }
     async function deleteRemoteProduct(id) { if(!supabaseClient || !currentUser || !isUuid(id)) return; const { error } = await supabaseClient.from("products").delete().eq("id", id); if(error) alert("No se pudo borrar en Supabase: " + error.message); else recordSyncEvent("remote_deleted", "Producto borrado en Supabase", "cloud"); }
     async function migrateLocalToSupabase() { if(!currentUser) return alert("Primero inicia sesión en Supabase."); const products = getProducts(); if(!products.length) return alert("No hay productos locales para migrar."); if(!confirm(`Se subirán ${products.length} producto(s) locales a Supabase. ¿Continuar?`)) return; const migrated=[]; try { for(const p of products) { const inserted = await upsertRemoteProduct({...p, id: isUuid(p.id) ? p.id : ""}); for(const h of (p.priceHistory||[]).slice().reverse()) await insertRemoteHistory(inserted.id, h); migrated.push(inserted); } saveProducts(migrated, "migrated_to_supabase"); alert("Migración completada. Tus productos ya están en Supabase."); await refreshRemoteProducts(false); } catch(e) { alert("Error al migrar: " + e.message); recordSyncEvent("migration_error", e.message, "error"); } }
@@ -641,7 +679,7 @@
     function recordSyncEvent(action, message, mode = currentUser ? "cloud" : "local") { const log = getSyncLog(); log.unshift({ id:generateId(), action, message, mode, date:new Date().toISOString() }); localStorage.setItem(SYNC_LOG_KEY, JSON.stringify(log.slice(0,80))); }
 
     function downloadJson(data, fileName) { const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"}); const url = URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
-    function exportProductsJson() { downloadJson({ app:"DealWatch MX", project:"Appcomercio", type:"dealwatch-products-backup", version:"9.2-supabase", exportedAt:new Date().toISOString(), totalProducts:getProducts().length, products:getProducts() }, `dealwatch-mx-respaldo-${new Date().toISOString().slice(0,10)}.json`); }
+    function exportProductsJson() { downloadJson({ app:"DealWatch MX", project:"Appcomercio", type:"dealwatch-products-backup", version:"9.3-supabase-fix", exportedAt:new Date().toISOString(), totalProducts:getProducts().length, products:getProducts() }, `dealwatch-mx-respaldo-${new Date().toISOString().slice(0,10)}.json`); }
     function prepareImportJson(mode) { pendingImportMode=mode; const input=document.getElementById("importJsonInput"); input.value=""; input.click(); }
     function importProductsJson(event) { const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try { const parsed=JSON.parse(reader.result); const raw=Array.isArray(parsed) ? parsed : parsed.products; if(!Array.isArray(raw)) throw new Error("sin productos"); const clean=raw.map(migrateProduct); if(pendingImportMode==="replace") { if(!confirm("¿Reemplazar productos locales por el JSON?")) return; saveProducts(clean,"json_import_replace"); } else saveProducts([...clean.map(p=>({...p,id:generateId(),importedAt:new Date().toISOString()})), ...getProducts()],"json_import_merge"); alert("JSON importado correctamente."); } catch(e){ alert("JSON inválido para DealWatch MX."); } }; reader.readAsText(file); }
 
