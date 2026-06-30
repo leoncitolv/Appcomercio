@@ -882,11 +882,11 @@
     <!-- INICIO -->
     <section class="screen active" id="screen-home">
       <div class="hero">
-        <small>🛒 Fase 3 · Favoritos completos</small>
-        <h2>Organiza tus productos favoritos.</h2>
+        <small>🛒 Fase 3.1 · Favoritos + JSON</small>
+        <h2>Organiza y respalda tus productos.</h2>
         <p>
-          Busca, filtra, edita y administra productos por tienda, categoría,
-          precio actual y precio objetivo.
+          Busca, filtra, edita y administra productos. Además, exporta o importa
+          respaldos JSON para no perder tu información.
         </p>
 
         <div class="hero-actions">
@@ -922,7 +922,7 @@
       <section class="section">
         <div class="section-header">
           <h3>Accesos rápidos</h3>
-          <span>Fase 3</span>
+          <span>Fase 3.1</span>
         </div>
 
         <div class="quick-actions">
@@ -941,7 +941,7 @@
           <article class="action-card" onclick="goToScreen('admin')">
             <div class="action-icon orange">✏️</div>
             <strong>Administrar</strong>
-            <p>Agrega, edita o elimina productos guardados.</p>
+            <p>Agrega, edita, elimina, importa o exporta JSON.</p>
           </article>
 
           <article class="action-card" onclick="goToScreen('settings')">
@@ -1032,7 +1032,7 @@
         <div class="admin-card" id="loginCard">
           <strong>Entrar al modo administrador</strong>
           <span>
-            Ingresa la clave local para agregar, editar y eliminar productos.
+            Ingresa la clave local para agregar, editar, eliminar, importar y exportar productos.
           </span>
 
           <div class="warning">
@@ -1208,6 +1208,39 @@
               </button>
             </div>
           </div>
+
+          <div class="admin-card">
+            <strong>Respaldo JSON</strong>
+            <span>
+              Exporta todos tus productos guardados a un archivo .json o importa un respaldo anterior.
+            </span>
+
+            <div class="warning">
+              Importar y reemplazar borrará los productos actuales y cargará los del archivo JSON.
+            </div>
+
+            <div class="form-actions" style="margin-top:16px;">
+              <button class="btn btn-primary" type="button" onclick="exportProductsJson()">
+                Exportar JSON
+              </button>
+
+              <button class="btn btn-soft" type="button" onclick="prepareImportJson('merge')">
+                Importar y sumar
+              </button>
+
+              <button class="btn btn-danger" type="button" onclick="prepareImportJson('replace')">
+                Importar y reemplazar
+              </button>
+            </div>
+
+            <input
+              type="file"
+              id="importJsonInput"
+              accept=".json,application/json"
+              style="display:none;"
+              onchange="importProductsJson(event)"
+            />
+          </div>
         </div>
       </section>
     </section>
@@ -1265,7 +1298,7 @@
           <div class="setting-row">
             <div>
               <strong>Datos locales</strong>
-              <span>Los productos se guardan en el navegador con localStorage.</span>
+              <span>Los productos se guardan en el navegador con localStorage. Puedes respaldarlos desde Admin → Respaldo JSON.</span>
             </div>
             <div style="font-size: 24px;">💾</div>
           </div>
@@ -1308,6 +1341,8 @@
     const OLD_PRODUCTS_KEY = "dealwatch_products_v2";
     const ADMIN_KEY = "dealwatch_admin_active";
     const THEME_KEY = "dealwatch_theme";
+
+    let pendingImportMode = "merge";
 
     const root = document.documentElement;
     const themeButton = document.getElementById("themeButton");
@@ -1412,7 +1447,8 @@
         url: normalizeUrl(product.url || ""),
         notes: product.notes || "",
         createdAt: product.createdAt || new Date().toISOString(),
-        updatedAt: product.updatedAt || new Date().toISOString()
+        updatedAt: product.updatedAt || new Date().toISOString(),
+        importedAt: product.importedAt || ""
       };
     }
 
@@ -1882,6 +1918,138 @@
       setAdminActive(false);
       resetProductForm();
       goToScreen("home");
+    }
+
+    function exportProductsJson() {
+      if (!isAdminActive()) {
+        alert("Primero entra como administrador.");
+        return;
+      }
+
+      const products = getProducts();
+
+      const backupData = {
+        app: "DealWatch MX",
+        project: "Appcomercio",
+        type: "dealwatch-products-backup",
+        version: "3.1",
+        exportedAt: new Date().toISOString(),
+        totalProducts: products.length,
+        products: products
+      };
+
+      const jsonText = JSON.stringify(backupData, null, 2);
+      const blob = new Blob([jsonText], {
+        type: "application/json"
+      });
+
+      const date = new Date().toISOString().slice(0, 10);
+      const fileName = `dealwatch-mx-respaldo-${date}.json`;
+
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = downloadUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+    }
+
+    function prepareImportJson(mode) {
+      if (!isAdminActive()) {
+        alert("Primero entra como administrador.");
+        return;
+      }
+
+      pendingImportMode = mode;
+      const input = document.getElementById("importJsonInput");
+
+      input.value = "";
+      input.click();
+    }
+
+    function importProductsJson(event) {
+      if (!isAdminActive()) {
+        alert("Primero entra como administrador.");
+        return;
+      }
+
+      const file = event.target.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = function () {
+        try {
+          const parsedData = JSON.parse(reader.result);
+
+          let importedProducts = [];
+
+          if (Array.isArray(parsedData)) {
+            importedProducts = parsedData;
+          } else if (Array.isArray(parsedData.products)) {
+            importedProducts = parsedData.products;
+          } else {
+            throw new Error("El archivo JSON no tiene productos válidos.");
+          }
+
+          const cleanProducts = importedProducts
+            .map(product => migrateProduct(product))
+            .filter(product => product.name && Number(product.currentPrice) >= 0);
+
+          if (cleanProducts.length === 0) {
+            throw new Error("El archivo no contiene productos válidos.");
+          }
+
+          if (pendingImportMode === "replace") {
+            const confirmReplace = confirm(
+              `Se reemplazarán tus productos actuales por ${cleanProducts.length} producto(s) del JSON. ¿Continuar?`
+            );
+
+            if (!confirmReplace) {
+              return;
+            }
+
+            const replacedProducts = cleanProducts.map(product => ({
+              ...product,
+              updatedAt: new Date().toISOString()
+            }));
+
+            saveProducts(replacedProducts);
+            resetProductForm();
+            alert("Respaldo importado correctamente. Se reemplazaron los productos actuales.");
+            return;
+          }
+
+          const currentProducts = getProducts();
+
+          const importedWithNewIds = cleanProducts.map(product => ({
+            ...product,
+            id: generateId(),
+            importedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }));
+
+          saveProducts([
+            ...importedWithNewIds,
+            ...currentProducts
+          ]);
+
+          resetProductForm();
+          alert("Productos importados y sumados correctamente.");
+        } catch (error) {
+          alert("No se pudo importar el archivo JSON. Revisa que sea un respaldo válido de DealWatch MX.");
+          console.log("Error al importar JSON:", error);
+        }
+      };
+
+      reader.readAsText(file);
     }
 
     document.getElementById("loginForm").addEventListener("submit", event => {
