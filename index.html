@@ -649,13 +649,14 @@
     function toggleTheme() { setTheme((localStorage.getItem(THEME_KEY)||"light") === "dark" ? "light" : "dark"); }
 
     function getFilteredProducts(products) {
-      const search = String(document.getElementById("searchInput").value || "").trim().toLowerCase();
-      const store = document.getElementById("storeFilter").value;
-      const category = document.getElementById("categoryFilter").value;
-      const onlyOffers = document.getElementById("onlyOffersFilter").checked;
+      const search = String(document.getElementById("searchInput")?.value || "").trim().toLowerCase();
+      const list = document.getElementById("listFilter")?.value || "";
+      const store = document.getElementById("storeFilter")?.value || "";
+      const category = document.getElementById("categoryFilter")?.value || "";
+      const onlyOffers = !!document.getElementById("onlyOffersFilter")?.checked;
       return products.filter(p => {
-        const text = [p.name,p.store,p.category,p.priority,p.notes].join(" ").toLowerCase();
-        return (!search || text.includes(search)) && (!list || p.dealList===list) && (!store || p.store===store) && (!category || p.category===category) && (!onlyOffers || productHasActiveAlert(p));
+        const text = [p.name, p.store, p.category, p.dealList, p.priority, p.notes].join(" ").toLowerCase();
+        return (!search || text.includes(search)) && (!list || p.dealList === list) && (!store || p.store === store) && (!category || p.category === category) && (!onlyOffers || productHasActiveAlert(p));
       });
     }
     function updateFilterOptions(products) {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-pwa-v16-listas-loginfix2";
+const CACHE_NAME = "dealwatch-mx-pwa-fase16-listfix-v2";
 
 self.addEventListener("install", event => {
   self.skipWaiting();
@@ -29,25 +29,15 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET") {
-    return;
-  }
+  if (event.request.method !== "GET") return;
 
   event.respondWith(
     fetch(event.request)
       .then(response => {
         const responseClone = response.clone();
-
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseClone);
-        });
-
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
         return response;
       })
-      .catch(() => {
-        return caches.match(event.request).then(cachedResponse => {
-          return cachedResponse || caches.match("./index.html");
-        });
-      })
+      .catch(() => caches.match(event.request).then(cachedResponse => cachedResponse || caches.match("./index.html")))
   );
 });
