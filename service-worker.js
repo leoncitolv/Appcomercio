@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-cloudfirst-savefix-v1";
+const CACHE_NAME = "dealwatch-mx-list-manager-v1";
 
 self.addEventListener("install", event => {
   self.skipWaiting();
