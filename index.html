@@ -308,7 +308,7 @@
     <section id="screen-cloud" class="screen">
       <div class="section-head"><h3>Nube</h3><span id="cloudStatusText">Conectando...</span></div>
       <div id="loginCard" class="card"><h3 style="margin:0 0 8px">Entrar a DealWatch</h3><p class="hint">Usa tu correo y contraseña. Si te invitaron, crea cuenta con el mismo correo.</p><div class="form" style="margin-top:14px"><div class="field"><label>Correo</label><input id="email" type="email" placeholder="tu-correo@ejemplo.com"></div><div class="field"><label>Contraseña</label><input id="password" type="password" placeholder="Contraseña"></div><div class="cta" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" onclick="signIn()">Iniciar sesión</button><button class="btn btn-soft" onclick="signUp()">Crear cuenta</button><button class="btn btn-soft" onclick="resetPassword()">Olvidé mi contraseña</button></div></div></div>
-      <div id="sessionCard" class="card hide"><div class="status-row"><div class="status-ico">☁️</div><div><div class="status-title">Nube ON</div><div class="status-meta" id="sessionEmail">Sesión activa</div></div><div class="check">✓</div></div><div class="status-list" style="margin-top:12px"><div class="status-row"><div class="status-ico">📣</div><div><div class="status-title">Telegram conectado</div><div class="status-meta">Un solo grupo para todos los avisos.</div></div><div class="check">✓</div></div><div class="status-row"><div class="status-ico">🔄</div><div><div class="status-title">Última sincronización</div><div class="status-meta" id="lastSync">Pendiente</div></div><div class="check">✓</div></div></div><div class="cta" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button id="syncButton" type="button" class="btn btn-primary" onclick="syncFromCloud(true)">Sincronizar ahora</button><button class="btn btn-soft" onclick="acceptInvites()">Aceptar invitaciones</button><button class="btn btn-danger" onclick="signOut()">Cerrar sesión</button></div></div>
+      <div id="sessionCard" class="card hide"><div class="status-row"><div class="status-ico">☁️</div><div><div class="status-title">Nube ON</div><div class="status-meta" id="sessionEmail">Sesión activa</div></div><div class="check">✓</div></div><div class="status-list" style="margin-top:12px"><div class="status-row"><div class="status-ico">📣</div><div><div class="status-title">Telegram conectado</div><div class="status-meta">Un solo grupo para todos los avisos.</div></div><div class="check">✓</div></div><div class="status-row"><div class="status-ico">🔄</div><div><div class="status-title">Última sincronización</div><div class="status-meta" id="lastSync">Pendiente</div></div><div class="check">✓</div></div><div class="status-row"><div class="status-ico">⚡</div><div><div class="status-title">Sincronización en vivo</div><div class="status-meta" id="realtimeStatus">Pendiente</div></div><div class="check" id="realtimeCheck">…</div></div></div><div class="cta" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button id="syncButton" type="button" class="btn btn-primary" onclick="syncFromCloud(true)">Sincronizar ahora</button><button class="btn btn-soft" onclick="acceptInvites()">Aceptar invitaciones</button><button class="btn btn-danger" onclick="signOut()">Cerrar sesión</button></div></div>
       <section class="section"><div class="section-head"><h3>Equipo</h3><span id="roleLabel">sin equipo</span></div><div class="card"><div class="field"><label>Equipo actual</label><select id="workspaceSelect" onchange="selectWorkspace(this.value)"></select></div><div id="membersList" class="status-list" style="margin-top:12px"></div><details style="margin-top:12px"><summary>Agregar familiar o amigo</summary><div class="form" style="margin-top:14px"><div class="field"><label>Correo</label><input id="inviteEmail" type="email" placeholder="correo@ejemplo.com"></div><div class="field"><label>Rol</label><select id="inviteRole"><option value="viewer">viewer · solo consulta</option><option value="admin">admin · puede editar</option></select></div><button class="btn btn-primary" onclick="inviteMember()">Agregar al equipo</button><p class="hint">La persona debe abrir la app, crear su cuenta con ese correo y presionar “Aceptar invitaciones”.</p></div></details></div></section>
       <section class="section"><div class="section-head"><h3>Listas y categorías</h3><span>personaliza</span></div><div class="card"><details open><summary>Administrar listas</summary><p class="hint" style="margin:10px 0 14px">Quita o renombra listas para dejar solo las que realmente uses. Si renombras una lista, los productos de esa lista también se actualizan.</p><div id="listManager" class="status-list"></div><div class="form" style="margin-top:14px"><div class="field"><label>Nueva lista</label><input id="newListName" placeholder="Ej. Familia · Mascotas"></div><div class="cta" style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn btn-primary" onclick="addDealList()">Agregar lista</button><button type="button" class="btn btn-soft" onclick="resetDealLists()">Restaurar sugeridas</button></div></div></details></div></section>
       <section class="section"><div class="section-head"><h3>Respaldo</h3><span>opcional</span></div><div class="card"><div class="cta" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-soft" onclick="exportJson()">Exportar JSON</button><button class="btn btn-soft" onclick="document.getElementById('importFile').click()">Importar JSON</button><button class="btn btn-soft" onclick="clearCache()">Limpiar caché</button><input id="importFile" class="hide" type="file" accept=".json,application/json" onchange="importJson(event)"></div></div></section>
@@ -324,7 +324,7 @@
     const THEME_KEY = "dealwatch_theme";
     const LISTS_KEY = "dealwatch_deal_lists_v3";
     const DEFAULT_LISTS = ["Familia · Despensa","Familia · Hogar","Familia · Tecnología","Familia · Salud","Familia · Regalos","Amigos gaming · Controles","Amigos gaming · Juegos","Amigos gaming · Audífonos","Amigos gaming · Monitores","Compras personales · Ropa","Compras personales · Celulares","Compras personales · Herramientas","Compras personales · Ofertas especiales"];
-    let sb=null, currentUser=null, workspaces=[], currentWorkspace=null, currentRole="viewer", products=[], alertEvents=[], monitorResults=[], formAlerts=true, activeList="", dealLists=loadListsLocal();
+    let sb=null, currentUser=null, workspaces=[], currentWorkspace=null, currentRole="viewer", products=[], alertEvents=[], monitorResults=[], formAlerts=true, activeList="", dealLists=loadListsLocal(), realtimeChannel=null, realtimeWorkspaceId=null, realtimeState="Pendiente", realtimeRefreshTimer=null;
     const $=id=>document.getElementById(id);
     const money=n=>Number(n||0).toLocaleString("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});
     const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
@@ -481,7 +481,7 @@
     function filtered(){ const q=($('searchInput')?.value||'').trim().toLowerCase(); return products.filter(p=>(!activeList||p.dealList.startsWith(activeList)) && (!q||[p.name,p.store,p.dealList,p.category,p.notes].join(' ').toLowerCase().includes(q))); }
     function renderProducts(){ if(!$('productList'))return; renderListTabs(); const list=filtered(); $('productCount').textContent=`${list.length} de ${products.length}`; $('productList').innerHTML=list.map(p=>productRow(p,{actions:true})).join('')||`<div class="empty card"><b>No encontré productos</b>Agrega uno o cambia el filtro.</div>`; $('adminList').innerHTML=products.slice(0,8).map(p=>productRow(p,{actions:true})).join('')||`<div class="empty card"><b>Aún no hay productos</b>Agrega tu primer producto en segundos.</div>`; }
     function renderAlerts(){ const active=products.filter(isOffer); $('alertCount').textContent=active.length+' activas'; $('activeAlerts').innerHTML=active.map(p=>productRow(p,{actions:true})).join('')||`<div class="empty card"><b>Sin alertas por ahora</b>Todo sigue vigilándose.</div>`; $('alertEvents').innerHTML=(alertEvents||[]).slice(0,6).map(e=>`<div class="status-row"><div class="status-ico">🔥</div><div><div class="status-title">${esc(e.title||e.product_name||'Oferta detectada')}</div><div class="status-meta">${esc(e.deal_list||e.raw?.dealList||'Lista general')} · ${new Date(e.created_at||Date.now()).toLocaleString('es-MX')}</div></div><div class="check">›</div></div>`).join('')||`<div class="empty"><b>Sin eventos recientes</b>Cuando el robot encuentre una oferta aparecerá aquí.</div>`; }
-    function renderCloud(){ const logged=!!currentUser; $('loginCard').classList.toggle('hide',logged); $('sessionCard').classList.toggle('hide',!logged); $('cloudStatusText').textContent=logged?'Sesión activa':'Sin sesión'; $('sessionEmail').textContent=logged?currentUser.email:'Sin sesión'; $('roleLabel').textContent=currentWorkspace?`${currentWorkspace.name} · ${currentRole}`:'sin equipo'; $('workspaceSelect').innerHTML=workspaces.map(w=>`<option value="${w.id}" ${currentWorkspace&&w.id===currentWorkspace.id?'selected':''}>${esc(w.name)}</option>`).join('')||`<option>Sin equipo</option>`; }
+    function renderCloud(){ const logged=!!currentUser; $('loginCard').classList.toggle('hide',logged); $('sessionCard').classList.toggle('hide',!logged); $('cloudStatusText').textContent=logged?'Sesión activa':'Sin sesión'; $('sessionEmail').textContent=logged?currentUser.email:'Sin sesión'; $('roleLabel').textContent=currentWorkspace?`${currentWorkspace.name} · ${currentRole}`:'sin equipo'; $('workspaceSelect').innerHTML=workspaces.map(w=>`<option value="${w.id}" ${currentWorkspace&&w.id===currentWorkspace.id?'selected':''}>${esc(w.name)}</option>`).join('')||`<option>Sin equipo</option>`; updateRealtimeStatus(realtimeState,false); }
     function clearFilters(){activeList='';$('searchInput').value='';renderProducts();}
     function toggleFormAlert(){formAlerts=!formAlerts;$('alertSwitch').classList.toggle('on',formAlerts);}
     function fillForm(p){ $('productId').value=p.id;$('name').value=p.name;$('store').value=p.store;$('url').value=p.url;$('currentPrice').value=p.currentPrice;$('targetPrice').value=p.targetPrice;{ const lists=allVisibleLists(); if(!lists.includes(p.dealList)){ dealLists=cleanLists([...dealLists,p.dealList]); renderDealListSelect(); } $('dealList').value=p.dealList; }$('normalPrice').value=p.normalPrice;$('discount').value=p.minDiscount;$('category').value=p.category;$('notes').value=p.notes;formAlerts=p.alertEnabled;$('alertSwitch').classList.toggle('on',formAlerts);$('formTitle').textContent='Editar producto';go('add');}
@@ -566,7 +566,7 @@
     async function signIn(){ try{ const client=await ensureSupabase(); const email=$('email').value.trim(); const password=$('password').value; const {data,error}=await client.auth.signInWithPassword({email,password}); if(error) throw error; currentUser=data.user; await bootCloud(); toast('Sesión iniciada.'); }catch(e){toast('No se pudo iniciar sesión: '+(e.message||e));} }
     async function signUp(){ try{ const client=await ensureSupabase(); const email=$('email').value.trim(); const password=$('password').value; const {error}=await client.auth.signUp({email,password}); if(error) throw error; toast('Cuenta creada. Ahora inicia sesión.'); }catch(e){toast('No se pudo crear cuenta: '+(e.message||e));} }
     async function resetPassword(){ try{ const client=await ensureSupabase(); const email=$('email').value.trim(); if(!email)return toast('Escribe tu correo.'); const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:location.href}); if(error) throw error; toast('Te enviamos un correo para recuperar contraseña.'); }catch(e){toast('No se pudo enviar recuperación: '+(e.message||e));} }
-    async function signOut(){ try{await (await ensureSupabase()).auth.signOut();}catch(e){} currentUser=null;currentWorkspace=null;workspaces=[];currentRole='viewer';renderAll(); }
+    async function signOut(){ try{await removeRealtimeChannel(); await (await ensureSupabase()).auth.signOut();}catch(e){} currentUser=null;currentWorkspace=null;workspaces=[];currentRole='viewer';realtimeState='Pendiente';renderAll(); }
     let syncBusy=false;
     function withTimeout(promise,label='operación',ms=22000){
       return Promise.race([
@@ -575,6 +575,100 @@
       ]);
     }
     async function q(query,label){ return withTimeout(query,label); }
+    function updateRealtimeStatus(text,render=false){
+      realtimeState=text||realtimeState||'Pendiente';
+      const status=$('realtimeStatus');
+      const check=$('realtimeCheck');
+      if(status) status.textContent=realtimeState;
+      if(check){
+        if(String(realtimeState).toLowerCase().includes('activo')) check.textContent='✓';
+        else if(String(realtimeState).toLowerCase().includes('error')||String(realtimeState).toLowerCase().includes('no disponible')) check.textContent='!';
+        else check.textContent='…';
+      }
+      if(render) renderCloud();
+    }
+    async function removeRealtimeChannel(){
+      const client=sb||await ensureSupabase().catch(()=>null);
+      if(client&&realtimeChannel){
+        try{ await client.removeChannel(realtimeChannel); }catch(e){ console.warn('removeRealtimeChannel',e); }
+      }
+      realtimeChannel=null;
+      realtimeWorkspaceId=null;
+      if(realtimeRefreshTimer){ clearTimeout(realtimeRefreshTimer); realtimeRefreshTimer=null; }
+    }
+    function touchLiveSyncLabel(msg='Actualizado en vivo'){
+      const now=new Date().toLocaleString('es-MX');
+      const label=`${msg} · ${now}`;
+      localStorage.setItem('dealwatch_last_sync_label',label);
+      const last=$('lastSync');
+      if(last && !syncBusy) last.textContent=label;
+    }
+    function upsertLocalProduct(row,source='en vivo'){
+      const p=normalizeProduct(row||{});
+      if(!p.id || (currentWorkspace&&p.workspace_id&&p.workspace_id!==currentWorkspace.id)) return;
+      const idx=products.findIndex(x=>x.id===p.id);
+      if(idx>=0) products[idx]=p; else products.unshift(p);
+      products.sort((a,b)=>new Date(b.updatedAt||0)-new Date(a.updatedAt||0));
+      localStorage.setItem(PRODUCTS_KEY,JSON.stringify(products));
+      touchLiveSyncLabel(source);
+      renderAll();
+    }
+    function removeLocalProduct(id,source='borrado en vivo'){
+      if(!id) return;
+      const next=products.filter(p=>p.id!==id);
+      if(next.length===products.length) return;
+      products=next;
+      localStorage.setItem(PRODUCTS_KEY,JSON.stringify(products));
+      touchLiveSyncLabel(source);
+      renderAll();
+    }
+    function handleProductRealtime(payload){
+      try{
+        const type=payload?.eventType;
+        if(type==='DELETE') removeLocalProduct(payload.old?.id,'Borrado en vivo');
+        else if(payload?.new) upsertLocalProduct(payload.new,'Actualizado en vivo');
+      }catch(e){ console.warn('handleProductRealtime',e); }
+    }
+    function handleAlertRealtime(payload){
+      try{
+        if(payload?.new){
+          alertEvents=[payload.new,...(alertEvents||[]).filter(e=>e.id!==payload.new.id)].slice(0,20);
+          renderAlerts();
+        }
+      }catch(e){ console.warn('handleAlertRealtime',e); }
+    }
+    async function setupRealtime(){
+      try{
+        if(!currentUser||!currentWorkspace){ await removeRealtimeChannel(); updateRealtimeStatus('Pendiente'); return; }
+        if(realtimeChannel && realtimeWorkspaceId===currentWorkspace.id){ updateRealtimeStatus('Activo en este equipo'); return; }
+        const client=await ensureSupabase();
+        await removeRealtimeChannel();
+        realtimeWorkspaceId=currentWorkspace.id;
+        updateRealtimeStatus('Conectando en vivo...');
+        const channelName='dealwatch-live-'+currentWorkspace.id;
+        realtimeChannel=client
+          .channel(channelName)
+          .on('postgres_changes',{event:'*',schema:'public',table:'products',filter:`workspace_id=eq.${currentWorkspace.id}`},handleProductRealtime)
+          .on('postgres_changes',{event:'INSERT',schema:'public',table:'alert_events',filter:`workspace_id=eq.${currentWorkspace.id}`},handleAlertRealtime)
+          .subscribe((status,err)=>{
+            if(status==='SUBSCRIBED') updateRealtimeStatus('Activo en este equipo');
+            else if(status==='CHANNEL_ERROR'){
+              console.warn('Realtime CHANNEL_ERROR',err);
+              updateRealtimeStatus('No disponible. Revisa Realtime en Supabase.');
+              if(realtimeRefreshTimer) clearTimeout(realtimeRefreshTimer);
+              realtimeRefreshTimer=setTimeout(()=>setupRealtime().catch(console.warn),8000);
+            }else if(status==='TIMED_OUT'){
+              updateRealtimeStatus('Reconectando en vivo...');
+              if(realtimeRefreshTimer) clearTimeout(realtimeRefreshTimer);
+              realtimeRefreshTimer=setTimeout(()=>setupRealtime().catch(console.warn),6000);
+            }else if(status==='CLOSED') updateRealtimeStatus('Cerrado');
+            else updateRealtimeStatus(status||'Conectando en vivo...');
+          });
+      }catch(e){
+        console.warn('setupRealtime',e);
+        updateRealtimeStatus('No disponible. Usa Sincronizar ahora.');
+      }
+    }
     async function loadMemberships(){
       const client=await ensureSupabase();
       const email=(currentUser?.email||'').toLowerCase().trim();
@@ -631,6 +725,7 @@
       currentWorkspace=workspaces.find(w=>w.id===id)||currentWorkspace;
       if(currentWorkspace) localStorage.setItem('dealwatch_workspace_id',currentWorkspace.id);
       await syncFromCloud(true);
+      await setupRealtime();
     }
     async function inviteMember(){
       try{
@@ -687,6 +782,7 @@
         products=(res.data||[]).map(normalizeProduct);
         localStorage.setItem(PRODUCTS_KEY,JSON.stringify(products));
         await Promise.allSettled([loadMembers(),loadMonitorData()]);
+        await setupRealtime();
         const now=new Date().toLocaleString('es-MX');
         localStorage.setItem('dealwatch_last_sync_label',now);
         renderAll();
@@ -725,6 +821,7 @@
             const res=await q(client.from('products').select('*').eq('workspace_id',currentWorkspace.id).order('updated_at',{ascending:false}),'descargar productos iniciales');
             if(!res.error){ products=(res.data||[]).map(normalizeProduct); localStorage.setItem(PRODUCTS_KEY,JSON.stringify(products)); }
             await Promise.allSettled([loadMembers(),loadMonitorData()]);
+            await setupRealtime();
           }
           renderAll();
         } else { products=getLocal(); renderAll(); }
@@ -733,8 +830,8 @@
     function exportJson(){ const blob=new Blob([JSON.stringify({app:'DealWatch MX',exportedAt:new Date().toISOString(),products},null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='dealwatch-respaldo.json'; a.click(); URL.revokeObjectURL(a.href); }
     function importJson(ev){ const f=ev.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{try{ const data=JSON.parse(r.result); const imported=(Array.isArray(data)?data:data.products||[]).map(normalizeProduct); saveLocal([...imported,...products]); toast('Respaldo importado.'); }catch(e){toast('JSON inválido.');}}; r.readAsText(f); }
     async function clearCache(){ if('serviceWorker' in navigator){ const regs=await navigator.serviceWorker.getRegistrations(); for(const r of regs) await r.unregister(); } const keys=await caches.keys(); for(const k of keys) await caches.delete(k); toast('Caché limpiado. Recarga la app.'); }
-    async function init(){ products=getLocal(); renderAll(); await ensureSupabase().catch(console.warn); if(sb){ sb.auth.onAuthStateChange(async (_event,session)=>{currentUser=session?.user||null; if(currentUser){ await bootCloud(); } else { currentWorkspace=null; workspaces=[]; currentRole='viewer'; renderAll(); } }); } await bootCloud(); }
-    init(); if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(console.warn)); }
+    async function init(){ products=getLocal(); renderAll(); await ensureSupabase().catch(console.warn); if(sb){ sb.auth.onAuthStateChange(async (_event,session)=>{currentUser=session?.user||null; if(currentUser){ await bootCloud(); } else { await removeRealtimeChannel(); currentWorkspace=null; workspaces=[]; currentRole='viewer'; realtimeState='Pendiente'; renderAll(); } }); } await bootCloud(); }
+    init(); document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&currentUser){ setupRealtime().catch(console.warn); syncFromCloud(false).catch(console.warn); } }); window.addEventListener('focus',()=>{ if(currentUser){ setupRealtime().catch(console.warn); } }); window.addEventListener('online',()=>{ if(currentUser){ setupRealtime().catch(console.warn); syncFromCloud(false).catch(console.warn); } }); if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(console.warn)); }
   </script>
 </body>
 </html>

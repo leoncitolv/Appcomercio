@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-list-manager-fix-v2";
+const CACHE_NAME = "dealwatch-mx-pwa-v18-realtime";
 
 self.addEventListener("install", event => {
   self.skipWaiting();
