@@ -845,7 +845,8 @@
     }
 
     async function createWorkspacePrompt() {
-      if(!currentUser) return alert("Primero inicia sesión en Supabase.");
+      const client = await getAuthenticatedClient(true);
+      if(!client) return;
       const name = prompt("Nombre del equipo:", currentWorkspace?.name || "DealWatch MX");
       if(!name) return;
       try { await createWorkspace(name); await loadWorkspaces(true); }
@@ -1101,6 +1102,33 @@
     }
     async function testSupabaseConnection() { const client = await ensureSupabaseReady(); const { data, error } = await client.auth.getSession(); if(error) return alert("Error de conexión: " + error.message); alert(currentUser ? "Conexión OK. Sesión: " + (currentUser.email || "activa") : "Conexión OK. Falta iniciar sesión."); }
 
+    async function getAuthenticatedClient(showAlert = true) {
+      try {
+        const client = await ensureSupabaseReady();
+        if (!currentUser) {
+          const { data, error } = await client.auth.getSession();
+          if (error) throw error;
+          currentSession = data?.session || null;
+          currentUser = currentSession?.user || null;
+        }
+        if (!currentUser) {
+          if (showAlert) alert("Primero inicia sesión en Supabase.");
+          renderApp();
+          return null;
+        }
+        if (!currentWorkspaces.length || !currentWorkspace) {
+          await loadWorkspaces(false);
+        }
+        renderApp();
+        return client;
+      } catch (error) {
+        if (showAlert) alert("No se pudo recuperar la sesión de Supabase: " + (error.message || error));
+        recordSyncEvent("session_restore_error", error.message || String(error), "error");
+        renderApp();
+        return null;
+      }
+    }
+
     function getAuthRedirectUrl() {
       return location.origin + location.pathname;
     }
@@ -1175,7 +1203,7 @@
     }
 
     async function signOutSupabaseUser() { if(!supabaseClient) return; await supabaseClient.auth.signOut(); currentSession=null; currentUser=null; currentWorkspaces=[]; currentWorkspace=null; currentMembers=[]; recordSyncEvent("logout", "Sesión cerrada", "local"); renderApp(); }
-    async function refreshRemoteProducts(showAlert = true) { if(!supabaseClient || !currentUser || isLoadingRemote) { if(showAlert) alert("Primero inicia sesión en Supabase."); return; } isLoadingRemote=true; try { let productQuery = supabaseClient.from("products").select("*").order("created_at", { ascending:false });
+    async function refreshRemoteProducts(showAlert = true) { const client = await getAuthenticatedClient(showAlert); if(!client || isLoadingRemote) return; isLoadingRemote=true; try { let productQuery = supabaseClient.from("products").select("*").order("created_at", { ascending:false });
       if(currentWorkspace?.id) productQuery = productQuery.eq("workspace_id", currentWorkspace.id);
       const { data: rows, error } = await productQuery;
       if(error) throw error; const ids = (rows||[]).map(r=>r.id); let histories = []; if(ids.length) { const { data:hrows, error:herror } = await supabaseClient.from("price_history").select("*").in("product_id", ids).order("created_at", { ascending:false }); if(herror) throw herror; histories = hrows || []; }
@@ -1280,15 +1308,15 @@
       }
     }
 
-    async function migrateLocalToSupabase() { if(!currentUser) return alert("Primero inicia sesión en Supabase."); const products = getProducts(); if(!products.length) return alert("No hay productos locales para migrar."); if(!confirm(`Se subirán ${products.length} producto(s) locales a Supabase. ¿Continuar?`)) return; const migrated=[]; try { for(const p of products) { const inserted = await upsertRemoteProduct({...p, workspaceId: currentWorkspace?.id || p.workspaceId || "", id: isUuid(p.id) ? p.id : ""}); for(const h of (p.priceHistory||[]).slice().reverse()) await insertRemoteHistory(inserted.id, h); migrated.push(inserted); } saveProducts(migrated, "migrated_to_supabase"); alert("Migración completada. Tus productos ya están en Supabase."); await refreshRemoteProducts(false); } catch(e) { alert("Error al migrar: " + e.message); recordSyncEvent("migration_error", e.message, "error"); } }
+    async function migrateLocalToSupabase() { const client = await getAuthenticatedClient(true); if(!client) return; const products = getProducts(); if(!products.length) return alert("No hay productos locales para migrar."); if(!confirm(`Se subirán ${products.length} producto(s) locales a Supabase. ¿Continuar?`)) return; const migrated=[]; try { for(const p of products) { const inserted = await upsertRemoteProduct({...p, workspaceId: currentWorkspace?.id || p.workspaceId || "", id: isUuid(p.id) ? p.id : ""}); for(const h of (p.priceHistory||[]).slice().reverse()) await insertRemoteHistory(inserted.id, h); migrated.push(inserted); } saveProducts(migrated, "migrated_to_supabase"); alert("Migración completada. Tus productos ya están en Supabase."); await refreshRemoteProducts(false); } catch(e) { alert("Error al migrar: " + e.message); recordSyncEvent("migration_error", e.message, "error"); } }
     function downloadSupabasePayload() { const data = { app:"DealWatch MX", type:"supabase-payload", exportedAt:new Date().toISOString(), user: currentUser?.email || null, workspace: currentWorkspace, products:getProducts() }; downloadJson(data, `dealwatch-supabase-payload-${new Date().toISOString().slice(0,10)}.json`); }
 
 
     async function refreshMonitorStatus(showAlert=false) {
       const box = document.getElementById("monitorStatusList");
       if (!box) return;
-      if (!supabaseClient || !currentUser) {
-        if (showAlert) alert("Primero inicia sesión en Supabase.");
+      const client = await getAuthenticatedClient(showAlert);
+      if (!client) {
         box.innerHTML = `<div class="empty-card"><div class="big">☁️</div><strong>Inicia sesión</strong>El monitoreo se consulta desde Supabase.</div>`;
         return;
       }
