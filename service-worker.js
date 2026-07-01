@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-interfaz-simple-syncfix-v1";
+const CACHE_NAME = "dealwatch-mx-ios-syncfix-v2";
 
 self.addEventListener("install", event => {
   self.skipWaiting();

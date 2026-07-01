@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b63f6" />
+  <meta name="theme-color" content="#050b16" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Interfaz simple</title>
+  <title>DealWatch MX | App simple</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -198,6 +198,77 @@
       color:#b6c2d2;
     }
 
+  
+
+    /* ===== iOS App Polish + Sync Fix UI ===== */
+    html{background:#050b16;min-height:100%;}
+    body{
+      min-height:100dvh;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+      overscroll-behavior-y:none;
+    }
+    [data-theme="dark"] body{
+      background:
+        radial-gradient(circle at 12% -8%,rgba(80,140,255,.35),transparent 30%),
+        radial-gradient(circle at 105% 4%,rgba(55,213,255,.16),transparent 27%),
+        linear-gradient(180deg,#06101e 0%,#050b16 42%,#020611 100%);
+    }
+    .app{padding-top:calc(12px + env(safe-area-inset-top));}
+    .top{
+      top:0;
+      padding-top:calc(14px + env(safe-area-inset-top));
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    [data-theme="dark"] .top{
+      background:linear-gradient(180deg,rgba(5,11,22,.98),rgba(5,11,22,.84) 68%,rgba(5,11,22,.25));
+      box-shadow:0 14px 32px rgba(0,0,0,.22);
+    }
+    [data-theme="dark"] .brand h1{color:#fff;}
+    [data-theme="dark"] .sub{color:#c5d0df;}
+    [data-theme="dark"] .section-head h3{color:#fff;}
+    [data-theme="dark"] .section-head span{color:#c2ccdc;}
+    [data-theme="dark"] .card,
+    [data-theme="dark"] .product-card{
+      background:linear-gradient(180deg,rgba(17,25,42,.98),rgba(10,17,30,.98));
+      border:1px solid rgba(255,255,255,.11);
+      box-shadow:0 18px 46px rgba(0,0,0,.42);
+    }
+    [data-theme="dark"] .status-row,
+    [data-theme="dark"] .toggle-row,
+    [data-theme="dark"] .price-box,
+    [data-theme="dark"] .field input,
+    [data-theme="dark"] .field select,
+    [data-theme="dark"] .field textarea,
+    [data-theme="dark"] .simple-input{
+      background:rgba(18,27,45,.92);
+      border-color:rgba(255,255,255,.13);
+    }
+    [data-theme="dark"] .status-ico,
+    [data-theme="dark"] .thumb{
+      background:linear-gradient(145deg,rgba(79,140,255,.20),rgba(55,213,255,.08));
+      border:1px solid rgba(255,255,255,.08);
+    }
+    [data-theme="dark"] .list-card{box-shadow:0 12px 28px rgba(0,0,0,.24);}
+    [data-theme="dark"] .familia{background:linear-gradient(145deg,rgba(34,197,94,.24),rgba(34,197,94,.10));color:#dbffe8;border:1px solid rgba(34,197,94,.18)}
+    [data-theme="dark"] .gaming{background:linear-gradient(145deg,rgba(139,92,246,.26),rgba(139,92,246,.10));color:#f0e8ff;border:1px solid rgba(139,92,246,.18)}
+    [data-theme="dark"] .personal{background:linear-gradient(145deg,rgba(245,158,11,.24),rgba(245,158,11,.10));color:#fff4d8;border:1px solid rgba(245,158,11,.18)}
+    [data-theme="dark"] .list-card small{color:rgba(255,255,255,.70)}
+    [data-theme="dark"] .nav{
+      background:rgba(8,14,26,.86);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 18px 50px rgba(0,0,0,.58);
+    }
+    [data-theme="dark"] .nav button.active{
+      background:linear-gradient(145deg,rgba(79,140,255,.34),rgba(11,99,246,.18));
+      color:#dbe9ff;
+    }
+    .btn[disabled],button[disabled]{opacity:.72;filter:saturate(.8);cursor:not-allowed;}
+    .sync-note{font-size:.78rem;font-weight:800;color:var(--muted);margin-top:8px;}
+    @supports (padding: max(0px)){
+      .app{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right));}
+    }
+
   </style>
 </head>
 <body>
@@ -293,25 +364,106 @@
     async function signUp(){ try{ const client=await ensureSupabase(); const email=$('email').value.trim(); const password=$('password').value; const {error}=await client.auth.signUp({email,password}); if(error) throw error; toast('Cuenta creada. Ahora inicia sesión.'); }catch(e){toast('No se pudo crear cuenta: '+(e.message||e));} }
     async function resetPassword(){ try{ const client=await ensureSupabase(); const email=$('email').value.trim(); if(!email)return toast('Escribe tu correo.'); const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:location.href}); if(error) throw error; toast('Te enviamos un correo para recuperar contraseña.'); }catch(e){toast('No se pudo enviar recuperación: '+(e.message||e));} }
     async function signOut(){ try{await (await ensureSupabase()).auth.signOut();}catch(e){} currentUser=null;currentWorkspace=null;workspaces=[];currentRole='viewer';renderAll(); }
-    async function loadMemberships(){ const client=await ensureSupabase(); const email=currentUser.email.toLowerCase(); const byUser=await client.from('workspace_members').select('*').eq('user_id',currentUser.id); const byEmail=await client.from('workspace_members').select('*').ilike('invited_email',email); const all=[...(byUser.data||[]),...(byEmail.data||[])].filter((v,i,a)=>a.findIndex(x=>x.id===v.id)===i); return all; }
-    async function ensureWorkspace(){ const client=await ensureSupabase(); let mems=await loadMemberships(); let active=mems.filter(m=>m.status==='active'); if(!active.length && mems.some(m=>m.status==='pending')) return {pending:true}; if(!active.length){ const {data:ws,error:e1}=await client.from('workspaces').insert({name:'DealWatch MX',owner_id:currentUser.id}).select().single(); if(e1) throw e1; const {error:e2}=await client.from('workspace_members').insert({workspace_id:ws.id,user_id:currentUser.id,role:'owner',status:'active'}); if(e2) throw e2; active=[{workspace_id:ws.id,role:'owner',status:'active'}]; }
-      const ids=active.map(m=>m.workspace_id); const {data:wsList,error}=await client.from('workspaces').select('*').in('id',ids); if(error) throw error; workspaces=wsList||[]; const saved=localStorage.getItem('dealwatch_workspace_id'); currentWorkspace=workspaces.find(w=>w.id===saved)||workspaces[0]||null; const mem=active.find(m=>m.workspace_id===currentWorkspace?.id); currentRole=mem?.role||'viewer'; return {pending:false}; }
-    async function acceptInvites(){ try{ const user=await getSession(); if(!user)return toast('Primero inicia sesión.'); const mems=await loadMemberships(); const pending=mems.filter(m=>m.status==='pending'); if(!pending.length)return toast('No hay invitaciones pendientes.'); const client=await ensureSupabase(); for(const m of pending){ await client.from('workspace_members').update({user_id:currentUser.id,status:'active'}).eq('id',m.id); } await bootCloud(); toast('Invitación aceptada.'); }catch(e){toast('No se pudo aceptar invitación: '+(e.message||e));} }
-    async function selectWorkspace(id){currentWorkspace=workspaces.find(w=>w.id===id)||currentWorkspace;localStorage.setItem('dealwatch_workspace_id',currentWorkspace?.id||'');await syncFromCloud();}
-    async function inviteMember(){ try{ if(!['owner','admin'].includes(currentRole))return toast('Tu rol no permite agregar personas.'); const email=$('inviteEmail').value.trim().toLowerCase(); if(!email)return toast('Escribe el correo.'); const role=$('inviteRole').value; const {error}=await (await ensureSupabase()).from('workspace_members').insert({workspace_id:currentWorkspace.id,invited_email:email,role,status:'pending'}); if(error) throw error; $('inviteEmail').value=''; await loadMembers(); toast('Invitación creada. Mándale el link de la app.'); }catch(e){toast('No se pudo agregar: '+(e.message||e));} }
-    async function loadMembers(){ if(!currentWorkspace)return; const {data}=await (await ensureSupabase()).from('workspace_members').select('*').eq('workspace_id',currentWorkspace.id).order('created_at',{ascending:true}); $('membersList').innerHTML=(data||[]).map(m=>`<div class="status-row"><div class="status-ico">👤</div><div><div class="status-title">${esc(m.user_id===currentUser?.id?'Tú':(m.invited_email||'Miembro'))}</div><div class="status-meta">Rol: ${esc(m.role)} · Estado: ${esc(m.status)}</div></div><div class="check">${m.status==='active'?'✓':'…'}</div></div>`).join('')||'<div class="empty">Sin miembros.</div>'; }
+    let syncBusy=false;
+    function withTimeout(promise,label='operación',ms=22000){
+      return Promise.race([
+        Promise.resolve(promise),
+        new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' tardó demasiado. Revisa tu conexión e intenta otra vez.')),ms))
+      ]);
+    }
+    async function q(query,label){ return withTimeout(query,label); }
+    async function loadMemberships(){
+      const client=await ensureSupabase();
+      const email=(currentUser?.email||'').toLowerCase().trim();
+      if(!currentUser) return [];
+      const [byUser,byEmail]=await Promise.all([
+        q(client.from('workspace_members').select('*').eq('user_id',currentUser.id),'membresías por usuario'),
+        q(client.from('workspace_members').select('*').ilike('invited_email',email),'membresías por correo')
+      ]);
+      if(byUser.error) throw byUser.error;
+      if(byEmail.error) throw byEmail.error;
+      return [...(byUser.data||[]),...(byEmail.data||[])].filter((v,i,a)=>a.findIndex(x=>x.id===v.id)===i);
+    }
+    async function ensureWorkspace(){
+      const client=await ensureSupabase();
+      const mems=await loadMemberships();
+      let active=mems.filter(m=>m.status==='active');
+      if(!active.length && mems.some(m=>m.status==='pending')) return {pending:true};
+      if(!active.length){
+        const created=await q(client.from('workspaces').insert({name:'DealWatch MX',owner_id:currentUser.id}).select().single(),'crear equipo');
+        if(created.error) throw created.error;
+        const member=await q(client.from('workspace_members').insert({workspace_id:created.data.id,user_id:currentUser.id,role:'owner',status:'active'}),'crear membresía');
+        if(member.error) throw member.error;
+        active=[{workspace_id:created.data.id,role:'owner',status:'active'}];
+      }
+      const ids=[...new Set(active.map(m=>m.workspace_id).filter(Boolean))];
+      if(!ids.length){ workspaces=[]; currentWorkspace=null; currentRole='viewer'; return {pending:false}; }
+      const wsRes=await q(client.from('workspaces').select('*').in('id',ids),'cargar equipos');
+      if(wsRes.error) throw wsRes.error;
+      workspaces=wsRes.data||[];
+      const saved=localStorage.getItem('dealwatch_workspace_id');
+      currentWorkspace=workspaces.find(w=>w.id===saved)||workspaces[0]||null;
+      if(currentWorkspace) localStorage.setItem('dealwatch_workspace_id',currentWorkspace.id);
+      const mem=active.find(m=>m.workspace_id===currentWorkspace?.id);
+      currentRole=mem?.role||'viewer';
+      return {pending:false};
+    }
+    async function acceptInvites(){
+      try{
+        const session=await getSession();
+        if(!session)return toast('Primero inicia sesión.');
+        const mems=await loadMemberships();
+        const pending=mems.filter(m=>m.status==='pending');
+        if(!pending.length)return toast('No hay invitaciones pendientes.');
+        const client=await ensureSupabase();
+        for(const m of pending){
+          const res=await q(client.from('workspace_members').update({user_id:currentUser.id,status:'active'}).eq('id',m.id),'aceptar invitación');
+          if(res.error) throw res.error;
+        }
+        await bootCloud();
+        toast('Invitación aceptada.');
+      }catch(e){toast('No se pudo aceptar invitación: '+(e.message||e));}
+    }
+    async function selectWorkspace(id){
+      currentWorkspace=workspaces.find(w=>w.id===id)||currentWorkspace;
+      if(currentWorkspace) localStorage.setItem('dealwatch_workspace_id',currentWorkspace.id);
+      await syncFromCloud(true);
+    }
+    async function inviteMember(){
+      try{
+        if(!['owner','admin'].includes(currentRole))return toast('Tu rol no permite agregar personas.');
+        if(!currentWorkspace)return toast('Primero sincroniza o selecciona un equipo.');
+        const email=$('inviteEmail').value.trim().toLowerCase();
+        if(!email)return toast('Escribe el correo.');
+        const role=$('inviteRole').value;
+        const res=await q((await ensureSupabase()).from('workspace_members').insert({workspace_id:currentWorkspace.id,invited_email:email,role,status:'pending'}),'agregar miembro');
+        if(res.error) throw res.error;
+        $('inviteEmail').value='';
+        await loadMembers();
+        toast('Invitación creada. Mándale el link de la app.');
+      }catch(e){toast('No se pudo agregar: '+(e.message||e));}
+    }
+    async function loadMembers(){
+      try{
+        if(!currentWorkspace||!$('membersList'))return;
+        const res=await q((await ensureSupabase()).from('workspace_members').select('*').eq('workspace_id',currentWorkspace.id).order('created_at',{ascending:true}),'cargar miembros');
+        if(res.error) throw res.error;
+        $('membersList').innerHTML=(res.data||[]).map(m=>`<div class="status-row"><div class="status-ico">👤</div><div><div class="status-title">${esc(m.user_id===currentUser?.id?'Tú':(m.invited_email||'Miembro'))}</div><div class="status-meta">Rol: ${esc(m.role)} · Estado: ${esc(m.status)}</div></div><div class="check">${m.status==='active'?'✓':'…'}</div></div>`).join('')||'<div class="empty">Sin miembros.</div>';
+      }catch(e){ console.warn('loadMembers',e); }
+    }
     function setSyncing(isSyncing){
       const btn=$('syncButton');
       if(btn){ btn.disabled=!!isSyncing; btn.textContent=isSyncing?'Sincronizando...':'Sincronizar ahora'; }
       const last=$('lastSync');
-      if(isSyncing && last) last.textContent='Sincronizando...';
+      if(last) last.textContent=isSyncing?'Sincronizando...':(localStorage.getItem('dealwatch_last_sync_label')||'Pendiente');
     }
     async function syncFromCloud(showMessage=false){
+      if(syncBusy) return false;
+      syncBusy=true;
       setSyncing(true);
       try{
-        const session=await getSession();
+        const session=await withTimeout(getSession(),'recuperar sesión',12000);
         if(!session){
-          renderAll();
           toast('Primero inicia sesión en Supabase.');
           return false;
         }
@@ -327,22 +479,16 @@
           return false;
         }
         const client=await ensureSupabase();
-        const {data,error}=await client
-          .from('products')
-          .select('*')
-          .eq('workspace_id',currentWorkspace.id)
-          .order('updated_at',{ascending:false});
-        if(error) throw error;
-        products=(data||[]).map(normalizeProduct);
+        const res=await q(client.from('products').select('*').eq('workspace_id',currentWorkspace.id).order('updated_at',{ascending:false}),'descargar productos');
+        if(res.error) throw res.error;
+        products=(res.data||[]).map(normalizeProduct);
         localStorage.setItem(PRODUCTS_KEY,JSON.stringify(products));
-        await loadMembers();
-        await loadMonitorData();
+        await Promise.allSettled([loadMembers(),loadMonitorData()]);
         const now=new Date().toLocaleString('es-MX');
+        localStorage.setItem('dealwatch_last_sync_label',now);
+        renderAll();
         const last=$('lastSync');
         if(last) last.textContent=now;
-        renderAll();
-        const last2=$('lastSync');
-        if(last2) last2.textContent=now;
         if(showMessage) toast(`Sincronización lista. ${products.length} producto(s) actualizados desde la nube.`);
         return true;
       }catch(e){
@@ -351,11 +497,35 @@
         toast('No se pudo sincronizar: '+(e.message||e));
         return false;
       }finally{
+        syncBusy=false;
         setSyncing(false);
       }
     }
-    async function loadMonitorData(){ try{ if(!currentWorkspace)return; const client=await ensureSupabase(); const alerts=await client.from('alert_events').select('*').eq('workspace_id',currentWorkspace.id).order('created_at',{ascending:false}).limit(10); alertEvents=alerts.data||[]; }catch(e){console.warn(e);} }
-    async function bootCloud(){ try{ await getSession(); if(currentUser){ const setup=await ensureWorkspace(); if(!setup.pending){ await syncFromCloud(); } } else { products=getLocal(); renderAll(); } }catch(e){console.warn(e); products=getLocal(); renderAll();} }
+    async function loadMonitorData(){
+      try{
+        if(!currentWorkspace)return;
+        const client=await ensureSupabase();
+        const res=await q(client.from('alert_events').select('*').eq('workspace_id',currentWorkspace.id).order('created_at',{ascending:false}).limit(10),'cargar alertas');
+        if(res.error) throw res.error;
+        alertEvents=res.data||[];
+      }catch(e){console.warn('loadMonitorData',e);}
+    }
+    async function bootCloud(){
+      try{
+        await withTimeout(getSession(),'recuperar sesión',12000);
+        if(currentUser){
+          const setup=await ensureWorkspace();
+          if(setup.pending){ renderAll(); return; }
+          if(currentWorkspace){
+            const client=await ensureSupabase();
+            const res=await q(client.from('products').select('*').eq('workspace_id',currentWorkspace.id).order('updated_at',{ascending:false}),'descargar productos iniciales');
+            if(!res.error){ products=(res.data||[]).map(normalizeProduct); localStorage.setItem(PRODUCTS_KEY,JSON.stringify(products)); }
+            await Promise.allSettled([loadMembers(),loadMonitorData()]);
+          }
+          renderAll();
+        } else { products=getLocal(); renderAll(); }
+      }catch(e){console.warn('bootCloud',e); products=getLocal(); renderAll();}
+    }
     function exportJson(){ const blob=new Blob([JSON.stringify({app:'DealWatch MX',exportedAt:new Date().toISOString(),products},null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='dealwatch-respaldo.json'; a.click(); URL.revokeObjectURL(a.href); }
     function importJson(ev){ const f=ev.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{try{ const data=JSON.parse(r.result); const imported=(Array.isArray(data)?data:data.products||[]).map(normalizeProduct); saveLocal([...imported,...products]); toast('Respaldo importado.'); }catch(e){toast('JSON inválido.');}}; r.readAsText(f); }
     async function clearCache(){ if('serviceWorker' in navigator){ const regs=await navigator.serviceWorker.getRegistrations(); for(const r of regs) await r.unregister(); } const keys=await caches.keys(); for(const k of keys) await caches.delete(k); toast('Caché limpiado. Recarga la app.'); }
