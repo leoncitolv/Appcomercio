@@ -237,7 +237,7 @@
     <section id="screen-cloud" class="screen">
       <div class="section-head"><h3>Nube</h3><span id="cloudStatusText">Conectando...</span></div>
       <div id="loginCard" class="card"><h3 style="margin:0 0 8px">Entrar a DealWatch</h3><p class="hint">Usa tu correo y contraseña. Si te invitaron, crea cuenta con el mismo correo.</p><div class="form" style="margin-top:14px"><div class="field"><label>Correo</label><input id="email" type="email" placeholder="tu-correo@ejemplo.com"></div><div class="field"><label>Contraseña</label><input id="password" type="password" placeholder="Contraseña"></div><div class="cta" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" onclick="signIn()">Iniciar sesión</button><button class="btn btn-soft" onclick="signUp()">Crear cuenta</button><button class="btn btn-soft" onclick="resetPassword()">Olvidé mi contraseña</button></div></div></div>
-      <div id="sessionCard" class="card hide"><div class="status-row"><div class="status-ico">☁️</div><div><div class="status-title">Nube ON</div><div class="status-meta" id="sessionEmail">Sesión activa</div></div><div class="check">✓</div></div><div class="status-list" style="margin-top:12px"><div class="status-row"><div class="status-ico">📣</div><div><div class="status-title">Telegram conectado</div><div class="status-meta">Un solo grupo para todos los avisos.</div></div><div class="check">✓</div></div><div class="status-row"><div class="status-ico">🔄</div><div><div class="status-title">Última sincronización</div><div class="status-meta" id="lastSync">Pendiente</div></div><div class="check">✓</div></div></div><div class="cta" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" onclick="syncFromCloud()">Sincronizar ahora</button><button class="btn btn-soft" onclick="acceptInvites()">Aceptar invitaciones</button><button class="btn btn-danger" onclick="signOut()">Cerrar sesión</button></div></div>
+      <div id="sessionCard" class="card hide"><div class="status-row"><div class="status-ico">☁️</div><div><div class="status-title">Nube ON</div><div class="status-meta" id="sessionEmail">Sesión activa</div></div><div class="check">✓</div></div><div class="status-list" style="margin-top:12px"><div class="status-row"><div class="status-ico">📣</div><div><div class="status-title">Telegram conectado</div><div class="status-meta">Un solo grupo para todos los avisos.</div></div><div class="check">✓</div></div><div class="status-row"><div class="status-ico">🔄</div><div><div class="status-title">Última sincronización</div><div class="status-meta" id="lastSync">Pendiente</div></div><div class="check">✓</div></div></div><div class="cta" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button id="syncButton" type="button" class="btn btn-primary" onclick="syncFromCloud(true)">Sincronizar ahora</button><button class="btn btn-soft" onclick="acceptInvites()">Aceptar invitaciones</button><button class="btn btn-danger" onclick="signOut()">Cerrar sesión</button></div></div>
       <section class="section"><div class="section-head"><h3>Equipo</h3><span id="roleLabel">sin equipo</span></div><div class="card"><div class="field"><label>Equipo actual</label><select id="workspaceSelect" onchange="selectWorkspace(this.value)"></select></div><div id="membersList" class="status-list" style="margin-top:12px"></div><details style="margin-top:12px"><summary>Agregar familiar o amigo</summary><div class="form" style="margin-top:14px"><div class="field"><label>Correo</label><input id="inviteEmail" type="email" placeholder="correo@ejemplo.com"></div><div class="field"><label>Rol</label><select id="inviteRole"><option value="viewer">viewer · solo consulta</option><option value="admin">admin · puede editar</option></select></div><button class="btn btn-primary" onclick="inviteMember()">Agregar al equipo</button><p class="hint">La persona debe abrir la app, crear su cuenta con ese correo y presionar “Aceptar invitaciones”.</p></div></details></div></section>
       <section class="section"><div class="section-head"><h3>Respaldo</h3><span>opcional</span></div><div class="card"><div class="cta" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-soft" onclick="exportJson()">Exportar JSON</button><button class="btn btn-soft" onclick="document.getElementById('importFile').click()">Importar JSON</button><button class="btn btn-soft" onclick="clearCache()">Limpiar caché</button><input id="importFile" class="hide" type="file" accept=".json,application/json" onchange="importJson(event)"></div></div></section>
     </section>
@@ -300,13 +300,66 @@
     async function selectWorkspace(id){currentWorkspace=workspaces.find(w=>w.id===id)||currentWorkspace;localStorage.setItem('dealwatch_workspace_id',currentWorkspace?.id||'');await syncFromCloud();}
     async function inviteMember(){ try{ if(!['owner','admin'].includes(currentRole))return toast('Tu rol no permite agregar personas.'); const email=$('inviteEmail').value.trim().toLowerCase(); if(!email)return toast('Escribe el correo.'); const role=$('inviteRole').value; const {error}=await (await ensureSupabase()).from('workspace_members').insert({workspace_id:currentWorkspace.id,invited_email:email,role,status:'pending'}); if(error) throw error; $('inviteEmail').value=''; await loadMembers(); toast('Invitación creada. Mándale el link de la app.'); }catch(e){toast('No se pudo agregar: '+(e.message||e));} }
     async function loadMembers(){ if(!currentWorkspace)return; const {data}=await (await ensureSupabase()).from('workspace_members').select('*').eq('workspace_id',currentWorkspace.id).order('created_at',{ascending:true}); $('membersList').innerHTML=(data||[]).map(m=>`<div class="status-row"><div class="status-ico">👤</div><div><div class="status-title">${esc(m.user_id===currentUser?.id?'Tú':(m.invited_email||'Miembro'))}</div><div class="status-meta">Rol: ${esc(m.role)} · Estado: ${esc(m.status)}</div></div><div class="check">${m.status==='active'?'✓':'…'}</div></div>`).join('')||'<div class="empty">Sin miembros.</div>'; }
-    async function syncFromCloud(){ try{ const session=await getSession(); if(!session)return toast('Primero inicia sesión en Supabase.'); const setup=await ensureWorkspace(); if(setup.pending)return toast('Tienes una invitación pendiente. Presiona Aceptar invitaciones.'); const client=await ensureSupabase(); const {data,error}=await client.from('products').select('*').eq('workspace_id',currentWorkspace.id).order('updated_at',{ascending:false}); if(error) throw error; products=(data||[]).map(normalizeProduct); saveLocal(products); await loadMembers(); await loadMonitorData(); $('lastSync').textContent=new Date().toLocaleString('es-MX'); renderAll(); }catch(e){toast('No se pudo actualizar desde nube: '+(e.message||e));} }
+    function setSyncing(isSyncing){
+      const btn=$('syncButton');
+      if(btn){ btn.disabled=!!isSyncing; btn.textContent=isSyncing?'Sincronizando...':'Sincronizar ahora'; }
+      const last=$('lastSync');
+      if(isSyncing && last) last.textContent='Sincronizando...';
+    }
+    async function syncFromCloud(showMessage=false){
+      setSyncing(true);
+      try{
+        const session=await getSession();
+        if(!session){
+          renderAll();
+          toast('Primero inicia sesión en Supabase.');
+          return false;
+        }
+        const setup=await ensureWorkspace();
+        if(setup.pending){
+          renderAll();
+          toast('Tienes una invitación pendiente. Presiona Aceptar invitaciones.');
+          return false;
+        }
+        if(!currentWorkspace){
+          renderAll();
+          toast('No encontré un equipo activo. Cierra sesión y vuelve a entrar.');
+          return false;
+        }
+        const client=await ensureSupabase();
+        const {data,error}=await client
+          .from('products')
+          .select('*')
+          .eq('workspace_id',currentWorkspace.id)
+          .order('updated_at',{ascending:false});
+        if(error) throw error;
+        products=(data||[]).map(normalizeProduct);
+        localStorage.setItem(PRODUCTS_KEY,JSON.stringify(products));
+        await loadMembers();
+        await loadMonitorData();
+        const now=new Date().toLocaleString('es-MX');
+        const last=$('lastSync');
+        if(last) last.textContent=now;
+        renderAll();
+        const last2=$('lastSync');
+        if(last2) last2.textContent=now;
+        if(showMessage) toast(`Sincronización lista. ${products.length} producto(s) actualizados desde la nube.`);
+        return true;
+      }catch(e){
+        console.error('syncFromCloud error:', e);
+        renderAll();
+        toast('No se pudo sincronizar: '+(e.message||e));
+        return false;
+      }finally{
+        setSyncing(false);
+      }
+    }
     async function loadMonitorData(){ try{ if(!currentWorkspace)return; const client=await ensureSupabase(); const alerts=await client.from('alert_events').select('*').eq('workspace_id',currentWorkspace.id).order('created_at',{ascending:false}).limit(10); alertEvents=alerts.data||[]; }catch(e){console.warn(e);} }
     async function bootCloud(){ try{ await getSession(); if(currentUser){ const setup=await ensureWorkspace(); if(!setup.pending){ await syncFromCloud(); } } else { products=getLocal(); renderAll(); } }catch(e){console.warn(e); products=getLocal(); renderAll();} }
     function exportJson(){ const blob=new Blob([JSON.stringify({app:'DealWatch MX',exportedAt:new Date().toISOString(),products},null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='dealwatch-respaldo.json'; a.click(); URL.revokeObjectURL(a.href); }
     function importJson(ev){ const f=ev.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{try{ const data=JSON.parse(r.result); const imported=(Array.isArray(data)?data:data.products||[]).map(normalizeProduct); saveLocal([...imported,...products]); toast('Respaldo importado.'); }catch(e){toast('JSON inválido.');}}; r.readAsText(f); }
     async function clearCache(){ if('serviceWorker' in navigator){ const regs=await navigator.serviceWorker.getRegistrations(); for(const r of regs) await r.unregister(); } const keys=await caches.keys(); for(const k of keys) await caches.delete(k); toast('Caché limpiado. Recarga la app.'); }
-    async function init(){ products=getLocal(); renderAll(); await ensureSupabase().catch(console.warn); if(sb){ sb.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;renderAll();}); } await bootCloud(); }
+    async function init(){ products=getLocal(); renderAll(); await ensureSupabase().catch(console.warn); if(sb){ sb.auth.onAuthStateChange(async (_event,session)=>{currentUser=session?.user||null; if(currentUser){ await bootCloud(); } else { currentWorkspace=null; workspaces=[]; currentRole='viewer'; renderAll(); } }); } await bootCloud(); }
     init(); if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(console.warn)); }
   </script>
 </body>
