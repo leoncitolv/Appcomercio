@@ -1,7 +1,7 @@
 {
   "name": "DealWatch MX - Appcomercio",
   "short_name": "DealWatch MX",
-  "description": "DealWatch MX: PWA para productos favoritos, Supabase, multi-admin, Telegram y monitoreo automático de Mercado Libre.",
+  "description": "App PWA para guardar productos favoritos, precios objetivo, historial y alertas locales de ofertas.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
