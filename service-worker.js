@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-pwa-v18-realtime";
+const CACHE_NAME = "dealwatch-mx-pwa-v18-listfix-2";
 
 self.addEventListener("install", event => {
   self.skipWaiting();

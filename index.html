@@ -310,7 +310,7 @@
       <div id="loginCard" class="card"><h3 style="margin:0 0 8px">Entrar a DealWatch</h3><p class="hint">Usa tu correo y contraseña. Si te invitaron, crea cuenta con el mismo correo.</p><div class="form" style="margin-top:14px"><div class="field"><label>Correo</label><input id="email" type="email" placeholder="tu-correo@ejemplo.com"></div><div class="field"><label>Contraseña</label><input id="password" type="password" placeholder="Contraseña"></div><div class="cta" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" onclick="signIn()">Iniciar sesión</button><button class="btn btn-soft" onclick="signUp()">Crear cuenta</button><button class="btn btn-soft" onclick="resetPassword()">Olvidé mi contraseña</button></div></div></div>
       <div id="sessionCard" class="card hide"><div class="status-row"><div class="status-ico">☁️</div><div><div class="status-title">Nube ON</div><div class="status-meta" id="sessionEmail">Sesión activa</div></div><div class="check">✓</div></div><div class="status-list" style="margin-top:12px"><div class="status-row"><div class="status-ico">📣</div><div><div class="status-title">Telegram conectado</div><div class="status-meta">Un solo grupo para todos los avisos.</div></div><div class="check">✓</div></div><div class="status-row"><div class="status-ico">🔄</div><div><div class="status-title">Última sincronización</div><div class="status-meta" id="lastSync">Pendiente</div></div><div class="check">✓</div></div><div class="status-row"><div class="status-ico">⚡</div><div><div class="status-title">Sincronización en vivo</div><div class="status-meta" id="realtimeStatus">Pendiente</div></div><div class="check" id="realtimeCheck">…</div></div></div><div class="cta" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button id="syncButton" type="button" class="btn btn-primary" onclick="syncFromCloud(true)">Sincronizar ahora</button><button class="btn btn-soft" onclick="acceptInvites()">Aceptar invitaciones</button><button class="btn btn-danger" onclick="signOut()">Cerrar sesión</button></div></div>
       <section class="section"><div class="section-head"><h3>Equipo</h3><span id="roleLabel">sin equipo</span></div><div class="card"><div class="field"><label>Equipo actual</label><select id="workspaceSelect" onchange="selectWorkspace(this.value)"></select></div><div id="membersList" class="status-list" style="margin-top:12px"></div><details style="margin-top:12px"><summary>Agregar familiar o amigo</summary><div class="form" style="margin-top:14px"><div class="field"><label>Correo</label><input id="inviteEmail" type="email" placeholder="correo@ejemplo.com"></div><div class="field"><label>Rol</label><select id="inviteRole"><option value="viewer">viewer · solo consulta</option><option value="admin">admin · puede editar</option></select></div><button class="btn btn-primary" onclick="inviteMember()">Agregar al equipo</button><p class="hint">La persona debe abrir la app, crear su cuenta con ese correo y presionar “Aceptar invitaciones”.</p></div></details></div></section>
-      <section class="section"><div class="section-head"><h3>Listas y categorías</h3><span>personaliza</span></div><div class="card"><details open><summary>Administrar listas</summary><p class="hint" style="margin:10px 0 14px">Quita o renombra listas para dejar solo las que realmente uses. Si renombras una lista, los productos de esa lista también se actualizan.</p><div id="listManager" class="status-list"></div><div class="form" style="margin-top:14px"><div class="field"><label>Nueva lista</label><input id="newListName" placeholder="Ej. Familia · Mascotas"></div><div class="cta" style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn btn-primary" onclick="addDealList()">Agregar lista</button><button type="button" class="btn btn-soft" onclick="resetDealLists()">Restaurar sugeridas</button></div></div></details></div></section>
+      <section class="section"><div class="section-head"><h3>Listas y categorías</h3><span>personaliza</span></div><div class="card"><details open><summary>Administrar listas</summary><p class="hint" style="margin:10px 0 14px">Quita o renombra listas para dejar solo las que realmente uses. Si renombras una lista, los productos de esa lista también se actualizan.</p><div id="listManager" class="status-list"></div><div class="form" style="margin-top:14px"><div class="field"><label>Nueva lista</label><input id="newListName" placeholder="Ej. Familia · Mascotas"></div><div class="cta" style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn btn-primary" onclick="addDealList()">Agregar lista</button><button type="button" class="btn btn-soft" onclick="repairProductsToConfiguredLists().then(changed=>toast(changed?'Productos movidos a tus listas activas.':'Todo está limpio.'))">Limpiar listas viejas</button><button type="button" class="btn btn-soft" onclick="resetDealLists()">Restaurar sugeridas</button></div></div></details></div></section>
       <section class="section"><div class="section-head"><h3>Respaldo</h3><span>opcional</span></div><div class="card"><div class="cta" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-soft" onclick="exportJson()">Exportar JSON</button><button class="btn btn-soft" onclick="document.getElementById('importFile').click()">Importar JSON</button><button class="btn btn-soft" onclick="clearCache()">Limpiar caché</button><input id="importFile" class="hide" type="file" accept=".json,application/json" onchange="importJson(event)"></div></div></section>
     </section>
   </main>
@@ -346,13 +346,20 @@
     }
     function loadListsLocal(){
       try{
-        const saved=JSON.parse(localStorage.getItem(LISTS_KEY)||'null');
-        const merged=cleanLists([...(Array.isArray(saved)?saved:[]),...DEFAULT_LISTS]);
-        return merged.length?merged:DEFAULT_LISTS.slice();
-      }catch(e){ return DEFAULT_LISTS.slice(); }
+        const raw=localStorage.getItem(LISTS_KEY);
+        if(raw!==null){
+          const saved=JSON.parse(raw);
+          if(Array.isArray(saved)){
+            const custom=cleanLists(saved);
+            return custom.length?custom:["Compras personales"];
+          }
+        }
+      }catch(e){ console.warn('No se pudieron cargar listas locales:', e); }
+      return DEFAULT_LISTS.slice();
     }
     function saveListsLocal(){
-      dealLists=cleanLists(dealLists.length?dealLists:DEFAULT_LISTS);
+      dealLists=cleanLists(dealLists);
+      if(!dealLists.length) dealLists=["Compras personales"];
       localStorage.setItem(LISTS_KEY,JSON.stringify(dealLists));
       renderDealListSelect();
       renderListManager();
@@ -361,7 +368,28 @@
     }
     function allVisibleLists(){
       const fromProducts=products.map(p=>p.dealList).filter(Boolean);
-      return cleanLists([...dealLists,...fromProducts,DEFAULT_LISTS[0]]);
+      return cleanLists([...dealLists,...fromProducts]);
+    }
+    function configuredLists(){
+      return cleanLists(dealLists.length?dealLists:["Compras personales"]);
+    }
+    async function repairProductsToConfiguredLists(){
+      const allowed=configuredLists();
+      const fallback=allowed[0]||"Compras personales";
+      let changed=false;
+      products=products.map(p=>{
+        if(allowed.includes(p.dealList)) return p;
+        changed=true;
+        return {...p,dealList:fallback,category:listName(fallback),updatedAt:new Date().toISOString()};
+      });
+      if(changed){
+        localStorage.setItem(PRODUCTS_KEY,JSON.stringify(products));
+        renderAll();
+        if(currentUser&&currentWorkspace){
+          for(const p of products.filter(x=>x.dealList===fallback && isUuid(x.id))){ saveProductRemote(p).catch(console.warn); }
+        }
+      }
+      return changed;
     }
     function groupName(list){ return String(list||'Compras personales').split(' · ')[0] || 'Compras personales'; }
     function listName(list){ const parts=String(list||'').split(' · '); return parts.slice(1).join(' · ') || parts[0] || 'General'; }
@@ -371,7 +399,7 @@
       const sel=$('dealList');
       if(!sel) return;
       const current=sel.value;
-      const lists=allVisibleLists();
+      const lists=configuredLists();
       sel.innerHTML=lists.map(l=>`<option value="${esc(l)}">${esc(l)}</option>`).join('');
       if(current && lists.includes(current)) sel.value=current;
     }
@@ -398,8 +426,9 @@
         if(!currentUser) return;
         const client=await ensureSupabase();
         const res=await client.from('app_settings').select('setting_value').eq('user_id',currentUser.id).eq('setting_key','deal_lists').maybeSingle();
-        if(!res.error && res.data?.setting_value?.deal_lists){
-          dealLists=cleanLists([...res.data.setting_value.deal_lists,...DEFAULT_LISTS]);
+        if(!res.error && Array.isArray(res.data?.setting_value?.deal_lists)){
+          dealLists=cleanLists(res.data.setting_value.deal_lists);
+          if(!dealLists.length) dealLists=["Compras personales"];
           localStorage.setItem(LISTS_KEY,JSON.stringify(dealLists));
         }
       }catch(e){ console.warn('No se pudieron cargar listas de nube:', e); }
