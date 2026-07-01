@@ -1,13 +1,13 @@
 {
   "name": "DealWatch MX - Appcomercio",
   "short_name": "DealWatch MX",
-  "description": "App PWA para guardar productos favoritos, precios objetivo, historial y alertas locales de ofertas.",
+  "description": "App PWA para monitorear ofertas, precios objetivo, productos con imagen, listas, nube en vivo y alertas por Telegram.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0b1220",
-  "theme_color": "#007aff",
+  "background_color": "#050510",
+  "theme_color": "#080411",
   "lang": "es-MX",
   "categories": [
     "shopping",
