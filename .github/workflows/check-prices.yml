@@ -8,11 +8,6 @@ on:
         required: false
         type: boolean
         default: false
-      live_prices:
-        description: "Actualizar Mercado Libre real y Amazon seguro"
-        required: false
-        type: boolean
-        default: true
   schedule:
     # Cada 6 horas, minuto 17 UTC. Cambia este cron si quieres otro horario.
     - cron: "17 */6 * * *"
@@ -34,9 +29,9 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "20"
 
-      - name: Revisar ML, Amazon seguro, listas y Telegram
+      - name: Revisar reglas de oferta y notificar Telegram
         run: node scripts/check-prices.mjs
         env:
           SUPABASE_URL: "https://ltsrjxvisptbdhhkabhj.supabase.co"
@@ -44,7 +39,4 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.telegram_test || false }}
-          DEALWATCH_LIVE_PRICES: ${{ github.event_name == 'workflow_dispatch' && inputs.live_prices || true }}
-          DEALWATCH_MODE: "lists_amazon_safe_mercadolibre_antispam"
-          DEALWATCH_ALERT_LOOKBACK_DAYS: "7"
-          DEALWATCH_SIGNIFICANT_DROP_PERCENT: "1"
+          DEALWATCH_MODE: "rules_only_telegram"
