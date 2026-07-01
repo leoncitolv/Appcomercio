@@ -356,8 +356,80 @@
     function fillForm(p){ $('productId').value=p.id;$('name').value=p.name;$('store').value=p.store;$('url').value=p.url;$('currentPrice').value=p.currentPrice;$('targetPrice').value=p.targetPrice;$('dealList').value=LISTS.includes(p.dealList)?p.dealList:'Compras personales · Ofertas especiales';$('normalPrice').value=p.normalPrice;$('discount').value=p.minDiscount;$('category').value=p.category;$('notes').value=p.notes;formAlerts=p.alertEnabled;$('alertSwitch').classList.toggle('on',formAlerts);$('formTitle').textContent='Editar producto';go('add');}
     function resetForm(){ $('productForm').reset(); $('productId').value=''; $('formTitle').textContent='Agregar producto'; formAlerts=true; $('alertSwitch').classList.add('on'); }
     function editProduct(id){ const p=products.find(x=>x.id===id); if(p) fillForm(p); }
-    async function saveProductRemote(p){ if(!currentUser||!currentWorkspace) return p; const row={user_id:currentUser.id,workspace_id:currentWorkspace.id,name:p.name,store:p.store,category:p.category,deal_list:p.dealList,icon:p.icon,priority:p.priority,product_url:p.url,normal_price:p.normalPrice,current_price:p.currentPrice,target_price:p.targetPrice,min_discount_percent:p.minDiscount,alerts_enabled:p.alertEnabled,notes:p.notes,updated_at:new Date().toISOString()}; const client=await ensureSupabase(); if(isUuid(p.id)){ const {data,error}=await client.from('products').update(row).eq('id',p.id).select().maybeSingle(); if(error) throw error; return normalizeProduct(data||{...p,...row}); } else { const {data,error}=await client.from('products').insert(row).select().single(); if(error) throw error; return normalizeProduct(data); } }
-    $('productForm').addEventListener('submit',async ev=>{ev.preventDefault(); if(!canEdit()) return toast('Tu rol solo permite consultar.'); const id=$('productId').value; let p=normalizeProduct({id:id||uuid(),name:$('name').value.trim(),store:$('store').value,product_url:$('url').value.trim(),current_price:$('currentPrice').value,target_price:$('targetPrice').value,normal_price:$('normalPrice').value,min_discount_percent:$('discount').value,deal_list:$('dealList').value,category:$('category').value||$('dealList').value.split(' · ')[1],alerts_enabled:formAlerts,notes:$('notes').value.trim()}); if(!p.name) return toast('Escribe el nombre del producto.'); try{ p=await saveProductRemote(p); }catch(e){ toast('No se pudo guardar en Supabase: '+(e.message||e)+'. Se guardará localmente.'); } const idx=products.findIndex(x=>x.id===id); if(idx>=0) products[idx]=p; else products.unshift(p); saveLocal(products); resetForm(); go('products'); });
+    async function saveProductRemote(p){
+      if(!currentUser||!currentWorkspace) return p;
+      const client=await ensureSupabase();
+      const row={
+        user_id:currentUser.id,
+        workspace_id:currentWorkspace.id,
+        name:p.name,
+        store:p.store,
+        category:p.category,
+        deal_list:p.dealList,
+        icon:p.icon,
+        priority:p.priority,
+        product_url:p.url,
+        normal_price:p.normalPrice,
+        current_price:p.currentPrice,
+        target_price:p.targetPrice,
+        min_discount_percent:p.minDiscount,
+        alerts_enabled:p.alertEnabled,
+        notes:p.notes,
+        updated_at:new Date().toISOString()
+      };
+
+      // Nube primero: si el producto existe en Supabase se actualiza.
+      // Si es nuevo, o si parecía existir pero Supabase no devuelve fila,
+      // se inserta como producto nuevo para evitar que se borre al sincronizar.
+      const existsLocally=isUuid(p.id)&&products.some(x=>x.id===p.id);
+      if(existsLocally){
+        const updated=await client.from('products').update(row).eq('id',p.id).select().maybeSingle();
+        if(updated.error) throw updated.error;
+        if(updated.data) return normalizeProduct(updated.data);
+      }
+
+      const inserted=await client.from('products').insert(row).select().single();
+      if(inserted.error) throw inserted.error;
+      return normalizeProduct(inserted.data);
+    }
+    $('productForm').addEventListener('submit',async ev=>{
+      ev.preventDefault();
+      if(!canEdit()) return toast('Tu rol solo permite consultar.');
+      const id=$('productId').value;
+      let p=normalizeProduct({
+        id:id||uuid(),
+        name:$('name').value.trim(),
+        store:$('store').value,
+        product_url:$('url').value.trim(),
+        current_price:$('currentPrice').value,
+        target_price:$('targetPrice').value,
+        normal_price:$('normalPrice').value,
+        min_discount_percent:$('discount').value,
+        deal_list:$('dealList').value,
+        category:$('category').value||$('dealList').value.split(' · ')[1],
+        alerts_enabled:formAlerts,
+        notes:$('notes').value.trim()
+      });
+      if(!p.name) return toast('Escribe el nombre del producto.');
+
+      try{
+        p=await saveProductRemote(p);
+      }catch(e){
+        // En modo nube NO fingimos que se guardó localmente, porque luego
+        // sincronizar desde Supabase lo elimina y parece que “se borró solo”.
+        if(currentUser&&currentWorkspace){
+          toast('No se guardó en la nube: '+(e.message||e)+'. Revisa conexión/permisos e intenta otra vez.');
+          return;
+        }
+        toast('No hay nube activa. Se guardará solo en este dispositivo.');
+      }
+
+      const idx=products.findIndex(x=>x.id===id);
+      if(idx>=0) products[idx]=p; else products.unshift(p);
+      saveLocal(products);
+      resetForm();
+      go('products');
+    });
     async function deleteProduct(id){ if(!confirm('¿Borrar este producto?'))return; const p=products.find(x=>x.id===id); if(currentUser&&p&&isUuid(id)){ try{await (await ensureSupabase()).from('products').delete().eq('id',id);}catch(e){console.warn(e);} } saveLocal(products.filter(p=>p.id!==id)); }
     async function toggleAlert(id){ const p=products.find(x=>x.id===id); if(!p)return; p.alertEnabled=!p.alertEnabled; p.updatedAt=new Date().toISOString(); try{await saveProductRemote(p);}catch(e){console.warn(e);} saveLocal(products); }
     async function signIn(){ try{ const client=await ensureSupabase(); const email=$('email').value.trim(); const password=$('password').value; const {data,error}=await client.auth.signInWithPassword({email,password}); if(error) throw error; currentUser=data.user; await bootCloud(); toast('Sesión iniciada.'); }catch(e){toast('No se pudo iniciar sesión: '+(e.message||e));} }
