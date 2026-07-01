@@ -336,6 +336,135 @@
     async function getSession(){ const client=await ensureSupabase(); const {data}=await client.auth.getSession(); currentUser=data.session?.user||null; return data.session||null; }
     function go(name){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $("screen-"+name).classList.add('active'); document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===name)); scrollTo({top:0,behavior:'smooth'}); if(name==='products')renderProducts(); if(name==='alerts')renderAlerts(); if(name==='cloud')renderCloud(); }
     function setTheme(t){document.documentElement.dataset.theme=t==='dark'?'dark':'';$('themeButton').textContent=t==='dark'?'🌙':'☀️';localStorage.setItem(THEME_KEY,t);} $('themeButton').onclick=()=>setTheme((localStorage.getItem(THEME_KEY)||'light')==='dark'?'light':'dark'); setTheme(localStorage.getItem(THEME_KEY)||'light');
+
+    function cleanLists(list){
+      const seen=new Set();
+      return (Array.isArray(list)?list:[])
+        .map(v=>String(v||'').trim())
+        .filter(Boolean)
+        .filter(v=>{ const k=v.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; });
+    }
+    function loadListsLocal(){
+      try{
+        const saved=JSON.parse(localStorage.getItem(LISTS_KEY)||'null');
+        const merged=cleanLists([...(Array.isArray(saved)?saved:[]),...DEFAULT_LISTS]);
+        return merged.length?merged:DEFAULT_LISTS.slice();
+      }catch(e){ return DEFAULT_LISTS.slice(); }
+    }
+    function saveListsLocal(){
+      dealLists=cleanLists(dealLists.length?dealLists:DEFAULT_LISTS);
+      localStorage.setItem(LISTS_KEY,JSON.stringify(dealLists));
+      renderDealListSelect();
+      renderListManager();
+      renderHome();
+      renderProducts();
+    }
+    function allVisibleLists(){
+      const fromProducts=products.map(p=>p.dealList).filter(Boolean);
+      return cleanLists([...dealLists,...fromProducts,DEFAULT_LISTS[0]]);
+    }
+    function groupName(list){ return String(list||'Compras personales').split(' · ')[0] || 'Compras personales'; }
+    function listName(list){ const parts=String(list||'').split(' · '); return parts.slice(1).join(' · ') || parts[0] || 'General'; }
+    function groupEmoji(group){ const g=String(group||'').toLowerCase(); if(g.includes('familia')) return '👨‍👩‍👧‍👦'; if(g.includes('gaming')||g.includes('amigos')) return '🎮'; if(g.includes('personal')) return '🛍️'; return '⭐'; }
+    function groupClass(group){ const g=String(group||'').toLowerCase(); if(g.includes('familia')) return 'family'; if(g.includes('gaming')||g.includes('amigos')) return 'gaming'; if(g.includes('personal')) return 'personal'; return 'default'; }
+    function renderDealListSelect(){
+      const sel=$('dealList');
+      if(!sel) return;
+      const current=sel.value;
+      const lists=allVisibleLists();
+      sel.innerHTML=lists.map(l=>`<option value="${esc(l)}">${esc(l)}</option>`).join('');
+      if(current && lists.includes(current)) sel.value=current;
+    }
+    function renderListManager(){
+      const box=$('listManager');
+      if(!box) return;
+      const lists=cleanLists(dealLists);
+      box.innerHTML=lists.map((l,i)=>{
+        const count=products.filter(p=>p.dealList===l).length;
+        return `<div class="status-row"><div class="status-ico">${groupEmoji(groupName(l))}</div><div><div class="status-title">${esc(l)}</div><div class="status-meta">${count} producto(s)</div></div><div class="actions compact"><button type="button" class="mini" onclick="renameDealList(${i})">Renombrar</button><button type="button" class="mini red" onclick="removeDealList(${i})">Quitar</button></div></div>`;
+      }).join('') || '<div class="empty"><b>Sin listas</b>Agrega una lista para organizar tus productos.</div>';
+    }
+    async function saveDealListsToCloud(){
+      saveListsLocal();
+      try{
+        if(!currentUser) return;
+        const client=await ensureSupabase();
+        const payload={deal_lists:dealLists,updated_at:new Date().toISOString()};
+        await client.from('app_settings').upsert({user_id:currentUser.id,setting_key:'deal_lists',setting_value:payload},{onConflict:'user_id,setting_key'});
+      }catch(e){ console.warn('No se pudieron guardar listas en nube:', e); }
+    }
+    async function loadDealListsFromCloud(){
+      try{
+        if(!currentUser) return;
+        const client=await ensureSupabase();
+        const res=await client.from('app_settings').select('setting_value').eq('user_id',currentUser.id).eq('setting_key','deal_lists').maybeSingle();
+        if(!res.error && res.data?.setting_value?.deal_lists){
+          dealLists=cleanLists([...res.data.setting_value.deal_lists,...DEFAULT_LISTS]);
+          localStorage.setItem(LISTS_KEY,JSON.stringify(dealLists));
+        }
+      }catch(e){ console.warn('No se pudieron cargar listas de nube:', e); }
+    }
+    async function addDealList(){
+      const input=$('newListName');
+      const name=String(input?.value||'').trim();
+      if(!name) return toast('Escribe el nombre de la lista. Ejemplo: Familia · Mascotas');
+      if(!name.includes(' · ')){
+        const ok=confirm('Para mantener orden te recomiendo usar formato "Grupo · Lista". ¿Agregarla así de todos modos?');
+        if(!ok) return;
+      }
+      if(dealLists.some(l=>l.toLowerCase()===name.toLowerCase())) return toast('Esa lista ya existe.');
+      dealLists=cleanLists([...dealLists,name]);
+      if(input) input.value='';
+      await saveDealListsToCloud();
+      toast('Lista agregada.');
+    }
+    async function resetDealLists(){
+      if(!confirm('¿Restaurar las listas sugeridas? No borra productos, solo vuelve a mostrar las listas base.')) return;
+      dealLists=cleanLists([...DEFAULT_LISTS,...products.map(p=>p.dealList)]);
+      await saveDealListsToCloud();
+      toast('Listas restauradas.');
+    }
+    async function renameDealList(index){
+      const oldName=dealLists[index];
+      if(!oldName) return;
+      const newName=prompt('Nuevo nombre de la lista:', oldName);
+      if(!newName || !newName.trim() || newName.trim()===oldName) return;
+      const finalName=newName.trim();
+      if(dealLists.some((l,i)=>i!==index && l.toLowerCase()===finalName.toLowerCase())) return toast('Ya existe una lista con ese nombre.');
+      dealLists[index]=finalName;
+      products=products.map(p=>p.dealList===oldName?{...p,dealList:finalName,category:listName(finalName),updatedAt:new Date().toISOString()}:p);
+      localStorage.setItem(PRODUCTS_KEY,JSON.stringify(products));
+      // Intento silencioso de actualizar productos afectados en Supabase.
+      if(currentUser&&currentWorkspace){
+        const affected=products.filter(p=>p.dealList===finalName && isUuid(p.id));
+        for(const p of affected){ saveProductRemote(p).catch(console.warn); }
+      }
+      await saveDealListsToCloud();
+      toast('Lista renombrada.');
+    }
+    async function removeDealList(index){
+      const name=dealLists[index];
+      if(!name) return;
+      const affected=products.filter(p=>p.dealList===name);
+      let moveTo=null;
+      if(affected.length){
+        const alternatives=dealLists.filter((_,i)=>i!==index);
+        moveTo=prompt(`Esta lista tiene ${affected.length} producto(s). Escribe la lista a donde moverlos:`, alternatives[0]||'Compras personales · Ofertas especiales');
+        if(!moveTo || !moveTo.trim()) return;
+        moveTo=moveTo.trim();
+        if(!dealLists.some(l=>l.toLowerCase()===moveTo.toLowerCase())) dealLists.push(moveTo);
+        products=products.map(p=>p.dealList===name?{...p,dealList:moveTo,category:listName(moveTo),updatedAt:new Date().toISOString()}:p);
+        localStorage.setItem(PRODUCTS_KEY,JSON.stringify(products));
+        if(currentUser&&currentWorkspace){
+          const moved=products.filter(p=>p.dealList===moveTo && isUuid(p.id));
+          for(const p of moved){ saveProductRemote(p).catch(console.warn); }
+        }
+      }else if(!confirm(`¿Quitar la lista "${name}"?`)) return;
+      dealLists=cleanLists(dealLists.filter((_,i)=>i!==index));
+      await saveDealListsToCloud();
+      toast('Lista quitada.');
+    }
+
     function normalizeProduct(p){ const list=p.deal_list||p.dealList||p.list||"Compras personales · Ofertas especiales"; return {id:p.id||uuid(),workspace_id:p.workspace_id||p.workspaceId||currentWorkspace?.id||null,name:p.name||"Producto sin nombre",store:p.store||"Otra tienda",category:p.category||list.split(' · ')[1]||"General",dealList:list,icon:p.icon||iconFor(p.store,p.category,list),priority:p.priority||"Media",url:p.product_url||p.url||"",normalPrice:Number(p.normal_price??p.normalPrice??0),currentPrice:Number(p.current_price??p.currentPrice??0),targetPrice:Number(p.target_price??p.targetPrice??0),minDiscount:Number(p.min_discount_percent??p.minDiscount??0),alertEnabled:p.alerts_enabled!==false && p.alertEnabled!==false,notes:p.notes||"",createdAt:p.created_at||p.createdAt||new Date().toISOString(),updatedAt:p.updated_at||p.updatedAt||new Date().toISOString()}; }
     function iconFor(store,cat,list){ const t=(store+" "+cat+" "+list).toLowerCase(); if(t.includes('gaming')||t.includes('play')||t.includes('juego')||t.includes('control'))return '🎮'; if(t.includes('audio')||t.includes('audí'))return '🎧'; if(t.includes('cel'))return '📱'; if(t.includes('hogar'))return '🏠'; if(t.includes('salud'))return '💚'; if(t.includes('despensa'))return '🛒'; if(t.includes('ropa'))return '👕'; if(t.includes('herramienta'))return '🛠️'; return '🛍️'; }
     function getLocal(){ try{return JSON.parse(localStorage.getItem(PRODUCTS_KEY)||'[]').map(normalizeProduct);}catch(e){return [];} }
