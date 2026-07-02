@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-pwa-v20-eneba";
+const CACHE_NAME = "dealwatch-mx-pwa-v19-ui-images";
 
 self.addEventListener("install", event => {
   self.skipWaiting();

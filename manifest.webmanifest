@@ -1,7 +1,7 @@
 {
   "name": "DealWatch MX - Appcomercio",
   "short_name": "DealWatch MX",
-  "description": "App PWA para monitorear ofertas, precios objetivo, productos con imagen, Eneba, Mercado Libre, Amazon, Walmart, Liverpool, listas, nube en vivo y alertas por Telegram.",
+  "description": "App PWA para monitorear ofertas, precios objetivo, productos con imagen, listas, nube en vivo y alertas por Telegram.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
