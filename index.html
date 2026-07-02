@@ -289,6 +289,7 @@
   </style>
 </head>
 <body>
+<div id='proSummary' style='padding:10px;color:#aaa'></div>
   <main class="app">
     <header class="top"><div class="top-row"><div class="brand"><div class="logo">🏷️</div><div><h1>DealWatch MX</h1><p class="sub" id="topSubtitle">Ofertas para familia y amigos</p></div></div><div class="top-actions"><div class="pill" id="cloudPill">Local</div><button class="icon-btn" id="themeButton" title="Modo claro/oscuro">☀️</button></div></div></header>
 
@@ -904,30 +905,100 @@
     init(); document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&currentUser){ setupRealtime().catch(console.warn); syncFromCloud(false).catch(console.warn); } }); window.addEventListener('focus',()=>{ if(currentUser){ setupRealtime().catch(console.warn); } }); window.addEventListener('online',()=>{ if(currentUser){ setupRealtime().catch(console.warn); syncFromCloud(false).catch(console.warn); } }); if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(console.warn)); }
   </script>
 
-
-
-
-
-
-
-
-
-</body>
-</html>
 <script>
-// ===== CLEAN COMPARATOR FIX =====
-function similarity(a, b){
+// ===============================
+// COMPARADOR PRO NIVEL 2
+// ===============================
+
+let __products = [];
+
+// token similarity (jaccard improved)
+function similarity(a,b){
   const A = new Set((a||"").toLowerCase().split(/\s+/));
   const B = new Set((b||"").toLowerCase().split(/\s+/));
+
   let inter = 0;
   A.forEach(x => { if(B.has(x)) inter++; });
+
+  return inter / Math.max(A.size, B.size);
+}
+
+function applyComparatorV2(products){
+
+  const groups = [];
+
+  products.forEach(p=>{
+    let found = false;
+
+    for(let g of groups){
+      if(similarity(p.title, g.base.title) > 0.55){
+        g.items.push(p);
+        found = true;
+        break;
+      }
+    }
+
+    if(!found){
+      groups.push({base:p, items:[p]});
+    }
+  });
+
+  groups.forEach(g=>{
+    if(g.items.length>1){
+      let best = g.items.reduce((min,p)=> p.price < min.price ? p : min);
+      g.items.forEach(p=>{
+        p.best = (p===best);
+      });
+    }
+  });
+
+  return products;
+}
+
+// override render if exists
+const oldRender = window.render;
+
+window.render = function(list){
+
+  const enhanced = applyComparatorV2(list);
+
+  const c = document.getElementById("productGrid");
+  if(!c) return;
+
+  c.innerHTML = enhanced.map(p=>`
+    <div class="card ${p.best?'best':''}">
+      <img src="${p.image||''}">
+      <h3>${p.title}</h3>
+      <p>$${p.price}</p>
+      <small>${p.store||''}</small>
+      ${p.best?'<div style="color:#00ff88;font-weight:bold">🔥 MEJOR OFERTA</div>':''}
+    </div>
+  `).join("");
+}
+</script>
+
+
+<script>
+// ===============================
+// COMPARADOR VISUAL FIX (PRO)
+// ===============================
+
+function similarity(a, b){
+  const A = new Set((a || "").toLowerCase().split(/\s+/));
+  const B = new Set((b || "").toLowerCase().split(/\s+/));
+
+  let inter = 0;
+  A.forEach(x => { if (B.has(x)) inter++; });
+
   return inter / Math.max(A.size, B.size, 1);
 }
 
 function applyComparator(products){
+
   const groups = [];
 
   products.forEach(p => {
+
     const name = p.name || "";
     let found = false;
 
@@ -959,3 +1030,82 @@ function applyComparator(products){
   return products;
 }
 </script>
+
+
+<script>
+// ===============================
+// DEALWATCH PRO UPGRADE (SAFE)
+// ===============================
+
+function normalize(t){
+  return (t||"").toLowerCase().replace(/[^a-z0-9 ]/g,'').trim();
+}
+
+function group(list){
+  const g = {};
+  list.forEach(p=>{
+    const k = normalize(p.title);
+    if(!g[k]) g[k]=[];
+    g[k].push(p);
+  });
+  return Object.values(g);
+}
+
+// fake offer detection
+function detectFake(group){
+  const avg = group.reduce((a,b)=>a+b.price,0)/group.length;
+  group.forEach(p=>{
+    p._fake = p.price > avg*1.8;
+  });
+}
+
+// compute best per group
+function compute(group){
+  detectFake(group);
+  const best = group.reduce((m,p)=> p.price < m.price ? p : m);
+  group.forEach(p=>{
+    p._best = (p===best);
+  });
+  return best;
+}
+
+// global ranking
+function buildSummary(groups){
+  const bests = groups.map(g=>compute(g));
+  bests.sort((a,b)=>a.price-b.price);
+
+  const el = document.getElementById("proSummary");
+  if(!el) return;
+
+  el.innerHTML = "<h3>🏆 Mejor oferta global</h3>" +
+    bests.slice(0,3).map(p=>
+      `<div>🔥 ${p.title} - $${p.price} (${p.store})</div>`
+    ).join("");
+}
+
+// override render safely
+function enhanceRender(){
+
+  const original = window.renderProducts;
+
+  if(!original) return;
+
+  window.renderProducts = function(){
+
+    let products = window.products || [];
+
+    const groups = group(products);
+
+    groups.forEach(g=>compute(g));
+
+    buildSummary(groups);
+
+    original();
+  }
+}
+
+window.addEventListener("load", enhanceRender);
+</script>
+
+</body>
+</html>
