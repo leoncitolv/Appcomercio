@@ -45,4 +45,5 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.telegram_test || false }}
           FORCE_SEND_OFFERS: ${{ github.event_name == 'workflow_dispatch' && inputs.force_send_offers || false }}
-          DEALWATCH_MODE: "rules_only_telegram"
+          AUTO_FETCH_ENEBA: "true"
+          DEALWATCH_MODE: "rules_only_telegram_eneba"
