@@ -8,6 +8,11 @@ on:
         required: false
         type: boolean
         default: false
+      force_send_offers:
+        description: "Forzar envío de ofertas aunque ya se hayan avisado en las últimas 24 horas"
+        required: false
+        type: boolean
+        default: false
   schedule:
     # Cada 6 horas, minuto 17 UTC. Cambia este cron si quieres otro horario.
     - cron: "17 */6 * * *"
@@ -39,4 +44,5 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.telegram_test || false }}
+          FORCE_SEND_OFFERS: ${{ github.event_name == 'workflow_dispatch' && inputs.force_send_offers || false }}
           DEALWATCH_MODE: "rules_only_telegram"
