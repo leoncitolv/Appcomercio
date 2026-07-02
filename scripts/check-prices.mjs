@@ -127,16 +127,6 @@ function formatMoney(value) {
   }).format(number);
 }
 
-function storeLabel(store) {
-  const value = String(store || "Tienda").toLowerCase();
-  if (value.includes("eneba")) return "🎮 Eneba";
-  if (value.includes("amazon")) return "🛒 Amazon México";
-  if (value.includes("mercado")) return "💛 Mercado Libre";
-  if (value.includes("walmart")) return "✦ Walmart";
-  if (value.includes("liverpool")) return "🏬 Liverpool";
-  return `🛍️ ${store || "Tienda"}`;
-}
-
 function telegramIsConfigured() {
   return Boolean(TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID);
 }
@@ -254,7 +244,7 @@ async function main() {
         discount_percent: analysis.discount,
         is_offer: analysis.isOffer,
         alert_reason: analysis.reason,
-        raw: { mode: MODE, checkedBy: "github_actions", storeLabel: storeLabel(product.store) },
+        raw: { mode: MODE, checkedBy: "github_actions" },
         checked_at: new Date().toISOString(),
       });
 
@@ -265,7 +255,7 @@ async function main() {
           product_id: product.id,
           event_type: "offer_detected",
           title: `Oferta detectada: ${product.name}`,
-          message: `${storeLabel(product.store)}: ${analysis.reason}`,
+          message: `${product.store || "Tienda"}: ${analysis.reason}`,
           current_price: toNumber(product.current_price),
           target_price: toNumber(product.target_price),
           discount_percent: analysis.discount,
