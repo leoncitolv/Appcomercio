@@ -8,6 +8,7 @@ const MODE = process.env.DEALWATCH_MODE || "rules_only";
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
 const TELEGRAM_TEST = String(process.env.TELEGRAM_TEST || "false").toLowerCase() === "true";
+const FORCE_SEND_OFFERS = String(process.env.FORCE_SEND_OFFERS || "false").toLowerCase() === "true";
 
 if (!SUPABASE_URL) {
   throw new Error("Falta SUPABASE_URL.");
@@ -244,12 +245,12 @@ async function main() {
         discount_percent: analysis.discount,
         is_offer: analysis.isOffer,
         alert_reason: analysis.reason,
-        raw: { mode: MODE, checkedBy: "github_actions" },
+        raw: { mode: MODE, checkedBy: "github_actions", forceSendOffers: FORCE_SEND_OFFERS },
         checked_at: new Date().toISOString(),
       });
 
       const alertKey = `${product.id}:${toNumber(product.current_price)}`;
-      if (analysis.isOffer && product.workspace_id && !recentKeys.has(alertKey)) {
+      if (analysis.isOffer && product.workspace_id && (FORCE_SEND_OFFERS || !recentKeys.has(alertKey))) {
         alertEvents.push({
           workspace_id: product.workspace_id,
           product_id: product.id,
@@ -260,7 +261,7 @@ async function main() {
           target_price: toNumber(product.target_price),
           discount_percent: analysis.discount,
           status: "new",
-          raw: { mode: MODE, checkedBy: "github_actions", productUrl: product.product_url || null },
+          raw: { mode: MODE, checkedBy: "github_actions", forceSendOffers: FORCE_SEND_OFFERS, productUrl: product.product_url || null },
         });
       }
     }
@@ -291,6 +292,7 @@ async function main() {
     }
 
     const offerCount = results.filter(r => r.is_offer).length;
+    const newAlertCount = alertEvents.length;
     const telegramSummary = telegramIsConfigured()
       ? ` Telegram: ${telegramSent} enviado(s)${telegramErrors ? `, ${telegramErrors} error(es)` : ""}.`
       : " Telegram no configurado.";
@@ -299,11 +301,11 @@ async function main() {
       status: "success",
       checked_count: results.length,
       offers_count: offerCount,
-      message: `Revisión completada. ${results.length} producto(s), ${offerCount} oferta(s).${telegramSummary}`,
+      message: `Revisión completada. ${results.length} producto(s), ${offerCount} oferta(s), ${newAlertCount} alerta(s) enviada(s)/registrada(s).${FORCE_SEND_OFFERS ? " Modo forzado activo." : ""}${telegramSummary}`,
       finished_at: new Date().toISOString(),
     });
 
-    console.log(`DealWatch MX OK: ${results.length} productos revisados, ${alertEvents.length} alerta(s) nueva(s), ${telegramSent} Telegram.`);
+    console.log(`DealWatch MX OK: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram. Force=${FORCE_SEND_OFFERS}`);
   } catch (error) {
     await patch(`monitor_runs`, `id=eq.${runId}`, {
       status: "error",
