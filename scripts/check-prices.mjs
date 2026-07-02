@@ -9,6 +9,7 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
 const TELEGRAM_TEST = String(process.env.TELEGRAM_TEST || "false").toLowerCase() === "true";
 const FORCE_SEND_OFFERS = String(process.env.FORCE_SEND_OFFERS || "false").toLowerCase() === "true";
+const AUTO_FETCH_ENEBA = String(process.env.AUTO_FETCH_ENEBA || "true").toLowerCase() === "true";
 
 if (!SUPABASE_URL) {
   throw new Error("Falta SUPABASE_URL.");
@@ -109,6 +110,101 @@ function chunk(items, size = 100) {
   const chunks = [];
   for (let i = 0; i < items.length; i += size) chunks.push(items.slice(i, i + size));
   return chunks;
+}
+
+
+function isEnebaProduct(product) {
+  const store = String(product.store || "").toLowerCase();
+  const url = String(product.product_url || "").toLowerCase();
+  return store.includes("eneba") || url.includes("eneba.com");
+}
+
+function parsePriceText(value) {
+  if (value == null) return 0;
+  let raw = String(value).trim();
+  if (!raw) return 0;
+  raw = raw.replace(/\s+/g, "");
+  raw = raw.replace(/[^0-9.,]/g, "");
+  if (!raw) return 0;
+
+  const lastComma = raw.lastIndexOf(",");
+  const lastDot = raw.lastIndexOf(".");
+
+  if (lastComma > lastDot) {
+    raw = raw.replace(/\./g, "").replace(",", ".");
+  } else {
+    raw = raw.replace(/,/g, "");
+  }
+
+  const n = Number(raw);
+  return Number.isFinite(n) ? Math.round(n * 100) / 100 : 0;
+}
+
+function findFirstPrice(html) {
+  const patterns = [
+    /"price"\s*:\s*"?([0-9]+(?:[.,][0-9]+)?)"?/i,
+    /"priceAmount"\s*:\s*"?([0-9]+(?:[.,][0-9]+)?)"?/i,
+    /"amount"\s*:\s*"?([0-9]+(?:[.,][0-9]+)?)"?/i,
+    /(?:MX\$|MXN|\$)\s*([0-9][0-9.,]*)/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    const price = match ? parsePriceText(match[1]) : 0;
+    if (price > 0) return price;
+  }
+
+  return 0;
+}
+
+async function fetchEnebaPrice(productUrl) {
+  if (!productUrl || !String(productUrl).startsWith("http")) return null;
+
+  const res = await fetch(productUrl, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; DealWatchMX/1.0; +https://github.com/leoncitolv/Appcomercio)",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "es-MX,es;q=0.9,en;q=0.8",
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Eneba HTTP ${res.status}`);
+  }
+
+  const html = await res.text();
+  const price = findFirstPrice(html);
+  return price > 0 ? price : null;
+}
+
+async function enrichProductPrice(product) {
+  const enriched = { ...product };
+
+  if (!AUTO_FETCH_ENEBA || !isEnebaProduct(product)) {
+    return enriched;
+  }
+
+  try {
+    const fetchedPrice = await fetchEnebaPrice(product.product_url);
+    if (fetchedPrice && fetchedPrice > 0) {
+      enriched.current_price = fetchedPrice;
+      enriched.raw_price_source = "eneba_auto_fetch";
+
+      if (fetchedPrice !== toNumber(product.current_price)) {
+        await patch("products", `id=eq.${product.id}`, {
+          current_price: fetchedPrice,
+          updated_at: new Date().toISOString(),
+        }).catch(error => {
+          console.warn(`No se pudo actualizar precio Eneba en Supabase para ${product.id}:`, error.message);
+        });
+      }
+    }
+  } catch (error) {
+    enriched.raw_price_error = error.message;
+    console.warn(`No se pudo leer precio Eneba para ${product.name || product.id}:`, error.message);
+  }
+
+  return enriched;
 }
 
 
@@ -228,7 +324,8 @@ async function main() {
     const results = [];
     const alertEvents = [];
 
-    for (const product of products || []) {
+    for (const originalProduct of products || []) {
+      const product = await enrichProductPrice(originalProduct);
       const analysis = analyzeProduct(product);
 
       results.push({
@@ -245,7 +342,7 @@ async function main() {
         discount_percent: analysis.discount,
         is_offer: analysis.isOffer,
         alert_reason: analysis.reason,
-        raw: { mode: MODE, checkedBy: "github_actions", forceSendOffers: FORCE_SEND_OFFERS },
+        raw: { mode: MODE, checkedBy: "github_actions", forceSendOffers: FORCE_SEND_OFFERS, priceSource: product.raw_price_source || "stored_price", priceError: product.raw_price_error || null },
         checked_at: new Date().toISOString(),
       });
 
@@ -261,7 +358,7 @@ async function main() {
           target_price: toNumber(product.target_price),
           discount_percent: analysis.discount,
           status: "new",
-          raw: { mode: MODE, checkedBy: "github_actions", forceSendOffers: FORCE_SEND_OFFERS, productUrl: product.product_url || null },
+          raw: { mode: MODE, checkedBy: "github_actions", forceSendOffers: FORCE_SEND_OFFERS, productUrl: product.product_url || null, priceSource: product.raw_price_source || "stored_price", priceError: product.raw_price_error || null },
         });
       }
     }
