@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | App simple</title>
+  <title>DealWatch MX | Fase 25</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -338,6 +338,12 @@
     @media(max-width:470px){.history-grid{grid-template-columns:1fr}.history-row{grid-template-columns:1fr}.history-price{text-align:left}}
 
 
+    /* ===== Fase 25 · Estado visual del precio ===== */
+    .price-status-card{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-top:10px;border-radius:18px;padding:10px 12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.055)}
+    .price-status-card b{display:block;font-size:.80rem;font-weight:950;letter-spacing:-.01em}.price-status-card span{display:block;margin-top:3px;color:#a99bc7;font-size:.70rem;font-weight:850;line-height:1.35}.price-status-card small{color:#c4b5fd;font-size:.68rem;font-weight:950;white-space:nowrap;text-align:right}.price-status-success{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.22)}.price-status-success b{color:#8ff7b0}.price-status-warning{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.24)}.price-status-warning b{color:#fde68a}.price-status-info{background:rgba(14,165,233,.09);border-color:rgba(14,165,233,.18)}.price-status-info b{color:#bae6fd}.price-status-neutral{background:rgba(148,163,184,.09);border-color:rgba(148,163,184,.18)}.price-status-neutral b{color:#e2e8f0}.price-status-mini{display:inline-flex;align-items:center;gap:5px;margin-top:5px;border-radius:999px;padding:5px 8px;font-size:.68rem;font-weight:950;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.06);color:#d8b4fe}.price-status-mini.success{background:rgba(16,185,129,.12);color:#8ff7b0;border-color:rgba(16,185,129,.22)}.price-status-mini.warning{background:rgba(245,158,11,.12);color:#fde68a;border-color:rgba(245,158,11,.24)}.price-status-mini.info{background:rgba(14,165,233,.12);color:#bae6fd;border-color:rgba(14,165,233,.18)}.price-status-mini.neutral{background:rgba(148,163,184,.10);color:#e2e8f0;border-color:rgba(148,163,184,.18)}
+    @media(max-width:470px){.price-status-card{grid-template-columns:1fr}.price-status-card small{text-align:left}}
+
+
   </style>
 </head>
 <body>
@@ -608,7 +614,64 @@
     function detectStoreFromUrl(){ const input=$('url'); if(!input) return; const u=input.value.trim(); const lower=u.toLowerCase(); if(lower.includes('mercadolibre.com')||lower.includes('articulo.mercadolibre')) $('store').value='Mercado Libre'; else if(lower.includes('amazon.')) $('store').value='Amazon México'; else if(lower.includes('walmart.com')) $('store').value='Walmart'; else if(lower.includes('liverpool.com')) $('store').value='Liverpool'; else if(lower.includes('eneba.com')) $('store').value='Eneba'; else if(lower.includes('aliexpress.')) $('store').value='AliExpress'; renderFormPreview(); detectMercadoLibreData(u).catch(console.warn); }
     function extractMlId(url){ const s=decodeURIComponent(String(url||'')); const wid=s.match(/[?&]wid=(MLM\d+)/i); if(wid) return wid[1].toUpperCase(); const item=s.match(/item_id[:=](MLM\d+)/i); if(item) return item[1].toUpperCase(); const direct=s.match(/(MLM-?\d{6,})/i); return direct?direct[1].replace('-','').toUpperCase():''; }
     async function detectMercadoLibreData(url){ const id=extractMlId(url); if(!id) return; const res=await fetch(`https://api.mercadolibre.com/items/${id}`); if(!res.ok) return; const data=await res.json(); if(!$('name').value.trim() && data.title) $('name').value=data.title; if(!Number($('currentPrice').value||0) && data.price) $('currentPrice').value=Math.round(Number(data.price)); const pic=data.secure_thumbnail||data.thumbnail||(Array.isArray(data.pictures)&&data.pictures[0]&&(data.pictures[0].secure_url||data.pictures[0].url)); if(pic && !$('imageUrl').value.trim()) $('imageUrl').value=pic; renderFormPreview(); }
-    function productRow(p,opts={}){ const offer=isOffer(p); const url=p.url?`<a class="mini primary" href="${esc(p.url)}" target="_blank" rel="noopener">Abrir</a>`:''; const edit=opts.actions&&canEdit()?`<button class="mini" onclick="editProduct('${esc(p.id)}')">Editar</button><button class="mini red" onclick="deleteProduct('${esc(p.id)}')">Borrar</button>`:''; const alertText=p.alertEnabled?'Silenciar':'Activar'; const alertClass=p.alertEnabled?'green':'red'; return `<article class="product-card"><div class="thumb">${productImageHtml(p)}</div><div><div class="prod-title">${esc(p.name)}</div><div class="meta">${storeBadge(p.store)} <span>${esc(p.store)}</span> · <span>${esc(p.dealList)}</span></div><div class="price-line"><div><div class="price-now">${money(p.currentPrice)}</div><div class="hint">${esc(savingsText(p))}</div></div><div class="target">Meta<br><strong>${money(p.targetPrice)}</strong></div></div><div class="badges"><span class="badge ${offer?'green':'orange'}">${offer?'Oferta':'Vigilando'}</span><span class="badge blue">${esc(discountText(p))}</span><span class="badge gray">${p.alertEnabled?'Alerta ON':'Alerta OFF'}</span></div>${p.notes?`<div class="meta" style="margin-top:8px">${esc(p.notes)}</div>`:''}<div class="actions">${url}${edit}<button class="mini ${alertClass}" onclick="toggleAlert('${esc(p.id)}')">${alertText}</button></div></div></article>`; }
+
+    function latestHistoryForProduct(productId){
+      const id=String(productId||'');
+      if(!id) return null;
+      return (priceHistory||[])
+        .filter(h=>String(h.productId||'')===id)
+        .sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0))[0]||null;
+    }
+    function isAutomaticStore(store){ const t=String(store||'').toLowerCase(); return t.includes('mercado')||t.includes('mercadolibre')||t.includes('eneba'); }
+    function isManualSafeStore(store){ const t=String(store||'').toLowerCase(); return t.includes('aliexpress')||t.includes('amazon')||t.includes('walmart')||t.includes('liverpool')||t.includes('otra'); }
+    function priceStatusFromProduct(p){
+      const latest=latestHistoryForProduct(p.id);
+      const raw=latest?.raw||{};
+      const saved=raw.priceStatus||null;
+      if(saved && typeof saved==='object'){
+        return {
+          code:saved.code||'manual_safe',
+          label:saved.label||'Precio manual seguro',
+          tone:saved.tone||'info',
+          icon:saved.icon||'🔵',
+          reason:saved.reason||saved.error||'Estado registrado por el robot.',
+          checkedAt:saved.checkedAt||latest?.checkedAt||raw.checkedAt||null,
+          source:saved.source||raw.priceSource||latest?.source||'stored_price',
+          error:saved.error||raw.priceError||null
+        };
+      }
+      const source=String(raw.priceSource||latest?.source||'stored_price');
+      const error=String(raw.priceError||'').trim();
+      const store=String(p.store||'');
+      const lowerStore=store.toLowerCase();
+      const checkedAt=latest?.checkedAt||null;
+      if(source==='mercadolibre_api') return {code:'auto_updated',label:'Precio automático actualizado',tone:'success',icon:'✅',reason:'Actualizado desde Mercado Libre API.',checkedAt,source,error:null};
+      if(source==='mercadolibre_html_fallback') return {code:'auto_updated_fallback',label:'Precio automático actualizado',tone:'success',icon:'✅',reason:'Actualizado desde fallback HTML de Mercado Libre.',checkedAt,source,error:null};
+      if(source==='eneba_auto_fetch') return {code:'auto_updated',label:'Precio automático actualizado',tone:'success',icon:'✅',reason:'Actualizado desde lectura automática de Eneba.',checkedAt,source,error:null};
+      if(source==='aliexpress_manual_safe') return {code:'manual_safe',label:'Precio manual seguro',tone:'info',icon:'🔵',reason:'AliExpress está en modo manual seguro para evitar bloqueos o precios falsos.',checkedAt,source,error:null};
+      if(error && /sospechoso|suspicious/i.test(error)) return {code:'suspicious_ignored',label:'Precio sospechoso ignorado',tone:'warning',icon:'🟠',reason:error,checkedAt,source,error};
+      if(error && (lowerStore.includes('mercado')||lowerStore.includes('mercadolibre'))) return {code:'manual_conserved',label:'Precio manual conservado',tone:'warning',icon:'🟡',reason:'Mercado Libre bloqueó la lectura o el producto no está disponible. Se conservó el precio manual guardado.',checkedAt,source,error};
+      if(error) return {code:'manual_conserved',label:'Precio manual conservado',tone:'warning',icon:'🟡',reason:error,checkedAt,source,error};
+      if(!latest && isAutomaticStore(store)) return {code:'auto_pending',label:'Precio automático pendiente',tone:'neutral',icon:'⚪',reason:'Aún no hay una lectura automática registrada en el historial.',checkedAt:null,source,error:null};
+      if(isManualSafeStore(store)) return {code:'manual_safe',label:'Precio manual seguro',tone:'info',icon:'🔵',reason:'Tienda en modo manual seguro. Actualiza el precio cuando lo revises.',checkedAt,source,error:null};
+      return {code:'manual_safe',label:'Precio manual seguro',tone:'info',icon:'🔵',reason:'Se conserva el precio guardado manualmente.',checkedAt,source,error:null};
+    }
+    function priceStatusDate(value){
+      if(!value) return 'Sin revisión';
+      const d=new Date(value);
+      if(Number.isNaN(d.getTime())) return 'Sin revisión';
+      return d.toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    }
+    function priceStatusBoxHtml(p){
+      const s=priceStatusFromProduct(p);
+      return `<div class="price-status-card price-status-${esc(s.tone)}" title="${esc(s.error||s.reason)}"><div><b>${esc(s.icon)} ${esc(s.label)}</b><span>${esc(s.reason)}</span></div><small>${esc(priceStatusDate(s.checkedAt))}</small></div>`;
+    }
+    function priceStatusMiniHtml(p){
+      const s=priceStatusFromProduct(p);
+      return `<span class="price-status-mini ${esc(s.tone)}" title="${esc(s.error||s.reason)}">${esc(s.icon)} ${esc(s.label)}</span>`;
+    }
+
+    function productRow(p,opts={}){ const offer=isOffer(p); const url=p.url?`<a class="mini primary" href="${esc(p.url)}" target="_blank" rel="noopener">Abrir</a>`:''; const edit=opts.actions&&canEdit()?`<button class="mini" onclick="editProduct('${esc(p.id)}')">Editar</button><button class="mini red" onclick="deleteProduct('${esc(p.id)}')">Borrar</button>`:''; const alertText=p.alertEnabled?'Silenciar':'Activar'; const alertClass=p.alertEnabled?'green':'red'; return `<article class="product-card"><div class="thumb">${productImageHtml(p)}</div><div><div class="prod-title">${esc(p.name)}</div><div class="meta">${storeBadge(p.store)} <span>${esc(p.store)}</span> · <span>${esc(p.dealList)}</span></div><div class="price-line"><div><div class="price-now">${money(p.currentPrice)}</div><div class="hint">${esc(savingsText(p))}</div></div><div class="target">Meta<br><strong>${money(p.targetPrice)}</strong></div></div><div class="badges"><span class="badge ${offer?'green':'orange'}">${offer?'Oferta':'Vigilando'}</span><span class="badge blue">${esc(discountText(p))}</span><span class="badge gray">${p.alertEnabled?'Alerta ON':'Alerta OFF'}</span></div>${priceStatusBoxHtml(p)}${p.notes?`<div class="meta" style="margin-top:8px">${esc(p.notes)}</div>`:''}<div class="actions">${url}${edit}<button class="mini ${alertClass}" onclick="toggleAlert('${esc(p.id)}')">${alertText}</button></div></div></article>`; }
 
     function compareKey(name){
       return String(name||'')
@@ -705,7 +768,7 @@
       const target=Number(p.targetPrice||0);
       const targetText=target>0?(price<=target?'Cumple meta':`Meta ${money(target)}`):'Sin meta';
       const open=p.url?`<a class="mini primary" href="${esc(p.url)}" target="_blank" rel="noopener">Abrir</a>`:'';
-      return `<div class="compare-row ${isBest?'best':'more-expensive'}"><div><div class="compare-store">${storeBadge(p.store)} <span>${esc(p.store||'Tienda')}</span></div><div class="compare-diff ${isBest?'good':'bad'}">${esc(diffText)} · ${esc(targetText)}</div></div><div><div class="compare-price">${money(price)}</div>${open?`<div style="margin-top:6px">${open}</div>`:''}</div></div>`;
+      return `<div class="compare-row ${isBest?'best':'more-expensive'}"><div><div class="compare-store">${storeBadge(p.store)} <span>${esc(p.store||'Tienda')}</span></div><div class="compare-diff ${isBest?'good':'bad'}">${esc(diffText)} · ${esc(targetText)}</div>${priceStatusMiniHtml(p)}</div><div><div class="compare-price">${money(price)}</div>${open?`<div style="margin-top:6px">${open}</div>`:''}</div></div>`;
     }
     function normalizeHistory(row){
       return {
@@ -803,7 +866,7 @@
       const maxText=hist.max?money(hist.max.price):'Sin dato';
       const avgText=hist.avg?money(hist.avg):'Sin dato';
       const lastText=hist.rows[0]?dateShort(hist.rows[0].checkedAt):'Pendiente';
-      return `<article class="card compare-card pro"><span class="compare-rank">#${index+1}</span><div class="compare-head"><div class="thumb">${productImageHtml(best)}</div><div><div class="compare-title">${esc(g.name)}</div><div class="compare-sub">${g.items.length} opciones · ${storeCount} tienda(s) · ganador actual</div><div class="winner-store-line">${storeBadge(best.store)} ${esc(best.store||'Tienda')}</div><div class="badges"><span class="badge blue">${esc(best.dealList||'Lista')}</span>${targetBadge}<span class="badge gray">Promedio ${money(g.average)}</span>${historyBadge}</div></div></div><div class="compare-winner"><div><small>Mejor precio actual</small><b>${money(bestPrice)}</b><div class="hint">Más caro detectado: ${money(highestPrice)}</div></div><div class="compare-save">${esc(saving)}</div></div><div class="compare-summary-grid"><div class="compare-summary-box"><small>Opciones</small><b>${g.items.length}</b></div><div class="compare-summary-box"><small>Diferencia</small><b>${money(g.spread)}</b></div><div class="compare-summary-box"><small>Meta</small><b>${target?money(target):'Sin meta'}</b></div></div><div class="history-grid"><div class="history-box"><small>Mínimo histórico</small><b>${minText}</b><div class="tiny">${hist.min?`${esc(hist.min.store||'Tienda')} · ${dateShort(hist.min.checkedAt)}`:'Corre el robot'}</div></div><div class="history-box"><small>Promedio histórico</small><b>${avgText}</b><div class="tiny">Máximo ${maxText}</div></div><div class="history-box"><small>Tendencia</small><b>${esc(hist.trend)}</b><div class="tiny">Última: ${lastText}</div></div></div>${!hist.hasHistory?'<div class="history-banner">El historial aparecerá después de ejecutar el SQL de Fase 22 y correr GitHub Actions. Mientras tanto se usa el precio actual para comparar.</div>':''}<details class="compare-options"><summary><b>Ver opciones comparadas</b><span>${g.items.length} tienda(s) ›</span></summary><div class="compare-items">${g.items.map((p,i)=>compareRow(p,bestPrice,i)).join('')}</div></details><details class="history-options"><summary><b>Ver historial por tienda</b><span>${hist.rows.length} revisión(es) ›</span></summary><div class="history-rows">${historyStoreRows(g)}</div></details><div class="compare-tools"><button class="mini" onclick="editProduct('${esc(best.id)}')">Editar ganador</button>${openBest}<button class="mini" onclick="activeList='${esc(groupName(best.dealList))}';go('products')">Ver lista</button></div><div class="compare-note">Comparación por nombre normalizado: ${esc(g.key)}</div></article>`;
+      return `<article class="card compare-card pro"><span class="compare-rank">#${index+1}</span><div class="compare-head"><div class="thumb">${productImageHtml(best)}</div><div><div class="compare-title">${esc(g.name)}</div><div class="compare-sub">${g.items.length} opciones · ${storeCount} tienda(s) · ganador actual</div><div class="winner-store-line">${storeBadge(best.store)} ${esc(best.store||'Tienda')}</div><div class="badges"><span class="badge blue">${esc(best.dealList||'Lista')}</span>${targetBadge}<span class="badge gray">Promedio ${money(g.average)}</span>${historyBadge}${priceStatusMiniHtml(best)}</div></div></div><div class="compare-winner"><div><small>Mejor precio actual</small><b>${money(bestPrice)}</b><div class="hint">Más caro detectado: ${money(highestPrice)}</div></div><div class="compare-save">${esc(saving)}</div></div><div class="compare-summary-grid"><div class="compare-summary-box"><small>Opciones</small><b>${g.items.length}</b></div><div class="compare-summary-box"><small>Diferencia</small><b>${money(g.spread)}</b></div><div class="compare-summary-box"><small>Meta</small><b>${target?money(target):'Sin meta'}</b></div></div><div class="history-grid"><div class="history-box"><small>Mínimo histórico</small><b>${minText}</b><div class="tiny">${hist.min?`${esc(hist.min.store||'Tienda')} · ${dateShort(hist.min.checkedAt)}`:'Corre el robot'}</div></div><div class="history-box"><small>Promedio histórico</small><b>${avgText}</b><div class="tiny">Máximo ${maxText}</div></div><div class="history-box"><small>Tendencia</small><b>${esc(hist.trend)}</b><div class="tiny">Última: ${lastText}</div></div></div>${!hist.hasHistory?'<div class="history-banner">El historial aparecerá después de ejecutar el SQL de Fase 22 y correr GitHub Actions. Mientras tanto se usa el precio actual para comparar.</div>':''}<details class="compare-options"><summary><b>Ver opciones comparadas</b><span>${g.items.length} tienda(s) ›</span></summary><div class="compare-items">${g.items.map((p,i)=>compareRow(p,bestPrice,i)).join('')}</div></details><details class="history-options"><summary><b>Ver historial por tienda</b><span>${hist.rows.length} revisión(es) ›</span></summary><div class="history-rows">${historyStoreRows(g)}</div></details><div class="compare-tools"><button class="mini" onclick="editProduct('${esc(best.id)}')">Editar ganador</button>${openBest}<button class="mini" onclick="activeList='${esc(groupName(best.dealList))}';go('products')">Ver lista</button></div><div class="compare-note">Comparación por nombre normalizado: ${esc(g.key)}</div></article>`;
     }
     function renderCompare(){
       const box=$('compareList');
