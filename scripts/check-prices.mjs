@@ -459,6 +459,8 @@ function buildPriceHistoryRow(product, runId) {
     return null;
   }
 
+  const normal = toNumber(product.normal_price);
+
   return {
     user_id: product.user_id,
     workspace_id: product.workspace_id,
@@ -466,9 +468,16 @@ function buildPriceHistoryRow(product, runId) {
     product_name: product.name || "Producto sin nombre",
     store: product.store || "Tienda",
     product_url: product.product_url || null,
+
+    // Compatibilidad con las 2 versiones de price_history:
+    // - Fase 22 limpia: usa price, normal_price, target_price.
+    // - Instalaciones previas: pueden exigir old_price/new_price como NOT NULL.
     price: current,
-    normal_price: toNumber(product.normal_price),
+    old_price: normal > 0 ? normal : current,
+    new_price: current,
+    normal_price: normal,
     target_price: toNumber(product.target_price),
+
     source: product.raw_price_source || "github_actions",
     checked_at: new Date().toISOString(),
     raw: {
