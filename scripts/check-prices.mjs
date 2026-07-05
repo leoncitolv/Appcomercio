@@ -112,7 +112,6 @@ function chunk(items, size = 100) {
   return chunks;
 }
 
-
 function isEnebaProduct(product) {
   const store = String(product.store || "").toLowerCase();
   const url = String(product.product_url || "").toLowerCase();
@@ -121,30 +120,69 @@ function isEnebaProduct(product) {
 
 function parsePriceText(value) {
   if (value == null) return 0;
-  let raw = String(value).trim();
-  if (!raw) return 0;
-  raw = raw.replace(/\s+/g, "");
-  raw = raw.replace(/[^0-9.,]/g, "");
+
+  let raw = String(value)
+    .trim()
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, "")
+    .replace(/[^0-9.,]/g, "");
+
   if (!raw) return 0;
 
-  const lastComma = raw.lastIndexOf(",");
-  const lastDot = raw.lastIndexOf(".");
+  const hasComma = raw.includes(",");
+  const hasDot = raw.includes(".");
 
-  if (lastComma > lastDot) {
-    raw = raw.replace(/\./g, "").replace(",", ".");
-  } else {
-    raw = raw.replace(/,/g, "");
+  if (hasComma && hasDot) {
+    const lastComma = raw.lastIndexOf(",");
+    const lastDot = raw.lastIndexOf(".");
+
+    // 1,099.99 -> 1099.99
+    // 1.099,99 -> 1099.99
+    raw = lastDot > lastComma
+      ? raw.replace(/,/g, "")
+      : raw.replace(/\./g, "").replace(/,/g, ".");
+  } else if (hasComma) {
+    const parts = raw.split(",");
+
+    // 1,099 / 12,999 / 1,099,999 -> miles, no decimales
+    if (parts.length > 1 && parts.slice(1).every(part => part.length === 3)) {
+      raw = parts.join("");
+    } else {
+      // 1099,99 -> decimal europeo
+      raw = raw.replace(/,/g, ".");
+    }
+  } else if (hasDot) {
+    const parts = raw.split(".");
+
+    // 1.099 / 12.999 / 1.099.999 -> miles, no decimales
+    if (parts.length > 1 && parts.slice(1).every(part => part.length === 3)) {
+      raw = parts.join("");
+    }
   }
 
   const n = Number(raw);
   return Number.isFinite(n) ? Math.round(n * 100) / 100 : 0;
 }
 
+function isSuspiciousFetchedPrice(fetchedPrice, product) {
+  const fetched = toNumber(fetchedPrice);
+  const current = toNumber(product.current_price);
+  const normal = toNumber(product.normal_price);
+  const target = toNumber(product.target_price);
+  const reference = Math.max(current, normal, target);
+
+  if (fetched <= 0) return true;
+  if (reference >= 100 && fetched < 10) return true;
+  if (reference >= 100 && fetched < reference * 0.1) return true;
+
+  return false;
+}
+
 function findFirstPrice(html) {
   const patterns = [
-    /"price"\s*:\s*"?([0-9]+(?:[.,][0-9]+)?)"?/i,
-    /"priceAmount"\s*:\s*"?([0-9]+(?:[.,][0-9]+)?)"?/i,
-    /"amount"\s*:\s*"?([0-9]+(?:[.,][0-9]+)?)"?/i,
+    /"price"\s*:\s*"?([0-9][0-9.,]*)"?/i,
+    /"priceAmount"\s*:\s*"?([0-9][0-9.,]*)"?/i,
+    /"amount"\s*:\s*"?([0-9][0-9.,]*)"?/i,
     /(?:MX\$|MXN|\$)\s*([0-9][0-9.,]*)/i,
   ];
 
@@ -186,7 +224,14 @@ async function enrichProductPrice(product) {
 
   try {
     const fetchedPrice = await fetchEnebaPrice(product.product_url);
+
     if (fetchedPrice && fetchedPrice > 0) {
+      if (isSuspiciousFetchedPrice(fetchedPrice, product)) {
+        enriched.raw_price_error = `Precio Eneba sospechoso ignorado: ${fetchedPrice}`;
+        console.warn(`Precio Eneba sospechoso ignorado para ${product.name || product.id}: ${fetchedPrice}`);
+        return enriched;
+      }
+
       enriched.current_price = fetchedPrice;
       enriched.raw_price_source = "eneba_auto_fetch";
 
@@ -206,7 +251,6 @@ async function enrichProductPrice(product) {
 
   return enriched;
 }
-
 
 function escapeTelegramHtml(value) {
   return String(value ?? "")
@@ -319,7 +363,10 @@ async function main() {
       `alert_events?select=product_id,current_price,event_type,created_at&event_type=eq.offer_detected&created_at=gte.${encodeURIComponent(since)}`
     ).catch(() => []);
 
-    const recentKeys = new Set((Array.isArray(recentAlerts) ? recentAlerts : []).map(a => `${a.product_id}:${Number(a.current_price || 0)}`));
+    const recentKeys = new Set(
+      (Array.isArray(recentAlerts) ? recentAlerts : [])
+        .map(a => `${a.product_id}:${Number(a.current_price || 0)}`)
+    );
 
     const results = [];
     const alertEvents = [];
@@ -342,12 +389,23 @@ async function main() {
         discount_percent: analysis.discount,
         is_offer: analysis.isOffer,
         alert_reason: analysis.reason,
-        raw: { mode: MODE, checkedBy: "github_actions", forceSendOffers: FORCE_SEND_OFFERS, priceSource: product.raw_price_source || "stored_price", priceError: product.raw_price_error || null },
+        raw: {
+          mode: MODE,
+          checkedBy: "github_actions",
+          forceSendOffers: FORCE_SEND_OFFERS,
+          priceSource: product.raw_price_source || "stored_price",
+          priceError: product.raw_price_error || null,
+        },
         checked_at: new Date().toISOString(),
       });
 
       const alertKey = `${product.id}:${toNumber(product.current_price)}`;
-      if (analysis.isOffer && product.workspace_id && (FORCE_SEND_OFFERS || !recentKeys.has(alertKey))) {
+
+      if (
+        analysis.isOffer &&
+        product.workspace_id &&
+        (FORCE_SEND_OFFERS || !recentKeys.has(alertKey))
+      ) {
         alertEvents.push({
           workspace_id: product.workspace_id,
           product_id: product.id,
@@ -358,7 +416,14 @@ async function main() {
           target_price: toNumber(product.target_price),
           discount_percent: analysis.discount,
           status: "new",
-          raw: { mode: MODE, checkedBy: "github_actions", forceSendOffers: FORCE_SEND_OFFERS, productUrl: product.product_url || null, priceSource: product.raw_price_source || "stored_price", priceError: product.raw_price_error || null },
+          raw: {
+            mode: MODE,
+            checkedBy: "github_actions",
+            forceSendOffers: FORCE_SEND_OFFERS,
+            productUrl: product.product_url || null,
+            priceSource: product.raw_price_source || "stored_price",
+            priceError: product.raw_price_error || null,
+          },
         });
       }
     }
@@ -394,7 +459,7 @@ async function main() {
       ? ` Telegram: ${telegramSent} enviado(s)${telegramErrors ? `, ${telegramErrors} error(es)` : ""}.`
       : " Telegram no configurado.";
 
-    await patch(`monitor_runs`, `id=eq.${runId}`, {
+    await patch("monitor_runs", `id=eq.${runId}`, {
       status: "success",
       checked_count: results.length,
       offers_count: offerCount,
@@ -402,9 +467,11 @@ async function main() {
       finished_at: new Date().toISOString(),
     });
 
-    console.log(`DealWatch MX OK: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram. Force=${FORCE_SEND_OFFERS}`);
+    console.log(
+      `DealWatch MX OK: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram. Force=${FORCE_SEND_OFFERS}`
+    );
   } catch (error) {
-    await patch(`monitor_runs`, `id=eq.${runId}`, {
+    await patch("monitor_runs", `id=eq.${runId}`, {
       status: "error",
       error_message: error.message,
       finished_at: new Date().toISOString(),
