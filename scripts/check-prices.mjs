@@ -1,6 +1,6 @@
 // DealWatch MX / Appcomercio
-// Fase 11: monitor automático básico con GitHub Actions + Supabase REST API.
-// No hace scraping todavía. Evalúa reglas ya guardadas: precio objetivo y descuento mínimo.
+// Fase 23: monitor automático con GitHub Actions + Supabase REST API.
+// Revisa reglas, Telegram, historial, Eneba y Mercado Libre automático.
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -10,6 +10,7 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
 const TELEGRAM_TEST = String(process.env.TELEGRAM_TEST || "false").toLowerCase() === "true";
 const FORCE_SEND_OFFERS = String(process.env.FORCE_SEND_OFFERS || "false").toLowerCase() === "true";
 const AUTO_FETCH_ENEBA = String(process.env.AUTO_FETCH_ENEBA || "true").toLowerCase() === "true";
+const AUTO_FETCH_MERCADOLIBRE = String(process.env.AUTO_FETCH_MERCADOLIBRE || "true").toLowerCase() === "true";
 const PRICE_HISTORY_ENABLED = String(process.env.PRICE_HISTORY_ENABLED || "true").toLowerCase() === "true";
 
 if (!SUPABASE_URL) {
@@ -119,6 +120,42 @@ function isEnebaProduct(product) {
   return store.includes("eneba") || url.includes("eneba.com");
 }
 
+function isMercadoLibreProduct(product) {
+  const store = String(product.store || "").toLowerCase();
+  const url = String(product.product_url || "").toLowerCase();
+
+  return (
+    store.includes("mercado libre") ||
+    store.includes("mercadolibre") ||
+    url.includes("mercadolibre.com") ||
+    url.includes("mercadolibre.com.mx") ||
+    url.includes("articulo.mercadolibre")
+  );
+}
+
+function normalizeMercadoLibreId(value) {
+  const id = String(value || "").replace(/-/g, "").toUpperCase().trim();
+  return /^ML[A-Z]{1,2}\d{6,}$/.test(id) ? id : "";
+}
+
+function extractMercadoLibreId(value) {
+  const text = decodeURIComponent(String(value || ""));
+
+  const patterns = [
+    /[?&](?:wid|item_id)=((?:ML[A-Z]{1,2})-?\d{6,})/i,
+    /\/((?:ML[A-Z]{1,2})-?\d{6,})(?:[/?#_\-]|$)/i,
+    /((?:ML[A-Z]{1,2})-?\d{6,})/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    const id = match ? normalizeMercadoLibreId(match[1]) : "";
+    if (id) return id;
+  }
+
+  return "";
+}
+
 function parsePriceText(value) {
   if (value == null) return 0;
 
@@ -137,25 +174,20 @@ function parsePriceText(value) {
     const lastComma = raw.lastIndexOf(",");
     const lastDot = raw.lastIndexOf(".");
 
-    // 1,099.99 -> 1099.99
-    // 1.099,99 -> 1099.99
     raw = lastDot > lastComma
       ? raw.replace(/,/g, "")
       : raw.replace(/\./g, "").replace(/,/g, ".");
   } else if (hasComma) {
     const parts = raw.split(",");
 
-    // 1,099 / 12,999 / 1,099,999 -> miles, no decimales
     if (parts.length > 1 && parts.slice(1).every(part => part.length === 3)) {
       raw = parts.join("");
     } else {
-      // 1099,99 -> decimal europeo
       raw = raw.replace(/,/g, ".");
     }
   } else if (hasDot) {
     const parts = raw.split(".");
 
-    // 1.099 / 12.999 / 1.099.999 -> miles, no decimales
     if (parts.length > 1 && parts.slice(1).every(part => part.length === 3)) {
       raw = parts.join("");
     }
@@ -173,8 +205,9 @@ function isSuspiciousFetchedPrice(fetchedPrice, product) {
   const reference = Math.max(current, normal, target);
 
   if (fetched <= 0) return true;
+
   if (reference >= 100 && fetched < 10) return true;
-  if (reference >= 100 && fetched < reference * 0.1) return true;
+  if (reference >= 500 && fetched < 50 && fetched < reference * 0.05) return true;
 
   return false;
 }
@@ -216,38 +249,159 @@ async function fetchEnebaPrice(productUrl) {
   return price > 0 ? price : null;
 }
 
-async function enrichProductPrice(product) {
+async function fetchUrlForMercadoLibreId(productUrl) {
+  const res = await fetch(productUrl, {
+    redirect: "follow",
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; DealWatchMX/1.0; +https://github.com/leoncitolv/Appcomercio)",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "es-MX,es;q=0.9,en;q=0.8",
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Mercado Libre HTTP ${res.status}`);
+  }
+
+  const finalUrl = res.url || productUrl;
+  let id = extractMercadoLibreId(finalUrl);
+  let html = "";
+
+  if (!id) {
+    html = await res.text();
+    id = extractMercadoLibreId(html);
+  }
+
+  return { id, html, finalUrl };
+}
+
+async function fetchMercadoLibrePrice(productUrl) {
+  if (!productUrl || !String(productUrl).startsWith("http")) return null;
+
+  let id = extractMercadoLibreId(productUrl);
+  let fallbackHtml = "";
+  let finalUrl = productUrl;
+
+  if (!id) {
+    const resolved = await fetchUrlForMercadoLibreId(productUrl);
+    id = resolved.id;
+    fallbackHtml = resolved.html || "";
+    finalUrl = resolved.finalUrl || productUrl;
+  }
+
+  if (id) {
+    const apiUrl = `https://api.mercadolibre.com/items/${encodeURIComponent(id)}`;
+    const res = await fetch(apiUrl, {
+      headers: {
+        "User-Agent": "DealWatchMX/1.0",
+        "Accept": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Mercado Libre API ${res.status} para ${id}`);
+    }
+
+    const data = await res.json();
+    const price = toNumber(data.price);
+
+    if (price > 0) {
+      return {
+        price,
+        source: "mercadolibre_api",
+        itemId: id,
+        title: data.title || null,
+        currency: data.currency_id || null,
+        finalUrl,
+      };
+    }
+  }
+
+  if (!fallbackHtml) {
+    const resolved = await fetchUrlForMercadoLibreId(productUrl);
+    fallbackHtml = resolved.html || "";
+    finalUrl = resolved.finalUrl || productUrl;
+  }
+
+  const fallbackPrice = findFirstPrice(fallbackHtml);
+  return fallbackPrice > 0
+    ? {
+        price: fallbackPrice,
+        source: "mercadolibre_html_fallback",
+        itemId: id || null,
+        title: null,
+        currency: "MXN",
+        finalUrl,
+      }
+    : null;
+}
+
+async function applyFetchedPrice(product, fetchedPrice, source, label, extraRaw = {}) {
   const enriched = { ...product };
 
-  if (!AUTO_FETCH_ENEBA || !isEnebaProduct(product)) {
+  if (!fetchedPrice || fetchedPrice <= 0) {
     return enriched;
   }
 
-  try {
-    const fetchedPrice = await fetchEnebaPrice(product.product_url);
+  if (isSuspiciousFetchedPrice(fetchedPrice, product)) {
+    enriched.raw_price_error = `Precio ${label} sospechoso ignorado: ${fetchedPrice}`;
+    console.warn(`Precio ${label} sospechoso ignorado para ${product.name || product.id}: ${fetchedPrice}`);
+    return enriched;
+  }
 
-    if (fetchedPrice && fetchedPrice > 0) {
-      if (isSuspiciousFetchedPrice(fetchedPrice, product)) {
-        enriched.raw_price_error = `Precio Eneba sospechoso ignorado: ${fetchedPrice}`;
-        console.warn(`Precio Eneba sospechoso ignorado para ${product.name || product.id}: ${fetchedPrice}`);
-        return enriched;
+  enriched.current_price = fetchedPrice;
+  enriched.raw_price_source = source;
+  enriched.raw_price_meta = extraRaw;
+
+  if (fetchedPrice !== toNumber(product.current_price)) {
+    await patch("products", `id=eq.${product.id}`, {
+      current_price: fetchedPrice,
+      updated_at: new Date().toISOString(),
+    }).catch(error => {
+      console.warn(`No se pudo actualizar precio ${label} en Supabase para ${product.id}:`, error.message);
+    });
+  }
+
+  return enriched;
+}
+
+async function enrichProductPrice(product) {
+  let enriched = { ...product };
+
+  if (AUTO_FETCH_MERCADOLIBRE && isMercadoLibreProduct(product)) {
+    try {
+      const fetched = await fetchMercadoLibrePrice(product.product_url);
+
+      if (fetched?.price) {
+        enriched = await applyFetchedPrice(
+          product,
+          fetched.price,
+          fetched.source || "mercadolibre_auto_fetch",
+          "Mercado Libre",
+          {
+            itemId: fetched.itemId || null,
+            title: fetched.title || null,
+            currency: fetched.currency || null,
+            finalUrl: fetched.finalUrl || product.product_url || null,
+          }
+        );
       }
-
-      enriched.current_price = fetchedPrice;
-      enriched.raw_price_source = "eneba_auto_fetch";
-
-      if (fetchedPrice !== toNumber(product.current_price)) {
-        await patch("products", `id=eq.${product.id}`, {
-          current_price: fetchedPrice,
-          updated_at: new Date().toISOString(),
-        }).catch(error => {
-          console.warn(`No se pudo actualizar precio Eneba en Supabase para ${product.id}:`, error.message);
-        });
-      }
+    } catch (error) {
+      enriched.raw_price_error = error.message;
+      console.warn(`No se pudo leer precio Mercado Libre para ${product.name || product.id}:`, error.message);
     }
-  } catch (error) {
-    enriched.raw_price_error = error.message;
-    console.warn(`No se pudo leer precio Eneba para ${product.name || product.id}:`, error.message);
+
+    return enriched;
+  }
+
+  if (AUTO_FETCH_ENEBA && isEnebaProduct(product)) {
+    try {
+      const fetchedPrice = await fetchEnebaPrice(product.product_url);
+      enriched = await applyFetchedPrice(product, fetchedPrice, "eneba_auto_fetch", "Eneba");
+    } catch (error) {
+      enriched.raw_price_error = error.message;
+      console.warn(`No se pudo leer precio Eneba para ${product.name || product.id}:`, error.message);
+    }
   }
 
   return enriched;
@@ -277,6 +431,7 @@ function buildPriceHistoryRow(product, runId) {
       mode: MODE,
       priceSource: product.raw_price_source || "stored_price",
       priceError: product.raw_price_error || null,
+      priceMeta: product.raw_price_meta || null,
     },
   };
 }
@@ -288,7 +443,6 @@ async function insertPriceHistory(rows) {
     await insert("price_history", rows);
     return { inserted: rows.length, skipped: false };
   } catch (error) {
-    // No rompemos el robot si la Fase 22 SQL aún no fue ejecutada.
     console.warn("Historial de precios no disponible. Ejecuta SUPABASE_SQL_FASE22_HISTORIAL_PRECIOS.sql:", error.message);
     return { inserted: 0, skipped: true, error: error.message };
   }
@@ -419,9 +573,7 @@ async function main() {
       const analysis = analyzeProduct(product);
       const historyRow = buildPriceHistoryRow(product, runId);
 
-      if (historyRow) {
-        priceHistoryRows.push(historyRow);
-      }
+      if (historyRow) priceHistoryRows.push(historyRow);
 
       results.push({
         run_id: runId,
@@ -532,7 +684,7 @@ async function main() {
     });
 
     console.log(
-      `DealWatch MX OK: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
+      `DealWatch MX OK Fase 23 ML: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
     );
   } catch (error) {
     await patch("monitor_runs", `id=eq.${runId}`, {
