@@ -46,4 +46,5 @@ jobs:
           TELEGRAM_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.telegram_test || false }}
           FORCE_SEND_OFFERS: ${{ github.event_name == 'workflow_dispatch' && inputs.force_send_offers || false }}
           AUTO_FETCH_ENEBA: "true"
+          PRICE_HISTORY_ENABLED: "true"
           DEALWATCH_MODE: "rules_only_telegram_eneba"
