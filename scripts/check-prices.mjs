@@ -1,6 +1,6 @@
 // DealWatch MX / Appcomercio
-// Fase 23: monitor automático con GitHub Actions + Supabase REST API.
-// Revisa reglas, Telegram, historial, Eneba y Mercado Libre automático.
+// Fase 24: monitor automático con GitHub Actions + Supabase REST API.
+// Revisa reglas, Telegram, historial, Eneba, Mercado Libre automático y AliExpress manual seguro.
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -11,6 +11,7 @@ const TELEGRAM_TEST = String(process.env.TELEGRAM_TEST || "false").toLowerCase()
 const FORCE_SEND_OFFERS = String(process.env.FORCE_SEND_OFFERS || "false").toLowerCase() === "true";
 const AUTO_FETCH_ENEBA = String(process.env.AUTO_FETCH_ENEBA || "true").toLowerCase() === "true";
 const AUTO_FETCH_MERCADOLIBRE = String(process.env.AUTO_FETCH_MERCADOLIBRE || "true").toLowerCase() === "true";
+const AUTO_FETCH_ALIEXPRESS = String(process.env.AUTO_FETCH_ALIEXPRESS || "false").toLowerCase() === "true";
 const PRICE_HISTORY_ENABLED = String(process.env.PRICE_HISTORY_ENABLED || "true").toLowerCase() === "true";
 
 if (!SUPABASE_URL) {
@@ -118,6 +119,19 @@ function isEnebaProduct(product) {
   const store = String(product.store || "").toLowerCase();
   const url = String(product.product_url || "").toLowerCase();
   return store.includes("eneba") || url.includes("eneba.com");
+}
+
+
+function isAliExpressProduct(product) {
+  const store = String(product.store || "").toLowerCase();
+  const url = String(product.product_url || "").toLowerCase();
+
+  return (
+    store.includes("aliexpress") ||
+    url.includes("aliexpress.com") ||
+    url.includes("aliexpress.us") ||
+    url.includes("aliexpress.com.mx")
+  );
 }
 
 function isMercadoLibreProduct(product) {
@@ -389,6 +403,17 @@ async function enrichProductPrice(product) {
     } catch (error) {
       enriched.raw_price_error = error.message;
       console.warn(`No se pudo leer precio Mercado Libre para ${product.name || product.id}:`, error.message);
+    }
+
+    return enriched;
+  }
+
+  if (isAliExpressProduct(product)) {
+    enriched.raw_price_source = "aliexpress_manual_safe";
+
+    if (AUTO_FETCH_ALIEXPRESS) {
+      enriched.raw_price_error = "AliExpress automático pendiente de API oficial/afiliado. Usando precio guardado manualmente.";
+      console.warn(`AliExpress automático aún no implementado para ${product.name || product.id}; se usa precio guardado.`);
     }
 
     return enriched;
@@ -684,7 +709,7 @@ async function main() {
     });
 
     console.log(
-      `DealWatch MX OK Fase 23 ML: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
+      `DealWatch MX OK Fase 24 AliExpress: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
     );
   } catch (error) {
     await patch("monitor_runs", `id=eq.${runId}`, {
