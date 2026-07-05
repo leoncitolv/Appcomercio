@@ -10,6 +10,7 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || "";
 const TELEGRAM_TEST = String(process.env.TELEGRAM_TEST || "false").toLowerCase() === "true";
 const FORCE_SEND_OFFERS = String(process.env.FORCE_SEND_OFFERS || "false").toLowerCase() === "true";
 const AUTO_FETCH_ENEBA = String(process.env.AUTO_FETCH_ENEBA || "true").toLowerCase() === "true";
+const PRICE_HISTORY_ENABLED = String(process.env.PRICE_HISTORY_ENABLED || "true").toLowerCase() === "true";
 
 if (!SUPABASE_URL) {
   throw new Error("Falta SUPABASE_URL.");
@@ -252,6 +253,47 @@ async function enrichProductPrice(product) {
   return enriched;
 }
 
+function buildPriceHistoryRow(product, runId) {
+  const current = toNumber(product.current_price);
+
+  if (!PRICE_HISTORY_ENABLED || !product.workspace_id || !product.id || current <= 0) {
+    return null;
+  }
+
+  return {
+    workspace_id: product.workspace_id,
+    product_id: product.id,
+    product_name: product.name || "Producto sin nombre",
+    store: product.store || "Tienda",
+    product_url: product.product_url || null,
+    price: current,
+    normal_price: toNumber(product.normal_price),
+    target_price: toNumber(product.target_price),
+    source: product.raw_price_source || "github_actions",
+    checked_at: new Date().toISOString(),
+    raw: {
+      runId,
+      checkedBy: "github_actions",
+      mode: MODE,
+      priceSource: product.raw_price_source || "stored_price",
+      priceError: product.raw_price_error || null,
+    },
+  };
+}
+
+async function insertPriceHistory(rows) {
+  if (!PRICE_HISTORY_ENABLED || !rows.length) return { inserted: 0, skipped: true };
+
+  try {
+    await insert("price_history", rows);
+    return { inserted: rows.length, skipped: false };
+  } catch (error) {
+    // No rompemos el robot si la Fase 22 SQL aún no fue ejecutada.
+    console.warn("Historial de precios no disponible. Ejecuta SUPABASE_SQL_FASE22_HISTORIAL_PRECIOS.sql:", error.message);
+    return { inserted: 0, skipped: true, error: error.message };
+  }
+}
+
 function escapeTelegramHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -370,10 +412,16 @@ async function main() {
 
     const results = [];
     const alertEvents = [];
+    const priceHistoryRows = [];
 
     for (const originalProduct of products || []) {
       const product = await enrichProductPrice(originalProduct);
       const analysis = analyzeProduct(product);
+      const historyRow = buildPriceHistoryRow(product, runId);
+
+      if (historyRow) {
+        priceHistoryRows.push(historyRow);
+      }
 
       results.push({
         run_id: runId,
@@ -432,6 +480,17 @@ async function main() {
       if (group.length) await insert("monitor_results", group);
     }
 
+    let historyInserted = 0;
+    let historySkipped = false;
+
+    for (const group of chunk(priceHistoryRows)) {
+      if (group.length) {
+        const historyResult = await insertPriceHistory(group);
+        historyInserted += historyResult.inserted || 0;
+        historySkipped = historySkipped || Boolean(historyResult.skipped);
+      }
+    }
+
     for (const group of chunk(alertEvents)) {
       if (group.length) await insert("alert_events", group);
     }
@@ -455,20 +514,25 @@ async function main() {
 
     const offerCount = results.filter(r => r.is_offer).length;
     const newAlertCount = alertEvents.length;
+
     const telegramSummary = telegramIsConfigured()
       ? ` Telegram: ${telegramSent} enviado(s)${telegramErrors ? `, ${telegramErrors} error(es)` : ""}.`
       : " Telegram no configurado.";
+
+    const historySummary = PRICE_HISTORY_ENABLED
+      ? ` Historial: ${historyInserted} registro(s)${historySkipped ? " (pendiente ejecutar SQL Fase 22 o revisar permisos)" : ""}.`
+      : " Historial desactivado.";
 
     await patch("monitor_runs", `id=eq.${runId}`, {
       status: "success",
       checked_count: results.length,
       offers_count: offerCount,
-      message: `Revisión completada. ${results.length} producto(s), ${offerCount} oferta(s), ${newAlertCount} alerta(s) enviada(s)/registrada(s).${FORCE_SEND_OFFERS ? " Modo forzado activo." : ""}${telegramSummary}`,
+      message: `Revisión completada. ${results.length} producto(s), ${offerCount} oferta(s), ${newAlertCount} alerta(s) enviada(s)/registrada(s).${FORCE_SEND_OFFERS ? " Modo forzado activo." : ""}${telegramSummary}${historySummary}`,
       finished_at: new Date().toISOString(),
     });
 
     console.log(
-      `DealWatch MX OK: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram. Force=${FORCE_SEND_OFFERS}`
+      `DealWatch MX OK: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
     );
   } catch (error) {
     await patch("monitor_runs", `id=eq.${runId}`, {
