@@ -1,6 +1,6 @@
 // DealWatch MX / Appcomercio
 // Fase 24: monitor automático con GitHub Actions + Supabase REST API.
-// Revisa reglas, Telegram, historial, Eneba, Mercado Libre automático y AliExpress manual seguro.
+// Revisa reglas, Telegram, historial, Eneba, Mercado Libre, AliExpress manual seguro y estado visual del precio.
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -450,6 +450,115 @@ async function enrichProductPrice(product) {
   return enriched;
 }
 
+
+function buildPriceStatus(product) {
+  const source = String(product.raw_price_source || "stored_price");
+  const error = String(product.raw_price_error || "").trim();
+  const store = String(product.store || "").toLowerCase();
+  const checkedAt = new Date().toISOString();
+
+  const status = {
+    code: "manual_safe",
+    label: "Precio manual seguro",
+    tone: "info",
+    icon: "🔵",
+    reason: "Tienda en modo manual seguro. Actualiza el precio cuando lo revises.",
+    source,
+    error: error || null,
+    checkedAt,
+  };
+
+  if (source === "mercadolibre_api") {
+    return {
+      ...status,
+      code: "auto_updated",
+      label: "Precio automático actualizado",
+      tone: "success",
+      icon: "✅",
+      reason: "Actualizado desde Mercado Libre API.",
+    };
+  }
+
+  if (source === "mercadolibre_html_fallback") {
+    return {
+      ...status,
+      code: "auto_updated_fallback",
+      label: "Precio automático actualizado",
+      tone: "success",
+      icon: "✅",
+      reason: "Actualizado desde fallback HTML de Mercado Libre.",
+    };
+  }
+
+  if (source === "eneba_auto_fetch") {
+    return {
+      ...status,
+      code: "auto_updated",
+      label: "Precio automático actualizado",
+      tone: "success",
+      icon: "✅",
+      reason: "Actualizado desde lectura automática de Eneba.",
+    };
+  }
+
+  if (source === "aliexpress_manual_safe") {
+    return {
+      ...status,
+      code: "manual_safe",
+      label: "Precio manual seguro",
+      tone: "info",
+      icon: "🔵",
+      reason: error || "AliExpress está en modo manual seguro para evitar bloqueos o precios falsos.",
+    };
+  }
+
+  if (error && /sospechoso|suspicious/i.test(error)) {
+    return {
+      ...status,
+      code: "suspicious_ignored",
+      label: "Precio sospechoso ignorado",
+      tone: "warning",
+      icon: "🟠",
+      reason: error,
+    };
+  }
+
+  if (error && (store.includes("mercado") || store.includes("mercadolibre"))) {
+    return {
+      ...status,
+      code: "manual_conserved",
+      label: "Precio manual conservado",
+      tone: "warning",
+      icon: "🟡",
+      reason: "Mercado Libre bloqueó la lectura o el producto no está disponible. Se conservó el precio manual guardado.",
+    };
+  }
+
+  if (error) {
+    return {
+      ...status,
+      code: "manual_conserved",
+      label: "Precio manual conservado",
+      tone: "warning",
+      icon: "🟡",
+      reason: error,
+    };
+  }
+
+  if (store.includes("mercado") || store.includes("mercadolibre") || store.includes("eneba")) {
+    return {
+      ...status,
+      code: "auto_pending",
+      label: "Precio automático pendiente",
+      tone: "neutral",
+      icon: "⚪",
+      reason: "Aún no hay una lectura automática registrada en el historial.",
+    };
+  }
+
+  return status;
+}
+
 function buildPriceHistoryRow(product, runId) {
   const current = toNumber(product.current_price);
 
@@ -488,6 +597,7 @@ function buildPriceHistoryRow(product, runId) {
       priceSource: product.raw_price_source || "stored_price",
       priceError: product.raw_price_error || null,
       priceMeta: product.raw_price_meta || null,
+      priceStatus: buildPriceStatus(product),
     },
   };
 }
@@ -651,6 +761,7 @@ async function main() {
           forceSendOffers: FORCE_SEND_OFFERS,
           priceSource: product.raw_price_source || "stored_price",
           priceError: product.raw_price_error || null,
+          priceStatus: buildPriceStatus(product),
         },
         checked_at: new Date().toISOString(),
       });
@@ -679,6 +790,7 @@ async function main() {
             productUrl: product.product_url || null,
             priceSource: product.raw_price_source || "stored_price",
             priceError: product.raw_price_error || null,
+            priceStatus: buildPriceStatus(product),
           },
         });
       }
@@ -740,7 +852,7 @@ async function main() {
     });
 
     console.log(
-      `DealWatch MX OK Fase 24.1 Historial FIX: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
+      `DealWatch MX OK Fase 25 Estado Visual Precio: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
     );
   } catch (error) {
     await patch("monitor_runs", `id=eq.${runId}`, {
