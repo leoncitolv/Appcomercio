@@ -295,6 +295,7 @@ async function fetchMercadoLibrePrice(productUrl) {
   let id = extractMercadoLibreId(productUrl);
   let fallbackHtml = "";
   let finalUrl = productUrl;
+  let apiError = "";
 
   if (!id) {
     const resolved = await fetchUrlForMercadoLibreId(productUrl);
@@ -305,36 +306,51 @@ async function fetchMercadoLibrePrice(productUrl) {
 
   if (id) {
     const apiUrl = `https://api.mercadolibre.com/items/${encodeURIComponent(id)}`;
-    const res = await fetch(apiUrl, {
-      headers: {
-        "User-Agent": "DealWatchMX/1.0",
-        "Accept": "application/json",
-      },
-    });
 
-    if (!res.ok) {
-      throw new Error(`Mercado Libre API ${res.status} para ${id}`);
-    }
+    try {
+      const res = await fetch(apiUrl, {
+        headers: {
+          "User-Agent": "DealWatchMX/1.0",
+          "Accept": "application/json",
+        },
+      });
 
-    const data = await res.json();
-    const price = toNumber(data.price);
+      if (res.ok) {
+        const data = await res.json();
+        const price = toNumber(data.price);
 
-    if (price > 0) {
-      return {
-        price,
-        source: "mercadolibre_api",
-        itemId: id,
-        title: data.title || null,
-        currency: data.currency_id || null,
-        finalUrl,
-      };
+        if (price > 0) {
+          return {
+            price,
+            source: "mercadolibre_api",
+            itemId: id,
+            title: data.title || null,
+            currency: data.currency_id || null,
+            finalUrl,
+          };
+        }
+      } else {
+        apiError = `Mercado Libre API ${res.status} para ${id}`;
+        console.warn(`${apiError}. Se intentará fallback HTML y, si no se puede, se conservará el precio manual guardado.`);
+      }
+    } catch (error) {
+      apiError = `Mercado Libre API error para ${id}: ${error.message}`;
+      console.warn(`${apiError}. Se intentará fallback HTML y, si no se puede, se conservará el precio manual guardado.`);
     }
   }
 
   if (!fallbackHtml) {
-    const resolved = await fetchUrlForMercadoLibreId(productUrl);
-    fallbackHtml = resolved.html || "";
-    finalUrl = resolved.finalUrl || productUrl;
+    try {
+      const resolved = await fetchUrlForMercadoLibreId(productUrl);
+      fallbackHtml = resolved.html || "";
+      finalUrl = resolved.finalUrl || productUrl;
+      if (!id && resolved.id) id = resolved.id;
+    } catch (error) {
+      if (apiError) {
+        throw new Error(`${apiError}; fallback HTML no disponible: ${error.message}`);
+      }
+      throw error;
+    }
   }
 
   const fallbackPrice = findFirstPrice(fallbackHtml);
@@ -346,6 +362,7 @@ async function fetchMercadoLibrePrice(productUrl) {
         title: null,
         currency: "MXN",
         finalUrl,
+        apiError: apiError || null,
       }
     : null;
 }
@@ -401,8 +418,9 @@ async function enrichProductPrice(product) {
         );
       }
     } catch (error) {
+      enriched.raw_price_source = "stored_price";
       enriched.raw_price_error = error.message;
-      console.warn(`No se pudo leer precio Mercado Libre para ${product.name || product.id}:`, error.message);
+      console.warn(`No se pudo leer precio Mercado Libre para ${product.name || product.id}; se conserva precio manual:`, error.message);
     }
 
     return enriched;
@@ -435,11 +453,14 @@ async function enrichProductPrice(product) {
 function buildPriceHistoryRow(product, runId) {
   const current = toNumber(product.current_price);
 
-  if (!PRICE_HISTORY_ENABLED || !product.workspace_id || !product.id || current <= 0) {
+  // La tabla price_history de esta instalación tiene user_id como obligatorio.
+  // Si no viene user_id, se omite ese registro para no romper todo el lote.
+  if (!PRICE_HISTORY_ENABLED || !product.workspace_id || !product.user_id || !product.id || current <= 0) {
     return null;
   }
 
   return {
+    user_id: product.user_id,
     workspace_id: product.workspace_id,
     product_id: product.id,
     product_name: product.name || "Producto sin nombre",
@@ -454,6 +475,7 @@ function buildPriceHistoryRow(product, runId) {
       runId,
       checkedBy: "github_actions",
       mode: MODE,
+      userId: product.user_id,
       priceSource: product.raw_price_source || "stored_price",
       priceError: product.raw_price_error || null,
       priceMeta: product.raw_price_meta || null,
@@ -709,7 +731,7 @@ async function main() {
     });
 
     console.log(
-      `DealWatch MX OK Fase 24 AliExpress: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
+      `DealWatch MX OK Fase 24.1 Historial FIX: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
     );
   } catch (error) {
     await patch("monitor_runs", `id=eq.${runId}`, {
