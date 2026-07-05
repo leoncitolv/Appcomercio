@@ -286,6 +286,45 @@
     .preview-card{margin-bottom:14px;border-radius:30px;padding:18px;background:linear-gradient(145deg,rgba(31,11,58,.94),rgba(12,9,28,.92));border:1px solid rgba(216,180,254,.22);box-shadow:0 0 42px rgba(168,85,247,.20),inset 0 1px 0 rgba(255,255,255,.08)}.preview-head{display:flex;justify-content:space-between;gap:10px;align-items:center;color:#d8b4fe;font-weight:950;margin-bottom:12px}.preview-body{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:center}.preview-body .thumb{width:120px;height:120px}.preview-name{font-size:1.25rem;font-weight:950;color:#fff;letter-spacing:-.02em}.preview-price{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.preview-price small{display:block;color:#a99bc7;font-weight:850;margin-bottom:4px}.preview-price b{font-size:1.05rem}.preview-price .goal{color:#e879f9}.preview-save{color:#c084fc;font-weight:900;margin-top:6px}.store-line{display:flex;align-items:center;gap:8px;color:#c4b5fd;font-weight:850;margin-top:6px}.nav{background:rgba(7,5,18,.86)!important;border:1px solid rgba(255,255,255,.12);box-shadow:0 -12px 42px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08)}.nav button{font-size:.70rem}.nav button.active{background:linear-gradient(145deg,rgba(126,34,206,.72),rgba(46,16,101,.52))!important;color:#fff;box-shadow:0 0 26px rgba(168,85,247,.42)}.nav button:nth-child(3){transform:translateY(-8px);font-size:.72rem}.nav button:nth-child(3) .ico{width:58px;height:58px;margin:-26px auto 2px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#c026d3,#7c3aed);box-shadow:0 0 34px rgba(168,85,247,.58);color:white;font-size:30px}
     @media(max-width:470px){.hero-pro{grid-template-columns:1fr 82px}.hero-art{width:82px;height:82px;font-size:54px}.hero-art span{width:34px;height:34px;font-size:18px}.product-card{grid-template-columns:86px 1fr}.thumb{width:86px;height:86px}.preview-body{grid-template-columns:96px 1fr}.preview-body .thumb{width:96px;height:96px}.product-list-featured{grid-template-columns:1fr}.price-line{align-items:flex-start}.actions{gap:6px}.top{border-radius:24px}}
 
+
+    /* ===== Fase 20 · Comparador de precios por nombre ===== */
+    .nav{grid-template-columns:repeat(6,1fr);}
+    .nav button{font-size:.60rem;}
+    .compare-list{display:grid;gap:14px;margin-top:14px;}
+    .compare-card{position:relative;overflow:hidden;}
+    .compare-card:before{content:"";position:absolute;right:-46px;top:-46px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,.22),transparent 68%);pointer-events:none;}
+    .compare-head{display:grid;grid-template-columns:74px 1fr;gap:12px;align-items:center;position:relative;z-index:1;}
+    .compare-head .thumb{width:74px;height:74px;}
+    .compare-title{font-weight:950;font-size:1.08rem;line-height:1.16;letter-spacing:-.03em;color:var(--text);}
+    .compare-sub{margin-top:4px;color:var(--muted);font-weight:850;font-size:.80rem;}
+    .compare-winner{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;margin-top:14px;padding:14px;border-radius:22px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.20);position:relative;z-index:1;}
+    .compare-winner small{display:block;color:var(--muted);font-weight:900;margin-bottom:4px;}
+    .compare-winner b{font-size:1.34rem;letter-spacing:-.05em;}
+    .compare-save{color:#e879f9;font-weight:950;text-align:right;font-size:.82rem;}
+    .compare-items{display:grid;gap:8px;margin-top:12px;position:relative;z-index:1;}
+    .compare-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--line);background:var(--surface2);border-radius:18px;padding:10px 12px;}
+    .compare-store{display:flex;align-items:center;gap:8px;min-width:0;font-weight:950;}
+    .compare-store span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .compare-price{text-align:right;font-weight:950;}
+    .compare-diff{font-size:.72rem;color:var(--muted);font-weight:850;margin-top:2px;}
+    .compare-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;position:relative;z-index:1;}
+    @media(max-width:470px){.nav button{font-size:.55rem}.nav .ico{font-size:18px}.compare-head{grid-template-columns:62px 1fr}.compare-head .thumb{width:62px;height:62px}.compare-winner{grid-template-columns:1fr}.compare-save{text-align:left}}
+
+
+
+    /* ===== Fase 21 · Comparador Pro ===== */
+    .compare-hero{position:relative;overflow:hidden;padding:18px;background:linear-gradient(135deg,rgba(88,28,135,.92),rgba(15,23,42,.88));border-color:rgba(216,180,254,.22)}
+    .compare-hero:after{content:"";position:absolute;right:-34px;top:-52px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(236,72,153,.24),transparent 68%);pointer-events:none}
+    .compare-hero h4{margin:0 0 6px;font-size:1.16rem;letter-spacing:-.04em;color:#fff;position:relative;z-index:1}
+    .compare-hero p{margin:0;color:#d8b4fe;font-weight:800;line-height:1.45;position:relative;z-index:1}
+    .compare-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;position:relative;z-index:1}
+    .compare-stat{border-radius:20px;padding:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+    .compare-stat b{display:block;font-size:1.22rem;letter-spacing:-.05em;color:#fff}.compare-stat span{display:block;margin-top:2px;font-size:.72rem;font-weight:900;color:#c4b5fd}
+    .compare-filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.compare-filter-grid select{width:100%;border:1px solid var(--line);background:var(--surface2);border-radius:18px;padding:13px 14px;color:var(--text);font-weight:900;outline:none}
+    .compare-mini-tabs{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:3px}.compare-mini-tabs button{border:1px solid rgba(255,255,255,.10);border-radius:999px;background:rgba(255,255,255,.06);color:#c4b5fd;padding:8px 11px;font-size:.74rem;font-weight:950;white-space:nowrap}.compare-mini-tabs button.active{background:linear-gradient(135deg,#a21caf,#7c3aed);color:white;box-shadow:0 0 22px rgba(168,85,247,.34)}
+    .compare-card.pro{padding:15px}.compare-rank{position:absolute;right:14px;top:14px;border-radius:999px;padding:7px 10px;background:rgba(236,72,153,.14);color:#f9a8d4;border:1px solid rgba(236,72,153,.20);font-size:.72rem;font-weight:950;z-index:2}.compare-title{padding-right:58px}.compare-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;position:relative;z-index:1}.compare-summary-box{border-radius:17px;padding:10px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09)}.compare-summary-box small{display:block;color:#a99bc7;font-weight:900;font-size:.67rem;margin-bottom:4px}.compare-summary-box b{font-size:.96rem;letter-spacing:-.03em}.winner-store-line{display:flex;align-items:center;gap:7px;color:#e9d5ff;font-weight:950;margin-top:6px}.compare-options{margin-top:12px;position:relative;z-index:1;border:1px solid rgba(255,255,255,.10);border-radius:20px;overflow:hidden;background:rgba(255,255,255,.04)}.compare-options summary{list-style:none;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#e9d5ff}.compare-options summary::-webkit-details-marker{display:none}.compare-options summary b{font-size:.86rem}.compare-options summary span{font-size:.75rem;color:#c084fc;font-weight:950}.compare-options[open] summary{border-bottom:1px solid rgba(255,255,255,.09)}.compare-row.best{border-color:rgba(82,210,115,.28);background:rgba(16,185,129,.10)}.compare-row.more-expensive{opacity:.96}.compare-price{text-align:right;font-weight:950}.compare-diff.good{color:#5dffae}.compare-diff.bad{color:#fbbf24}.compare-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;position:relative;z-index:1}.compare-note{font-size:.76rem;font-weight:850;color:#a99bc7;margin-top:10px}.compare-empty-tip{line-height:1.5}.compare-empty-tip code{background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.16);border-radius:8px;padding:2px 5px;color:#e9d5ff}
+    @media(max-width:470px){.compare-stats,.compare-summary-grid,.compare-filter-grid{grid-template-columns:1fr}.compare-head{grid-template-columns:68px 1fr}.compare-head .thumb{width:68px;height:68px}.compare-title{padding-right:0}.compare-rank{position:static;display:inline-block;margin-bottom:10px}.compare-winner{grid-template-columns:1fr}.compare-save{text-align:left}.compare-row{grid-template-columns:1fr}.compare-price{text-align:left}.nav button{font-size:.56rem}}
+
   </style>
 </head>
 <body>
@@ -323,6 +362,31 @@
 
     <section id="screen-alerts" class="screen"><div class="section-head"><h3>Alertas</h3><span id="alertCount">0</span></div><div class="card status-list" id="alertEvents"></div><section class="section"><div class="section-head"><h3>Ofertas activas</h3><span>por precio</span></div><div id="activeAlerts" class="product-list"></div></section></section>
 
+    <section id="screen-compare" class="screen">
+      <div class="section-head screen-title"><div><h3>Top precios</h3><p class="hint">Comparador Pro por nombre igual: encuentra la tienda más barata, el ahorro posible y las opciones disponibles.</p></div><span id="compareCount">0 grupos</span></div>
+      <div class="card compare-hero">
+        <h4>🏆 Mejor precio por producto</h4>
+        <p>Guarda el mismo producto con el mismo nombre en varias tiendas. La app agrupa automáticamente y te muestra el ganador.</p>
+        <div id="compareStats" class="compare-stats"></div>
+      </div>
+      <div class="card search-card compare-controls" style="margin-top:14px">
+        <div class="search-row"><input class="simple-input" id="compareSearch" placeholder="Buscar producto, tienda o lista..." oninput="renderCompare()"><button class="icon-btn" onclick="clearCompareSearch()">↺</button></div>
+        <div class="compare-filter-grid">
+          <select id="compareListFilter" onchange="renderCompare()"><option value="">Todas las listas</option></select>
+          <select id="compareSort" onchange="renderCompare()">
+            <option value="spread">Mayor ahorro posible</option>
+            <option value="best">Precio más bajo</option>
+            <option value="target">Cumplen meta primero</option>
+            <option value="options">Más tiendas comparadas</option>
+            <option value="name">Nombre A-Z</option>
+          </select>
+        </div>
+        <div class="compare-mini-tabs" id="compareQuickFilters"></div>
+        <p class="hint" style="margin:10px 0 0">Tip: usa nombres idénticos, por ejemplo <b>Control Xbox Elite Series 2</b>, en Eneba, Amazon y Mercado Libre.</p>
+      </div>
+      <div id="compareList" class="compare-list"></div>
+    </section>
+
     <section id="screen-cloud" class="screen">
       <div class="section-head"><h3>Nube</h3><span id="cloudStatusText">Conectando...</span></div>
       <div id="loginCard" class="card"><h3 style="margin:0 0 8px">Entrar a DealWatch</h3><p class="hint">Usa tu correo y contraseña. Si te invitaron, crea cuenta con el mismo correo.</p><div class="form" style="margin-top:14px"><div class="field"><label>Correo</label><input id="email" type="email" placeholder="tu-correo@ejemplo.com"></div><div class="field"><label>Contraseña</label><input id="password" type="password" placeholder="Contraseña"></div><div class="cta" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" onclick="signIn()">Iniciar sesión</button><button class="btn btn-soft" onclick="signUp()">Crear cuenta</button><button class="btn btn-soft" onclick="resetPassword()">Olvidé mi contraseña</button></div></div></div>
@@ -333,7 +397,7 @@
     </section>
   </main>
 
-  <nav class="nav"><button data-screen="home" class="active" onclick="go('home')"><span class="ico">🏠</span>Inicio</button><button data-screen="products" onclick="go('products')"><span class="ico">🛒</span>Productos</button><button data-screen="add" onclick="go('add')"><span class="ico">➕</span>Agregar</button><button data-screen="alerts" onclick="go('alerts')"><span class="ico">🔔</span>Alertas</button><button data-screen="cloud" onclick="go('cloud')"><span class="ico">☁️</span>Nube</button></nav>
+  <nav class="nav"><button data-screen="home" class="active" onclick="go('home')"><span class="ico">🏠</span>Inicio</button><button data-screen="products" onclick="go('products')"><span class="ico">🛒</span>Productos</button><button data-screen="add" onclick="go('add')"><span class="ico">➕</span>Agregar</button><button data-screen="compare" onclick="go('compare')"><span class="ico">🏆</span>Top</button><button data-screen="alerts" onclick="go('alerts')"><span class="ico">🔔</span>Alertas</button><button data-screen="cloud" onclick="go('cloud')"><span class="ico">☁️</span>Nube</button></nav>
 
   <script>
     const SUPABASE_URL = "https://ltsrjxvisptbdhhkabhj.supabase.co";
@@ -343,6 +407,7 @@
     const LISTS_KEY = "dealwatch_deal_lists_v3";
     const DEFAULT_LISTS = ["Familia · Despensa","Familia · Hogar","Familia · Tecnología","Familia · Salud","Familia · Regalos","Amigos gaming · Controles","Amigos gaming · Juegos","Amigos gaming · Audífonos","Amigos gaming · Monitores","Compras personales · Ropa","Compras personales · Celulares","Compras personales · Herramientas","Compras personales · Ofertas especiales"];
     let sb=null, currentUser=null, workspaces=[], currentWorkspace=null, currentRole="viewer", products=[], alertEvents=[], monitorResults=[], formAlerts=true, activeList="", dealLists=loadListsLocal(), realtimeChannel=null, realtimeWorkspaceId=null, realtimeState="Pendiente", realtimeRefreshTimer=null;
+    let compareMode="all";
     const $=id=>document.getElementById(id);
     const money=n=>Number(n||0).toLocaleString("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});
     const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
@@ -352,7 +417,7 @@
     async function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
     async function ensureSupabase(){ if(sb) return sb; if(!window.supabase){ try{await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js");}catch(e){ await loadScript("https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"); } } if(!window.supabase) throw new Error("No cargó Supabase. Revisa internet o recarga la app."); sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}); return sb; }
     async function getSession(){ const client=await ensureSupabase(); const {data}=await client.auth.getSession(); currentUser=data.session?.user||null; return data.session||null; }
-    function go(name){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $("screen-"+name).classList.add('active'); document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===name)); scrollTo({top:0,behavior:'smooth'}); if(name==='products')renderProducts(); if(name==='alerts')renderAlerts(); if(name==='cloud')renderCloud(); }
+    function go(name){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $("screen-"+name).classList.add('active'); document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===name)); scrollTo({top:0,behavior:'smooth'}); if(name==='products')renderProducts(); if(name==='compare')renderCompare(); if(name==='alerts')renderAlerts(); if(name==='cloud')renderCloud(); }
     function setTheme(t){document.documentElement.dataset.theme=t==='dark'?'dark':'';$('themeButton').textContent=t==='dark'?'🌙':'☀️';localStorage.setItem(THEME_KEY,t);} $('themeButton').onclick=()=>setTheme((localStorage.getItem(THEME_KEY)||'light')==='dark'?'light':'dark'); setTheme(localStorage.getItem(THEME_KEY)||'light');
 
     function cleanLists(list){
@@ -530,7 +595,128 @@
     function extractMlId(url){ const s=decodeURIComponent(String(url||'')); const wid=s.match(/[?&]wid=(MLM\d+)/i); if(wid) return wid[1].toUpperCase(); const item=s.match(/item_id[:=](MLM\d+)/i); if(item) return item[1].toUpperCase(); const direct=s.match(/(MLM-?\d{6,})/i); return direct?direct[1].replace('-','').toUpperCase():''; }
     async function detectMercadoLibreData(url){ const id=extractMlId(url); if(!id) return; const res=await fetch(`https://api.mercadolibre.com/items/${id}`); if(!res.ok) return; const data=await res.json(); if(!$('name').value.trim() && data.title) $('name').value=data.title; if(!Number($('currentPrice').value||0) && data.price) $('currentPrice').value=Math.round(Number(data.price)); const pic=data.secure_thumbnail||data.thumbnail||(Array.isArray(data.pictures)&&data.pictures[0]&&(data.pictures[0].secure_url||data.pictures[0].url)); if(pic && !$('imageUrl').value.trim()) $('imageUrl').value=pic; renderFormPreview(); }
     function productRow(p,opts={}){ const offer=isOffer(p); const url=p.url?`<a class="mini primary" href="${esc(p.url)}" target="_blank" rel="noopener">Abrir</a>`:''; const edit=opts.actions&&canEdit()?`<button class="mini" onclick="editProduct('${esc(p.id)}')">Editar</button><button class="mini red" onclick="deleteProduct('${esc(p.id)}')">Borrar</button>`:''; const alertText=p.alertEnabled?'Silenciar':'Activar'; const alertClass=p.alertEnabled?'green':'red'; return `<article class="product-card"><div class="thumb">${productImageHtml(p)}</div><div><div class="prod-title">${esc(p.name)}</div><div class="meta">${storeBadge(p.store)} <span>${esc(p.store)}</span> · <span>${esc(p.dealList)}</span></div><div class="price-line"><div><div class="price-now">${money(p.currentPrice)}</div><div class="hint">${esc(savingsText(p))}</div></div><div class="target">Meta<br><strong>${money(p.targetPrice)}</strong></div></div><div class="badges"><span class="badge ${offer?'green':'orange'}">${offer?'Oferta':'Vigilando'}</span><span class="badge blue">${esc(discountText(p))}</span><span class="badge gray">${p.alertEnabled?'Alerta ON':'Alerta OFF'}</span></div>${p.notes?`<div class="meta" style="margin-top:8px">${esc(p.notes)}</div>`:''}<div class="actions">${url}${edit}<button class="mini ${alertClass}" onclick="toggleAlert('${esc(p.id)}')">${alertText}</button></div></div></article>`; }
-        function renderAll(){ renderDealListSelect(); renderListManager(); renderHome(); renderProducts(); renderAlerts(); renderCloud(); }
+
+    function compareKey(name){
+      return String(name||'')
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+        .replace(/\b(mx|mexico|nuevo|nueva|oferta|promo|promocion|version|edicion)\b/g,' ')
+        .replace(/[^a-z0-9]+/g,' ')
+        .trim()
+        .replace(/\s+/g,' ');
+    }
+    function compareProductsBase(){
+      return products.filter(p=>Number(p.currentPrice||0)>0 && compareKey(p.name));
+    }
+    function compareGroups(){
+      const map=new Map();
+      for(const p of compareProductsBase()){
+        const key=compareKey(p.name);
+        if(!map.has(key)) map.set(key,[]);
+        map.get(key).push(p);
+      }
+      return [...map.entries()]
+        .map(([key,items])=>{
+          const sorted=items.slice().sort((a,b)=>Number(a.currentPrice||0)-Number(b.currentPrice||0));
+          const best=sorted[0];
+          const highest=sorted[sorted.length-1];
+          const bestPrice=Number(best?.currentPrice||0);
+          const highestPrice=Number(highest?.currentPrice||0);
+          const spread=Math.max(0,highestPrice-bestPrice);
+          const average=sorted.reduce((sum,p)=>sum+Number(p.currentPrice||0),0)/Math.max(1,sorted.length);
+          const stores=[...new Set(sorted.map(p=>p.store||'Tienda'))];
+          const targetHit=sorted.some(p=>Number(p.targetPrice||0)>0 && Number(p.currentPrice||0)<=Number(p.targetPrice||0));
+          const bestTarget=Number(best?.targetPrice||0);
+          const targetDelta=bestTarget>0 ? bestPrice-bestTarget : null;
+          return {key,name:best?.name||items[0]?.name||'Producto',items:sorted,best,highest,spread,average,stores,targetHit,targetDelta};
+        })
+        .filter(g=>g.items.length>=2);
+    }
+    function renderCompareFilterOptions(groups){
+      const listSel=$('compareListFilter');
+      if(listSel){
+        const current=listSel.value||'';
+        const lists=[...new Set(groups.flatMap(g=>g.items.map(p=>p.dealList).filter(Boolean)))].sort((a,b)=>a.localeCompare(b,'es'));
+        listSel.innerHTML='<option value="">Todas las listas</option>'+lists.map(l=>`<option value="${esc(l)}">${esc(l)}</option>`).join('');
+        if(current && lists.includes(current)) listSel.value=current;
+      }
+      const quick=$('compareQuickFilters');
+      if(quick){
+        const modes=[['all','Todos'],['target','Cumplen meta'],['saving','Mayor ahorro'],['eneba','Eneba'],['alerts','Alertas ON']];
+        quick.innerHTML=modes.map(([id,label])=>`<button type="button" class="${compareMode===id?'active':''}" onclick="setCompareMode('${id}')">${label}</button>`).join('');
+      }
+    }
+    function setCompareMode(mode){ compareMode=mode||'all'; renderCompare(); }
+    function applyCompareFilters(groups){
+      const q=($('compareSearch')?.value||'').trim().toLowerCase();
+      const qKey=compareKey(q);
+      const listFilter=$('compareListFilter')?.value||'';
+      let next=groups;
+      if(q){
+        next=next.filter(g=>compareKey(g.name).includes(qKey) || g.items.some(p=>[p.name,p.store,p.dealList,p.category,p.notes].join(' ').toLowerCase().includes(q)));
+      }
+      if(listFilter){
+        next=next.filter(g=>g.items.some(p=>p.dealList===listFilter));
+      }
+      if(compareMode==='target') next=next.filter(g=>g.targetHit || (Number(g.best?.targetPrice||0)>0 && Number(g.best?.currentPrice||0)<=Number(g.best?.targetPrice||0)));
+      if(compareMode==='saving') next=next.filter(g=>g.spread>0);
+      if(compareMode==='eneba') next=next.filter(g=>g.items.some(p=>String(p.store||'').toLowerCase().includes('eneba')));
+      if(compareMode==='alerts') next=next.filter(g=>g.items.some(p=>p.alertEnabled));
+      return next;
+    }
+    function sortCompareGroups(groups){
+      const sort=$('compareSort')?.value||'spread';
+      const copy=groups.slice();
+      if(sort==='best') copy.sort((a,b)=>Number(a.best.currentPrice||0)-Number(b.best.currentPrice||0));
+      else if(sort==='target') copy.sort((a,b)=>Number(b.targetHit)-Number(a.targetHit) || (a.targetDelta??999999999)-(b.targetDelta??999999999));
+      else if(sort==='options') copy.sort((a,b)=>b.items.length-a.items.length || b.spread-a.spread);
+      else if(sort==='name') copy.sort((a,b)=>a.name.localeCompare(b.name,'es'));
+      else copy.sort((a,b)=>b.spread-a.spread || Number(a.best.currentPrice||0)-Number(b.best.currentPrice||0));
+      return copy;
+    }
+    function renderCompareStats(groups){
+      const box=$('compareStats');
+      if(!box) return;
+      const maxSaving=groups.reduce((m,g)=>Math.max(m,g.spread||0),0);
+      const targetHits=groups.filter(g=>g.targetHit || (Number(g.best?.targetPrice||0)>0 && Number(g.best?.currentPrice||0)<=Number(g.best?.targetPrice||0))).length;
+      const options=groups.reduce((sum,g)=>sum+g.items.length,0);
+      box.innerHTML=`<div class="compare-stat"><b>${groups.length}</b><span>comparaciones</span></div><div class="compare-stat"><b>${money(maxSaving)}</b><span>mayor ahorro</span></div><div class="compare-stat"><b>${targetHits}</b><span>cumplen meta</span></div>`;
+      if($('compareCount')) $('compareCount').textContent=`${groups.length} grupo(s) · ${options} opción(es)`;
+    }
+    function compareRow(p,bestPrice,index=0){
+      const price=Number(p.currentPrice||0);
+      const diff=price-Number(bestPrice||0);
+      const isBest=diff<=0;
+      const diffText=isBest?'🏆 Mejor precio':`+ ${money(diff)} vs mejor`;
+      const target=Number(p.targetPrice||0);
+      const targetText=target>0?(price<=target?'Cumple meta':`Meta ${money(target)}`):'Sin meta';
+      const open=p.url?`<a class="mini primary" href="${esc(p.url)}" target="_blank" rel="noopener">Abrir</a>`:'';
+      return `<div class="compare-row ${isBest?'best':'more-expensive'}"><div><div class="compare-store">${storeBadge(p.store)} <span>${esc(p.store||'Tienda')}</span></div><div class="compare-diff ${isBest?'good':'bad'}">${esc(diffText)} · ${esc(targetText)}</div></div><div><div class="compare-price">${money(price)}</div>${open?`<div style="margin-top:6px">${open}</div>`:''}</div></div>`;
+    }
+    function compareCard(g,index){
+      const best=g.best;
+      const bestPrice=Number(best.currentPrice||0);
+      const highestPrice=Number(g.highest.currentPrice||0);
+      const saving=highestPrice>bestPrice?`Ahorro posible ${money(highestPrice-bestPrice)}`:'Precios empatados';
+      const target=Number(best.targetPrice||0);
+      const targetBadge=target>0 && bestPrice<=target?'<span class="badge green">Cumple meta</span>':(target>0?`<span class="badge orange">Faltan ${money(bestPrice-target)}</span>`:'<span class="badge gray">Sin meta</span>');
+      const storeCount=g.stores.length;
+      const openBest=best.url?`<a class="mini green" href="${esc(best.url)}" target="_blank" rel="noopener">Ir al mejor precio</a>`:'';
+      return `<article class="card compare-card pro"><span class="compare-rank">#${index+1}</span><div class="compare-head"><div class="thumb">${productImageHtml(best)}</div><div><div class="compare-title">${esc(g.name)}</div><div class="compare-sub">${g.items.length} opciones · ${storeCount} tienda(s) · ganador actual</div><div class="winner-store-line">${storeBadge(best.store)} ${esc(best.store||'Tienda')}</div><div class="badges"><span class="badge blue">${esc(best.dealList||'Lista')}</span>${targetBadge}<span class="badge gray">Promedio ${money(g.average)}</span></div></div></div><div class="compare-winner"><div><small>Mejor precio actual</small><b>${money(bestPrice)}</b><div class="hint">Más caro detectado: ${money(highestPrice)}</div></div><div class="compare-save">${esc(saving)}</div></div><div class="compare-summary-grid"><div class="compare-summary-box"><small>Opciones</small><b>${g.items.length}</b></div><div class="compare-summary-box"><small>Diferencia</small><b>${money(g.spread)}</b></div><div class="compare-summary-box"><small>Meta</small><b>${target?money(target):'Sin meta'}</b></div></div><details class="compare-options"><summary><b>Ver opciones comparadas</b><span>${g.items.length} tienda(s) ›</span></summary><div class="compare-items">${g.items.map((p,i)=>compareRow(p,bestPrice,i)).join('')}</div></details><div class="compare-tools"><button class="mini" onclick="editProduct('${esc(best.id)}')">Editar ganador</button>${openBest}<button class="mini" onclick="activeList='${esc(groupName(best.dealList))}';go('products')">Ver lista</button></div><div class="compare-note">Comparación por nombre normalizado: ${esc(g.key)}</div></article>`;
+    }
+    function renderCompare(){
+      const box=$('compareList');
+      if(!box) return;
+      const allGroups=compareGroups();
+      renderCompareFilterOptions(allGroups);
+      let groups=applyCompareFilters(allGroups);
+      groups=sortCompareGroups(groups);
+      renderCompareStats(groups);
+      box.innerHTML=groups.map((g,i)=>compareCard(g,i)).join('') || `<div class="empty card compare-empty-tip"><b>Aún no hay comparaciones</b>Guarda el mismo producto con el mismo nombre en dos o más tiendas.<br>Ejemplo: <code>Xbox Elite Series 2</code> en Amazon, Mercado Libre y Eneba.</div>`;
+    }
+    function clearCompareSearch(){ const el=$('compareSearch'); if(el) el.value=''; const list=$('compareListFilter'); if(list) list.value=''; compareMode='all'; renderCompare(); }
+
+        function renderAll(){ renderDealListSelect(); renderListManager(); renderHome(); renderProducts(); renderCompare(); renderAlerts(); renderCloud(); }
     function renderHome(){ const offers=products.filter(isOffer); $('statProducts').textContent=products.length; $('statOffers').textContent=offers.length; $('statCloud').textContent=currentUser?'ON':'OFF'; if($('heroOffers')) $('heroOffers').textContent=offers.length; if($('heroProducts')) $('heroProducts').textContent=products.length; $('cloudPill').textContent=currentUser?'Nube ON':'Local'; $('cloudPill').classList.toggle('on',!!currentUser); $('topSubtitle').textContent=currentWorkspace?`Equipo: ${currentWorkspace.name}`:'Ofertas para familia y amigos'; const groups=[...new Set(allVisibleLists().map(groupName))]; const cards=groups.slice(0,6).map(g=>{ const count=products.filter(p=>groupName(p.dealList)===g).length; return `<button class="list-card ${groupClass(g)}" onclick="quickList('${esc(g)}')"><span class="emoji">${groupEmoji(g)}</span>${esc(g)}<small>${count} producto(s)</small></button>`; }).join(''); if($('homeListCards')) $('homeListCards').innerHTML=cards||'<div class="empty card"><b>Sin listas</b>Agrega tus listas desde Nube.</div>'; const featured=(offers.length?offers:products).slice(0,4); $('homeOffers').innerHTML=featured.map(p=>productRow(p)).join('')||`<div class="empty card"><b>Sin productos todavía</b>Agrega tu primer producto con imagen y precio objetivo.</div>`; }
     function renderListTabs(){ const groups=['',...new Set(allVisibleLists().map(groupName))]; $('listTabs').innerHTML=groups.map(g=>`<button class="tab ${activeList===g?'active':''}" onclick="setActiveList('${esc(g)}')">${g||'Todos'}</button>`).join(''); }
     function setActiveList(g){activeList=g;renderProducts();}
