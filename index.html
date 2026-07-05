@@ -325,6 +325,19 @@
     .compare-card.pro{padding:15px}.compare-rank{position:absolute;right:14px;top:14px;border-radius:999px;padding:7px 10px;background:rgba(236,72,153,.14);color:#f9a8d4;border:1px solid rgba(236,72,153,.20);font-size:.72rem;font-weight:950;z-index:2}.compare-title{padding-right:58px}.compare-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;position:relative;z-index:1}.compare-summary-box{border-radius:17px;padding:10px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09)}.compare-summary-box small{display:block;color:#a99bc7;font-weight:900;font-size:.67rem;margin-bottom:4px}.compare-summary-box b{font-size:.96rem;letter-spacing:-.03em}.winner-store-line{display:flex;align-items:center;gap:7px;color:#e9d5ff;font-weight:950;margin-top:6px}.compare-options{margin-top:12px;position:relative;z-index:1;border:1px solid rgba(255,255,255,.10);border-radius:20px;overflow:hidden;background:rgba(255,255,255,.04)}.compare-options summary{list-style:none;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#e9d5ff}.compare-options summary::-webkit-details-marker{display:none}.compare-options summary b{font-size:.86rem}.compare-options summary span{font-size:.75rem;color:#c084fc;font-weight:950}.compare-options[open] summary{border-bottom:1px solid rgba(255,255,255,.09)}.compare-row.best{border-color:rgba(82,210,115,.28);background:rgba(16,185,129,.10)}.compare-row.more-expensive{opacity:.96}.compare-price{text-align:right;font-weight:950}.compare-diff.good{color:#5dffae}.compare-diff.bad{color:#fbbf24}.compare-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;position:relative;z-index:1}.compare-note{font-size:.76rem;font-weight:850;color:#a99bc7;margin-top:10px}.compare-empty-tip{line-height:1.5}.compare-empty-tip code{background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.16);border-radius:8px;padding:2px 5px;color:#e9d5ff}
     @media(max-width:470px){.compare-stats,.compare-summary-grid,.compare-filter-grid{grid-template-columns:1fr}.compare-head{grid-template-columns:68px 1fr}.compare-head .thumb{width:68px;height:68px}.compare-title{padding-right:0}.compare-rank{position:static;display:inline-block;margin-bottom:10px}.compare-winner{grid-template-columns:1fr}.compare-save{text-align:left}.compare-row{grid-template-columns:1fr}.compare-price{text-align:left}.nav button{font-size:.56rem}}
 
+
+    /* ===== Fase 22 · Historial de precios ===== */
+    .history-banner{margin-top:12px;padding:12px 14px;border-radius:20px;background:rgba(14,165,233,.10);border:1px solid rgba(14,165,233,.18);color:#bae6fd;font-size:.78rem;font-weight:850;line-height:1.45}
+    .history-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;position:relative;z-index:1}
+    .history-box{border-radius:17px;padding:10px;background:rgba(14,165,233,.075);border:1px solid rgba(14,165,233,.14)}
+    .history-box small{display:block;color:#93c5fd;font-weight:900;font-size:.67rem;margin-bottom:4px}.history-box b{font-size:.96rem;letter-spacing:-.03em}.history-box .tiny{margin-top:3px;color:#c4b5fd;font-size:.66rem;font-weight:850}
+    .history-options{margin-top:12px;position:relative;z-index:1;border:1px solid rgba(14,165,233,.14);border-radius:20px;overflow:hidden;background:rgba(14,165,233,.045)}
+    .history-options summary{list-style:none;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#dbeafe}.history-options summary::-webkit-details-marker{display:none}.history-options summary b{font-size:.86rem}.history-options summary span{font-size:.75rem;color:#93c5fd;font-weight:950}.history-options[open] summary{border-bottom:1px solid rgba(255,255,255,.09)}
+    .history-rows{display:grid;gap:8px;padding:10px}.history-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border-radius:16px;padding:10px 12px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)}
+    .history-title{display:flex;align-items:center;gap:8px;font-weight:950;min-width:0}.history-title span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.history-meta{margin-top:3px;color:#a99bc7;font-size:.70rem;font-weight:850}.history-price{text-align:right;font-weight:950}.history-trend{margin-top:3px;font-size:.70rem;font-weight:900;color:#5dffae}.history-trend.warn{color:#fbbf24}.history-muted{font-size:.76rem;color:#a99bc7;font-weight:850;line-height:1.45}.history-chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:6px 9px;background:rgba(14,165,233,.12);border:1px solid rgba(14,165,233,.18);color:#bae6fd;font-size:.70rem;font-weight:950}
+    @media(max-width:470px){.history-grid{grid-template-columns:1fr}.history-row{grid-template-columns:1fr}.history-price{text-align:left}}
+
+
   </style>
 </head>
 <body>
@@ -403,10 +416,11 @@
     const SUPABASE_URL = "https://ltsrjxvisptbdhhkabhj.supabase.co";
     const SUPABASE_KEY = "sb_publishable_NLb1XKeqzT5H08iJBBOD4Q_HlrtyLgI";
     const PRODUCTS_KEY = "dealwatch_simple_products_v1";
+    const PRICE_HISTORY_KEY = "dealwatch_price_history_v1";
     const THEME_KEY = "dealwatch_theme";
     const LISTS_KEY = "dealwatch_deal_lists_v3";
     const DEFAULT_LISTS = ["Familia · Despensa","Familia · Hogar","Familia · Tecnología","Familia · Salud","Familia · Regalos","Amigos gaming · Controles","Amigos gaming · Juegos","Amigos gaming · Audífonos","Amigos gaming · Monitores","Compras personales · Ropa","Compras personales · Celulares","Compras personales · Herramientas","Compras personales · Ofertas especiales"];
-    let sb=null, currentUser=null, workspaces=[], currentWorkspace=null, currentRole="viewer", products=[], alertEvents=[], monitorResults=[], formAlerts=true, activeList="", dealLists=loadListsLocal(), realtimeChannel=null, realtimeWorkspaceId=null, realtimeState="Pendiente", realtimeRefreshTimer=null;
+    let sb=null, currentUser=null, workspaces=[], currentWorkspace=null, currentRole="viewer", products=[], alertEvents=[], monitorResults=[], priceHistory=[], formAlerts=true, activeList="", dealLists=loadListsLocal(), realtimeChannel=null, realtimeWorkspaceId=null, realtimeState="Pendiente", realtimeRefreshTimer=null;
     let compareMode="all";
     const $=id=>document.getElementById(id);
     const money=n=>Number(n||0).toLocaleString("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});
@@ -693,6 +707,87 @@
       const open=p.url?`<a class="mini primary" href="${esc(p.url)}" target="_blank" rel="noopener">Abrir</a>`:'';
       return `<div class="compare-row ${isBest?'best':'more-expensive'}"><div><div class="compare-store">${storeBadge(p.store)} <span>${esc(p.store||'Tienda')}</span></div><div class="compare-diff ${isBest?'good':'bad'}">${esc(diffText)} · ${esc(targetText)}</div></div><div><div class="compare-price">${money(price)}</div>${open?`<div style="margin-top:6px">${open}</div>`:''}</div></div>`;
     }
+    function normalizeHistory(row){
+      return {
+        id:row.id||uuid(),
+        workspace_id:row.workspace_id||row.workspaceId||null,
+        productId:row.product_id||row.productId||row.product?.id||'',
+        productName:row.product_name||row.productName||row.name||'Producto',
+        store:row.store||'Tienda',
+        productUrl:row.product_url||row.productUrl||'',
+        price:Number(row.price??row.current_price??0),
+        normalPrice:Number(row.normal_price??row.normalPrice??0),
+        targetPrice:Number(row.target_price??row.targetPrice??0),
+        source:row.source||row.raw?.priceSource||'historial',
+        checkedAt:row.checked_at||row.checkedAt||row.created_at||new Date().toISOString(),
+        raw:row.raw||{}
+      };
+    }
+    function loadHistoryLocal(){
+      try{return JSON.parse(localStorage.getItem(PRICE_HISTORY_KEY)||'[]').map(normalizeHistory).filter(h=>h.price>0);}catch(e){return [];}
+    }
+    function saveHistoryLocal(list){
+      priceHistory=(Array.isArray(list)?list:[]).map(normalizeHistory).filter(h=>h.price>0);
+      localStorage.setItem(PRICE_HISTORY_KEY,JSON.stringify(priceHistory.slice(0,2500)));
+    }
+    function dateShort(value){
+      if(!value || value==='actual') return 'Actual';
+      const d=new Date(value);
+      if(Number.isNaN(d.getTime())) return 'Sin fecha';
+      return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
+    }
+    function historyForItems(items){
+      const ids=new Set((items||[]).map(p=>String(p.id||'')));
+      return priceHistory
+        .filter(h=>ids.has(String(h.productId||'')) && Number(h.price||0)>0)
+        .sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0));
+    }
+    function historyStatsForGroup(g){
+      const rows=historyForItems(g.items);
+      const currentRows=(g.items||[]).filter(p=>Number(p.currentPrice||0)>0).map(p=>({
+        productId:p.id,
+        productName:p.name,
+        store:p.store,
+        price:Number(p.currentPrice||0),
+        checkedAt:'actual',
+        source:'precio_actual'
+      }));
+      const all=[...rows,...currentRows].filter(h=>Number(h.price||0)>0);
+      const min=all.reduce((m,h)=>!m||Number(h.price)<Number(m.price)?h:m,null);
+      const max=all.reduce((m,h)=>!m||Number(h.price)>Number(m.price)?h:m,null);
+      const avg=all.length?all.reduce((s,h)=>s+Number(h.price||0),0)/all.length:0;
+      const todayBest=Number(g.best?.currentPrice||0);
+      const historyOnlyMin=rows.reduce((m,h)=>!m||Number(h.price)<Number(m.price)?h:m,null);
+      let trend='Sin historial aún';
+      let trendClass='warn';
+      if(rows.length && historyOnlyMin){
+        const minPrice=Number(historyOnlyMin.price||0);
+        if(todayBest>0 && todayBest<=minPrice){ trend='Está en mínimo histórico'; trendClass=''; }
+        else if(todayBest>0 && minPrice>0){ trend=`Ha estado ${money(todayBest-minPrice)} más barato`; trendClass='warn'; }
+      }
+      return {rows,all,min,max,avg,trend,trendClass,hasHistory:rows.length>0};
+    }
+    function historyStoreRows(g){
+      const itemRows=(g.items||[]).map(p=>{
+        const rows=priceHistory.filter(h=>String(h.productId||'')===String(p.id||'') && Number(h.price||0)>0).sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0));
+        const current={productId:p.id,productName:p.name,store:p.store,price:Number(p.currentPrice||0),checkedAt:'actual',source:'precio_actual'};
+        const all=[...rows,current].filter(h=>Number(h.price||0)>0);
+        const low=all.reduce((m,h)=>!m||Number(h.price)<Number(m.price)?h:m,null);
+        const latest=rows[0]||current;
+        const previous=rows[1]||null;
+        const latestPrice=Number(latest?.price||0);
+        const previousPrice=Number(previous?.price||0);
+        let trend='';
+        let trendClass='';
+        if(previous && latestPrice>previousPrice){trend=`Subió ${money(latestPrice-previousPrice)} vs revisión previa`;trendClass='warn';}
+        else if(previous && latestPrice<previousPrice){trend=`Bajó ${money(previousPrice-latestPrice)} vs revisión previa`;}
+        else if(rows.length){trend='Sin cambio reciente';}
+        else trend='Esperando primera corrida del robot';
+        return {product:p,rows,low,latest,trend,trendClass};
+      });
+      return itemRows.map(item=>`<div class="history-row"><div><div class="history-title">${storeBadge(item.product.store)} <span>${esc(item.product.store||'Tienda')}</span></div><div class="history-meta">Mínimo: ${item.low?money(item.low.price):'Sin dato'} · Última revisión: ${dateShort(item.latest?.checkedAt)} · ${item.rows.length} punto(s)</div></div><div><div class="history-price">${money(item.product.currentPrice)}</div><div class="history-trend ${item.trendClass}">${esc(item.trend)}</div></div></div>`).join('') || '<div class="history-muted">Aún no hay tiendas con historial.</div>';
+    }
+
     function compareCard(g,index){
       const best=g.best;
       const bestPrice=Number(best.currentPrice||0);
@@ -702,7 +797,13 @@
       const targetBadge=target>0 && bestPrice<=target?'<span class="badge green">Cumple meta</span>':(target>0?`<span class="badge orange">Faltan ${money(bestPrice-target)}</span>`:'<span class="badge gray">Sin meta</span>');
       const storeCount=g.stores.length;
       const openBest=best.url?`<a class="mini green" href="${esc(best.url)}" target="_blank" rel="noopener">Ir al mejor precio</a>`:'';
-      return `<article class="card compare-card pro"><span class="compare-rank">#${index+1}</span><div class="compare-head"><div class="thumb">${productImageHtml(best)}</div><div><div class="compare-title">${esc(g.name)}</div><div class="compare-sub">${g.items.length} opciones · ${storeCount} tienda(s) · ganador actual</div><div class="winner-store-line">${storeBadge(best.store)} ${esc(best.store||'Tienda')}</div><div class="badges"><span class="badge blue">${esc(best.dealList||'Lista')}</span>${targetBadge}<span class="badge gray">Promedio ${money(g.average)}</span></div></div></div><div class="compare-winner"><div><small>Mejor precio actual</small><b>${money(bestPrice)}</b><div class="hint">Más caro detectado: ${money(highestPrice)}</div></div><div class="compare-save">${esc(saving)}</div></div><div class="compare-summary-grid"><div class="compare-summary-box"><small>Opciones</small><b>${g.items.length}</b></div><div class="compare-summary-box"><small>Diferencia</small><b>${money(g.spread)}</b></div><div class="compare-summary-box"><small>Meta</small><b>${target?money(target):'Sin meta'}</b></div></div><details class="compare-options"><summary><b>Ver opciones comparadas</b><span>${g.items.length} tienda(s) ›</span></summary><div class="compare-items">${g.items.map((p,i)=>compareRow(p,bestPrice,i)).join('')}</div></details><div class="compare-tools"><button class="mini" onclick="editProduct('${esc(best.id)}')">Editar ganador</button>${openBest}<button class="mini" onclick="activeList='${esc(groupName(best.dealList))}';go('products')">Ver lista</button></div><div class="compare-note">Comparación por nombre normalizado: ${esc(g.key)}</div></article>`;
+      const hist=historyStatsForGroup(g);
+      const historyBadge=hist.hasHistory?`<span class="history-chip">📈 ${hist.rows.length} revisión(es)</span>`:'<span class="history-chip">📈 Sin historial aún</span>';
+      const minText=hist.min?money(hist.min.price):'Sin dato';
+      const maxText=hist.max?money(hist.max.price):'Sin dato';
+      const avgText=hist.avg?money(hist.avg):'Sin dato';
+      const lastText=hist.rows[0]?dateShort(hist.rows[0].checkedAt):'Pendiente';
+      return `<article class="card compare-card pro"><span class="compare-rank">#${index+1}</span><div class="compare-head"><div class="thumb">${productImageHtml(best)}</div><div><div class="compare-title">${esc(g.name)}</div><div class="compare-sub">${g.items.length} opciones · ${storeCount} tienda(s) · ganador actual</div><div class="winner-store-line">${storeBadge(best.store)} ${esc(best.store||'Tienda')}</div><div class="badges"><span class="badge blue">${esc(best.dealList||'Lista')}</span>${targetBadge}<span class="badge gray">Promedio ${money(g.average)}</span>${historyBadge}</div></div></div><div class="compare-winner"><div><small>Mejor precio actual</small><b>${money(bestPrice)}</b><div class="hint">Más caro detectado: ${money(highestPrice)}</div></div><div class="compare-save">${esc(saving)}</div></div><div class="compare-summary-grid"><div class="compare-summary-box"><small>Opciones</small><b>${g.items.length}</b></div><div class="compare-summary-box"><small>Diferencia</small><b>${money(g.spread)}</b></div><div class="compare-summary-box"><small>Meta</small><b>${target?money(target):'Sin meta'}</b></div></div><div class="history-grid"><div class="history-box"><small>Mínimo histórico</small><b>${minText}</b><div class="tiny">${hist.min?`${esc(hist.min.store||'Tienda')} · ${dateShort(hist.min.checkedAt)}`:'Corre el robot'}</div></div><div class="history-box"><small>Promedio histórico</small><b>${avgText}</b><div class="tiny">Máximo ${maxText}</div></div><div class="history-box"><small>Tendencia</small><b>${esc(hist.trend)}</b><div class="tiny">Última: ${lastText}</div></div></div>${!hist.hasHistory?'<div class="history-banner">El historial aparecerá después de ejecutar el SQL de Fase 22 y correr GitHub Actions. Mientras tanto se usa el precio actual para comparar.</div>':''}<details class="compare-options"><summary><b>Ver opciones comparadas</b><span>${g.items.length} tienda(s) ›</span></summary><div class="compare-items">${g.items.map((p,i)=>compareRow(p,bestPrice,i)).join('')}</div></details><details class="history-options"><summary><b>Ver historial por tienda</b><span>${hist.rows.length} revisión(es) ›</span></summary><div class="history-rows">${historyStoreRows(g)}</div></details><div class="compare-tools"><button class="mini" onclick="editProduct('${esc(best.id)}')">Editar ganador</button>${openBest}<button class="mini" onclick="activeList='${esc(groupName(best.dealList))}';go('products')">Ver lista</button></div><div class="compare-note">Comparación por nombre normalizado: ${esc(g.key)}</div></article>`;
     }
     function renderCompare(){
       const box=$('compareList');
@@ -810,7 +911,7 @@
     async function signIn(){ try{ const client=await ensureSupabase(); const email=$('email').value.trim(); const password=$('password').value; const {data,error}=await client.auth.signInWithPassword({email,password}); if(error) throw error; currentUser=data.user; await bootCloud(); toast('Sesión iniciada.'); }catch(e){toast('No se pudo iniciar sesión: '+(e.message||e));} }
     async function signUp(){ try{ const client=await ensureSupabase(); const email=$('email').value.trim(); const password=$('password').value; const {error}=await client.auth.signUp({email,password}); if(error) throw error; toast('Cuenta creada. Ahora inicia sesión.'); }catch(e){toast('No se pudo crear cuenta: '+(e.message||e));} }
     async function resetPassword(){ try{ const client=await ensureSupabase(); const email=$('email').value.trim(); if(!email)return toast('Escribe tu correo.'); const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:location.href}); if(error) throw error; toast('Te enviamos un correo para recuperar contraseña.'); }catch(e){toast('No se pudo enviar recuperación: '+(e.message||e));} }
-    async function signOut(){ try{await removeRealtimeChannel(); await (await ensureSupabase()).auth.signOut();}catch(e){} currentUser=null;currentWorkspace=null;workspaces=[];currentRole='viewer';realtimeState='Pendiente';renderAll(); }
+    async function signOut(){ try{await removeRealtimeChannel(); await (await ensureSupabase()).auth.signOut();}catch(e){} currentUser=null;currentWorkspace=null;workspaces=[];currentRole='viewer';priceHistory=[];realtimeState='Pendiente';renderAll(); }
     let syncBusy=false;
     function withTimeout(promise,label='operación',ms=22000){
       return Promise.race([
@@ -1025,7 +1126,7 @@
         if(res.error) throw res.error;
         products=(res.data||[]).map(normalizeProduct);
         localStorage.setItem(PRODUCTS_KEY,JSON.stringify(products));
-        await Promise.allSettled([loadMembers(),loadMonitorData()]);
+        await Promise.allSettled([loadMembers(),loadMonitorData(),loadPriceHistory()]);
         await setupRealtime();
         const now=new Date().toLocaleString('es-MX');
         localStorage.setItem('dealwatch_last_sync_label',now);
@@ -1042,6 +1143,18 @@
       }finally{
         syncBusy=false;
         setSyncing(false);
+      }
+    }
+    async function loadPriceHistory(){
+      try{
+        if(!currentWorkspace){ priceHistory=loadHistoryLocal(); return; }
+        const client=await ensureSupabase();
+        const res=await q(client.from('price_history').select('id,workspace_id,product_id,product_name,store,product_url,price,normal_price,target_price,source,checked_at,raw').eq('workspace_id',currentWorkspace.id).order('checked_at',{ascending:false}).limit(2500),'cargar historial de precios');
+        if(res.error) throw res.error;
+        saveHistoryLocal(res.data||[]);
+      }catch(e){
+        console.warn('loadPriceHistory',e);
+        priceHistory=loadHistoryLocal();
       }
     }
     async function loadMonitorData(){
@@ -1064,7 +1177,7 @@
             const client=await ensureSupabase();
             const res=await q(client.from('products').select('*').eq('workspace_id',currentWorkspace.id).order('updated_at',{ascending:false}),'descargar productos iniciales');
             if(!res.error){ products=(res.data||[]).map(normalizeProduct); localStorage.setItem(PRODUCTS_KEY,JSON.stringify(products)); }
-            await Promise.allSettled([loadMembers(),loadMonitorData()]);
+            await Promise.allSettled([loadMembers(),loadMonitorData(),loadPriceHistory()]);
             await setupRealtime();
           }
           renderAll();
@@ -1075,7 +1188,7 @@
     function importJson(ev){ const f=ev.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{try{ const data=JSON.parse(r.result); const imported=(Array.isArray(data)?data:data.products||[]).map(normalizeProduct); saveLocal([...imported,...products]); toast('Respaldo importado.'); }catch(e){toast('JSON inválido.');}}; r.readAsText(f); }
     async function clearCache(){ if('serviceWorker' in navigator){ const regs=await navigator.serviceWorker.getRegistrations(); for(const r of regs) await r.unregister(); } const keys=await caches.keys(); for(const k of keys) await caches.delete(k); toast('Caché limpiado. Recarga la app.'); }
     function setupFormLivePreview(){ ['name','store','url','currentPrice','targetPrice','normalPrice','discount','dealList','category','imageUrl'].forEach(id=>{ const el=$(id); if(el){ el.addEventListener('input',renderFormPreview); el.addEventListener('change',renderFormPreview); } }); const urlEl=$('url'); if(urlEl){ urlEl.addEventListener('blur',detectStoreFromUrl); urlEl.addEventListener('change',detectStoreFromUrl); } renderFormPreview(); }
-    async function init(){ setupFormLivePreview(); products=getLocal(); renderAll(); await ensureSupabase().catch(console.warn); if(sb){ sb.auth.onAuthStateChange(async (_event,session)=>{currentUser=session?.user||null; if(currentUser){ await bootCloud(); } else { await removeRealtimeChannel(); currentWorkspace=null; workspaces=[]; currentRole='viewer'; realtimeState='Pendiente'; renderAll(); } }); } await bootCloud(); }
+    async function init(){ setupFormLivePreview(); products=getLocal(); priceHistory=loadHistoryLocal(); renderAll(); await ensureSupabase().catch(console.warn); if(sb){ sb.auth.onAuthStateChange(async (_event,session)=>{currentUser=session?.user||null; if(currentUser){ await bootCloud(); } else { await removeRealtimeChannel(); currentWorkspace=null; workspaces=[]; currentRole='viewer'; priceHistory=[]; realtimeState='Pendiente'; renderAll(); } }); } await bootCloud(); }
     init(); document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&currentUser){ setupRealtime().catch(console.warn); syncFromCloud(false).catch(console.warn); } }); window.addEventListener('focus',()=>{ if(currentUser){ setupRealtime().catch(console.warn); } }); window.addEventListener('online',()=>{ if(currentUser){ setupRealtime().catch(console.warn); syncFromCloud(false).catch(console.warn); } }); if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(console.warn)); }
   </script>
 </body>
