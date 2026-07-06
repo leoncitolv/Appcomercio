@@ -49,4 +49,4 @@ jobs:
           AUTO_FETCH_MERCADOLIBRE: "true"
           AUTO_FETCH_ALIEXPRESS: "false"
           PRICE_HISTORY_ENABLED: "true"
-          DEALWATCH_MODE: "rules_only_telegram_eneba_ml_aliexpress_history_visual_status"
+          DEALWATCH_MODE: "rules_only_telegram_eneba_ml_aliexpress_history_visual_status_fase26"
