@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 25</title>
+  <title>DealWatch MX | Fase 26</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -432,6 +432,7 @@
     const money=n=>Number(n||0).toLocaleString("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});
     const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
     const uuid=()=>crypto.randomUUID?crypto.randomUUID():"dw_"+Date.now()+"_"+Math.random().toString(16).slice(2);
+    function safeDecodeText(value){ const raw=String(value||''); try{return decodeURIComponent(raw);}catch{return raw;} }
     function toast(msg){ alert(msg); }
     function isUuid(v){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(v||""));}
     async function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
@@ -612,20 +613,32 @@
     function formProductDraft(){ return normalizeProduct({id:$('productId')?.value||uuid(),name:$('name')?.value.trim()||'Producto nuevo',store:$('store')?.value||'Otra tienda',product_url:$('url')?.value.trim()||'',current_price:$('currentPrice')?.value||0,target_price:$('targetPrice')?.value||0,normal_price:$('normalPrice')?.value||0,min_discount_percent:$('discount')?.value||0,deal_list:$('dealList')?.value||configuredLists()[0]||'Compras personales',category:$('category')?.value||listName($('dealList')?.value||''),alerts_enabled:formAlerts,icon:$('imageUrl')?.value.trim()||''}); }
     function renderFormPreview(){ const box=$('formPreview'); if(!box) return; const p=formProductDraft(); const save=Number(p.currentPrice)>0 && Number(p.targetPrice)>0?`Te avisaremos al llegar a ${money(p.targetPrice)}.`:'Pega un precio objetivo para calcular tu meta.'; box.innerHTML=`<div class="preview-head"><span>✦ Vista previa del producto</span><span class="badge blue">${isImageUrl(p.imageUrl)?'Imagen lista':'Logo de tienda'}</span></div><div class="preview-body"><div class="thumb">${productImageHtml(p)}</div><div><div class="preview-name">${esc(p.name)}</div><div class="store-line">${storeBadge(p.store)} ${esc(p.store)}</div><div class="badges"><span class="badge green">${p.alertEnabled?'Alerta activa':'Sin alerta'}</span><span class="badge blue">${esc(p.dealList)}</span></div><div class="preview-price"><div><small>Precio actual</small><b>${money(p.currentPrice)}</b></div><div><small>Objetivo</small><b class="goal">${money(p.targetPrice)}</b></div></div><div class="preview-save">${esc(save)}</div></div></div>`; }
     function detectStoreFromUrl(){ const input=$('url'); if(!input) return; const u=input.value.trim(); const lower=u.toLowerCase(); if(lower.includes('mercadolibre.com')||lower.includes('articulo.mercadolibre')) $('store').value='Mercado Libre'; else if(lower.includes('amazon.')) $('store').value='Amazon México'; else if(lower.includes('walmart.com')) $('store').value='Walmart'; else if(lower.includes('liverpool.com')) $('store').value='Liverpool'; else if(lower.includes('eneba.com')) $('store').value='Eneba'; else if(lower.includes('aliexpress.')) $('store').value='AliExpress'; renderFormPreview(); detectMercadoLibreData(u).catch(console.warn); }
-    function extractMlId(url){ const s=decodeURIComponent(String(url||'')); const wid=s.match(/[?&]wid=(MLM\d+)/i); if(wid) return wid[1].toUpperCase(); const item=s.match(/item_id[:=](MLM\d+)/i); if(item) return item[1].toUpperCase(); const direct=s.match(/(MLM-?\d{6,})/i); return direct?direct[1].replace('-','').toUpperCase():''; }
+    function extractMlId(url){ const raw=String(url||''); const candidates=[safeDecodeText(raw),raw].filter(Boolean); for(const s of candidates){ const wid=s.match(/[?&#]wid=(MLM-?\d+)/i)||s.match(/wid[:=](MLM-?\d+)/i); if(wid) return wid[1].replace('-','').toUpperCase(); const item=s.match(/[?&#]item_id=(MLM-?\d+)/i)||s.match(/item_id[:=](MLM-?\d+)/i); if(item) return item[1].replace('-','').toUpperCase(); const direct=s.match(/(MLM-?\d{6,})/i); if(direct) return direct[1].replace('-','').toUpperCase(); } return ''; }
     async function detectMercadoLibreData(url){ const id=extractMlId(url); if(!id) return; const res=await fetch(`https://api.mercadolibre.com/items/${id}`); if(!res.ok) return; const data=await res.json(); if(!$('name').value.trim() && data.title) $('name').value=data.title; if(!Number($('currentPrice').value||0) && data.price) $('currentPrice').value=Math.round(Number(data.price)); const pic=data.secure_thumbnail||data.thumbnail||(Array.isArray(data.pictures)&&data.pictures[0]&&(data.pictures[0].secure_url||data.pictures[0].url)); if(pic && !$('imageUrl').value.trim()) $('imageUrl').value=pic; renderFormPreview(); }
 
-    function latestHistoryForProduct(productId){
-      const id=String(productId||'');
-      if(!id) return null;
-      return (priceHistory||[])
-        .filter(h=>String(h.productId||'')===id)
-        .sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0))[0]||null;
+    function historyTextKey(value){ return String(value||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' '); }
+    function historyUrlKey(value){ return String(value||'').trim().toLowerCase().replace(/#.*$/,'').replace(/[?&](utm_[^=&]+|matt_tool|sid|share|ua|action|origin)=[^&]*/g,'').replace(/[?&]$/,''); }
+    function historyMatchesProduct(h,p){
+      if(!h||!p) return false;
+      if(String(h.productId||'') && String(h.productId||'')===String(p.id||'')) return true;
+      const hUrl=historyUrlKey(h.productUrl), pUrl=historyUrlKey(p.url||p.productUrl);
+      if(hUrl && pUrl && hUrl===pUrl) return true;
+      const hName=historyTextKey(h.productName||h.name), pName=historyTextKey(p.name);
+      const hStore=historyTextKey(h.store), pStore=historyTextKey(p.store);
+      return Boolean(hName && pName && hName===pName && hStore && pStore && hStore===pStore);
+    }
+    function latestHistoryForProduct(productOrId){
+      if(!productOrId) return null;
+      const rows=(priceHistory||[]).filter(h=>{
+        if(typeof productOrId==='object') return historyMatchesProduct(h,productOrId);
+        return String(h.productId||'')===String(productOrId||'');
+      });
+      return rows.sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0))[0]||null;
     }
     function isAutomaticStore(store){ const t=String(store||'').toLowerCase(); return t.includes('mercado')||t.includes('mercadolibre')||t.includes('eneba'); }
     function isManualSafeStore(store){ const t=String(store||'').toLowerCase(); return t.includes('aliexpress')||t.includes('amazon')||t.includes('walmart')||t.includes('liverpool')||t.includes('otra'); }
     function priceStatusFromProduct(p){
-      const latest=latestHistoryForProduct(p.id);
+      const latest=latestHistoryForProduct(p);
       const raw=latest?.raw||{};
       const saved=raw.priceStatus||null;
       if(saved && typeof saved==='object'){
@@ -637,22 +650,35 @@
           reason:saved.reason||saved.error||'Estado registrado por el robot.',
           checkedAt:saved.checkedAt||latest?.checkedAt||raw.checkedAt||null,
           source:saved.source||raw.priceSource||latest?.source||'stored_price',
-          error:saved.error||raw.priceError||null
+          error:saved.error||raw.priceError||null,
+          note:saved.note||latest?.note||raw.statusNote||null
         };
       }
+      const note=String(latest?.note||raw.statusNote||raw.note||'').trim();
       const source=String(raw.priceSource||latest?.source||'stored_price');
       const error=String(raw.priceError||'').trim();
       const store=String(p.store||'');
       const lowerStore=store.toLowerCase();
       const checkedAt=latest?.checkedAt||null;
-      if(source==='mercadolibre_api') return {code:'auto_updated',label:'Precio automático actualizado',tone:'success',icon:'✅',reason:'Actualizado desde Mercado Libre API.',checkedAt,source,error:null};
-      if(source==='mercadolibre_html_fallback') return {code:'auto_updated_fallback',label:'Precio automático actualizado',tone:'success',icon:'✅',reason:'Actualizado desde fallback HTML de Mercado Libre.',checkedAt,source,error:null};
-      if(source==='eneba_auto_fetch') return {code:'auto_updated',label:'Precio automático actualizado',tone:'success',icon:'✅',reason:'Actualizado desde lectura automática de Eneba.',checkedAt,source,error:null};
+
+      if(note==='auto_ok') return {code:'auto_updated',label:'Precio automático revisado',tone:'success',icon:'✅',reason:'Lectura automática guardada por el robot.',checkedAt,source,error:null,note};
+      if(note==='manual_preserved_ml_403') return {code:'manual_conserved',label:'ML bloqueó revisión automática',tone:'warning',icon:'🟡',reason:'Mercado Libre rechazó la lectura automática. Se conservó el precio manual guardado.',checkedAt,source,error,note};
+      if(note==='manual_preserved_uri_error') return {code:'link_error',label:'Link requiere corrección',tone:'warning',icon:'🟠',reason:'La URL del producto generó error. Pega un link limpio de la publicación.',checkedAt,source,error,note};
+      if(note==='manual_preserved_eneba_suspicious') return {code:'suspicious_ignored',label:'Precio sospechoso ignorado',tone:'warning',icon:'🟠',reason:'El robot detectó un precio raro y conservó el precio manual.',checkedAt,source,error,note};
+      if(note==='manual_safe_store') return {code:'manual_safe',label:'Precio manual seguro',tone:'info',icon:'🔵',reason:'Tienda en modo manual seguro. Actualiza el precio cuando lo revises.',checkedAt,source,error:null,note};
+      if(note==='manual_preserved_auto_store') return {code:'manual_conserved',label:'Precio manual conservado',tone:'warning',icon:'🟡',reason:'El robot registró historial, pero conservó el precio manual porque no confirmó lectura automática.',checkedAt,source,error,note};
+      if(note==='manual_preserved') return {code:'manual_conserved',label:'Precio manual conservado',tone:'info',icon:'🔵',reason:'Se conservó el precio guardado y se registró en historial.',checkedAt,source,error,note};
+
+      if(source==='mercadolibre_api') return {code:'auto_updated',label:'Precio automático revisado',tone:'success',icon:'✅',reason:'Actualizado desde Mercado Libre API.',checkedAt,source,error:null};
+      if(source==='mercadolibre_html_fallback') return {code:'auto_updated_fallback',label:'Precio automático revisado',tone:'success',icon:'✅',reason:'Actualizado desde fallback HTML de Mercado Libre.',checkedAt,source,error:null};
+      if(source==='eneba_auto_fetch') return {code:'auto_updated',label:'Precio automático revisado',tone:'success',icon:'✅',reason:'Actualizado desde lectura automática de Eneba.',checkedAt,source,error:null};
       if(source==='aliexpress_manual_safe') return {code:'manual_safe',label:'Precio manual seguro',tone:'info',icon:'🔵',reason:'AliExpress está en modo manual seguro para evitar bloqueos o precios falsos.',checkedAt,source,error:null};
       if(error && /sospechoso|suspicious/i.test(error)) return {code:'suspicious_ignored',label:'Precio sospechoso ignorado',tone:'warning',icon:'🟠',reason:error,checkedAt,source,error};
-      if(error && (lowerStore.includes('mercado')||lowerStore.includes('mercadolibre'))) return {code:'manual_conserved',label:'Precio manual conservado',tone:'warning',icon:'🟡',reason:'Mercado Libre bloqueó la lectura o el producto no está disponible. Se conservó el precio manual guardado.',checkedAt,source,error};
+      if(error && /uri malformed|mal formada/i.test(error)) return {code:'link_error',label:'Link requiere corrección',tone:'warning',icon:'🟠',reason:'La URL del producto generó error. Pega un link limpio de la publicación.',checkedAt,source,error};
+      if(error && (lowerStore.includes('mercado')||lowerStore.includes('mercadolibre'))) return {code:'manual_conserved',label:'ML bloqueó revisión automática',tone:'warning',icon:'🟡',reason:'Mercado Libre bloqueó la lectura o el producto no está disponible. Se conservó el precio manual guardado.',checkedAt,source,error};
       if(error) return {code:'manual_conserved',label:'Precio manual conservado',tone:'warning',icon:'🟡',reason:error,checkedAt,source,error};
       if(!latest && isAutomaticStore(store)) return {code:'auto_pending',label:'Precio automático pendiente',tone:'neutral',icon:'⚪',reason:'Aún no hay una lectura automática registrada en el historial.',checkedAt:null,source,error:null};
+      if(latest && isAutomaticStore(store)) return {code:'manual_conserved',label:'Precio manual conservado',tone:'warning',icon:'🟡',reason:'Hay historial, pero el robot conservó el precio manual porque no confirmó lectura automática.',checkedAt,source,error:null};
       if(isManualSafeStore(store)) return {code:'manual_safe',label:'Precio manual seguro',tone:'info',icon:'🔵',reason:'Tienda en modo manual seguro. Actualiza el precio cuando lo revises.',checkedAt,source,error:null};
       return {code:'manual_safe',label:'Precio manual seguro',tone:'info',icon:'🔵',reason:'Se conserva el precio guardado manualmente.',checkedAt,source,error:null};
     }
@@ -778,10 +804,13 @@
         productName:row.product_name||row.productName||row.name||'Producto',
         store:row.store||'Tienda',
         productUrl:row.product_url||row.productUrl||'',
-        price:Number(row.price??row.current_price??0),
+        price:Number(row.price??row.current_price??row.new_price??0),
+        oldPrice:Number(row.old_price??row.oldPrice??0),
+        newPrice:Number(row.new_price??row.newPrice??row.price??0),
         normalPrice:Number(row.normal_price??row.normalPrice??0),
         targetPrice:Number(row.target_price??row.targetPrice??0),
         source:row.source||row.raw?.priceSource||'historial',
+        note:row.note||row.raw?.statusNote||row.raw?.priceStatus?.note||'',
         checkedAt:row.checked_at||row.checkedAt||row.created_at||new Date().toISOString(),
         raw:row.raw||{}
       };
@@ -800,9 +829,9 @@
       return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
     }
     function historyForItems(items){
-      const ids=new Set((items||[]).map(p=>String(p.id||'')));
+      const list=Array.isArray(items)?items:[];
       return priceHistory
-        .filter(h=>ids.has(String(h.productId||'')) && Number(h.price||0)>0)
+        .filter(h=>Number(h.price||0)>0 && list.some(p=>historyMatchesProduct(h,p)))
         .sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0));
     }
     function historyStatsForGroup(g){
@@ -832,7 +861,7 @@
     }
     function historyStoreRows(g){
       const itemRows=(g.items||[]).map(p=>{
-        const rows=priceHistory.filter(h=>String(h.productId||'')===String(p.id||'') && Number(h.price||0)>0).sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0));
+        const rows=priceHistory.filter(h=>historyMatchesProduct(h,p) && Number(h.price||0)>0).sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0));
         const current={productId:p.id,productName:p.name,store:p.store,price:Number(p.currentPrice||0),checkedAt:'actual',source:'precio_actual'};
         const all=[...rows,current].filter(h=>Number(h.price||0)>0);
         const low=all.reduce((m,h)=>!m||Number(h.price)<Number(m.price)?h:m,null);
@@ -1212,7 +1241,7 @@
       try{
         if(!currentWorkspace){ priceHistory=loadHistoryLocal(); return; }
         const client=await ensureSupabase();
-        const res=await q(client.from('price_history').select('id,workspace_id,product_id,product_name,store,product_url,price,normal_price,target_price,source,checked_at,raw').eq('workspace_id',currentWorkspace.id).order('checked_at',{ascending:false}).limit(2500),'cargar historial de precios');
+        const res=await q(client.from('price_history').select('id,workspace_id,product_id,product_name,store,product_url,price,old_price,new_price,normal_price,target_price,source,note,checked_at,raw').eq('workspace_id',currentWorkspace.id).order('checked_at',{ascending:false}).limit(2500),'cargar historial de precios');
         if(res.error) throw res.error;
         saveHistoryLocal(res.data||[]);
       }catch(e){
