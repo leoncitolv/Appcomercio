@@ -1,6 +1,7 @@
 // DealWatch MX / Appcomercio
-// Fase 24: monitor automático con GitHub Actions + Supabase REST API.
-// Revisa reglas, Telegram, historial, Eneba, Mercado Libre, AliExpress manual seguro y estado visual del precio.
+// Fase 26: monitor automático con GitHub Actions + Supabase REST API.
+// Revisa reglas, Telegram, historial, Eneba, Mercado Libre, AliExpress manual seguro,
+// historial robusto y estado visual inteligente del precio.
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -74,6 +75,36 @@ async function patch(table, filter, body) {
 function toNumber(value) {
   const n = Number(value || 0);
   return Number.isFinite(n) ? n : 0;
+}
+
+function safeDecodeURIComponent(value) {
+  const raw = String(value || "");
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+function cleanUrlForFetch(value) {
+  const raw = String(value || "").trim();
+  if (!/^https?:\/\//i.test(raw)) return "";
+
+  const candidates = [
+    raw,
+    raw.replace(/%(?![0-9a-fA-F]{2})/g, "%25"),
+    encodeURI(raw),
+  ];
+
+  for (const candidate of candidates) {
+    try {
+      return new URL(candidate).toString();
+    } catch {
+      // probar siguiente candidato
+    }
+  }
+
+  return "";
 }
 
 function discountPercent(normalPrice, currentPrice) {
@@ -153,18 +184,23 @@ function normalizeMercadoLibreId(value) {
 }
 
 function extractMercadoLibreId(value) {
-  const text = decodeURIComponent(String(value || ""));
+  const raw = String(value || "");
+  const decoded = safeDecodeURIComponent(raw);
+  const candidates = [decoded, raw].filter(Boolean);
 
   const patterns = [
-    /[?&](?:wid|item_id)=((?:ML[A-Z]{1,2})-?\d{6,})/i,
+    /(?:[?&#]|^)(?:wid|item_id)=((?:ML[A-Z]{1,2})-?\d{6,})/i,
+    /(?:wid|item_id)[:=]((?:ML[A-Z]{1,2})-?\d{6,})/i,
     /\/((?:ML[A-Z]{1,2})-?\d{6,})(?:[/?#_\-]|$)/i,
     /((?:ML[A-Z]{1,2})-?\d{6,})/i,
   ];
 
-  for (const pattern of patterns) {
-    const match = text.match(pattern);
-    const id = match ? normalizeMercadoLibreId(match[1]) : "";
-    if (id) return id;
+  for (const text of candidates) {
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      const id = match ? normalizeMercadoLibreId(match[1]) : "";
+      if (id) return id;
+    }
   }
 
   return "";
@@ -244,9 +280,10 @@ function findFirstPrice(html) {
 }
 
 async function fetchEnebaPrice(productUrl) {
-  if (!productUrl || !String(productUrl).startsWith("http")) return null;
+  const safeUrl = cleanUrlForFetch(productUrl);
+  if (!safeUrl) return null;
 
-  const res = await fetch(productUrl, {
+  const res = await fetch(safeUrl, {
     headers: {
       "User-Agent": "Mozilla/5.0 (compatible; DealWatchMX/1.0; +https://github.com/leoncitolv/Appcomercio)",
       "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -264,7 +301,12 @@ async function fetchEnebaPrice(productUrl) {
 }
 
 async function fetchUrlForMercadoLibreId(productUrl) {
-  const res = await fetch(productUrl, {
+  const safeUrl = cleanUrlForFetch(productUrl);
+  if (!safeUrl) {
+    throw new Error("URL Mercado Libre inválida o mal formada");
+  }
+
+  const res = await fetch(safeUrl, {
     redirect: "follow",
     headers: {
       "User-Agent": "Mozilla/5.0 (compatible; DealWatchMX/1.0; +https://github.com/leoncitolv/Appcomercio)",
@@ -277,7 +319,7 @@ async function fetchUrlForMercadoLibreId(productUrl) {
     throw new Error(`Mercado Libre HTTP ${res.status}`);
   }
 
-  const finalUrl = res.url || productUrl;
+  const finalUrl = res.url || safeUrl;
   let id = extractMercadoLibreId(finalUrl);
   let html = "";
 
@@ -290,15 +332,16 @@ async function fetchUrlForMercadoLibreId(productUrl) {
 }
 
 async function fetchMercadoLibrePrice(productUrl) {
-  if (!productUrl || !String(productUrl).startsWith("http")) return null;
+  const safeUrl = cleanUrlForFetch(productUrl);
+  if (!safeUrl) return null;
 
   let id = extractMercadoLibreId(productUrl);
   let fallbackHtml = "";
-  let finalUrl = productUrl;
+  let finalUrl = safeUrl;
   let apiError = "";
 
   if (!id) {
-    const resolved = await fetchUrlForMercadoLibreId(productUrl);
+    const resolved = await fetchUrlForMercadoLibreId(safeUrl);
     id = resolved.id;
     fallbackHtml = resolved.html || "";
     finalUrl = resolved.finalUrl || productUrl;
@@ -341,7 +384,7 @@ async function fetchMercadoLibrePrice(productUrl) {
 
   if (!fallbackHtml) {
     try {
-      const resolved = await fetchUrlForMercadoLibreId(productUrl);
+      const resolved = await fetchUrlForMercadoLibreId(safeUrl);
       fallbackHtml = resolved.html || "";
       finalUrl = resolved.finalUrl || productUrl;
       if (!id && resolved.id) id = resolved.id;
@@ -354,17 +397,23 @@ async function fetchMercadoLibrePrice(productUrl) {
   }
 
   const fallbackPrice = findFirstPrice(fallbackHtml);
-  return fallbackPrice > 0
-    ? {
-        price: fallbackPrice,
-        source: "mercadolibre_html_fallback",
-        itemId: id || null,
-        title: null,
-        currency: "MXN",
-        finalUrl,
-        apiError: apiError || null,
-      }
-    : null;
+  if (fallbackPrice > 0) {
+    return {
+      price: fallbackPrice,
+      source: "mercadolibre_html_fallback",
+      itemId: id || null,
+      title: null,
+      currency: "MXN",
+      finalUrl,
+      apiError: apiError || null,
+    };
+  }
+
+  if (apiError) {
+    throw new Error(`${apiError}; fallback HTML sin precio usable`);
+  }
+
+  return null;
 }
 
 async function applyFetchedPrice(product, fetchedPrice, source, label, extraRaw = {}) {
@@ -413,7 +462,7 @@ async function enrichProductPrice(product) {
             itemId: fetched.itemId || null,
             title: fetched.title || null,
             currency: fetched.currency || null,
-            finalUrl: fetched.finalUrl || product.product_url || null,
+            finalUrl: fetched.finalUrl || cleanUrlForFetch(product.product_url) || product.product_url || null,
           }
         );
       }
@@ -451,11 +500,53 @@ async function enrichProductPrice(product) {
 }
 
 
+function buildPriceHistoryNote(product) {
+  const source = String(product.raw_price_source || "stored_price").toLowerCase();
+  const error = String(product.raw_price_error || "").trim();
+  const store = String(product.store || "").toLowerCase();
+
+  if (["mercadolibre_api", "mercadolibre_html_fallback", "eneba_auto_fetch"].includes(source)) {
+    return "auto_ok";
+  }
+
+  if (error && /uri malformed|url mercado libre inválida|mal formada/i.test(error)) {
+    return "manual_preserved_uri_error";
+  }
+
+  if (error && /mercado libre api 403|api 403|http 403|bloque/i.test(error)) {
+    return "manual_preserved_ml_403";
+  }
+
+  if (error && /sospechoso|suspicious/i.test(error)) {
+    return "manual_preserved_eneba_suspicious";
+  }
+
+  if (
+    source === "aliexpress_manual_safe" ||
+    store.includes("amazon") ||
+    store.includes("walmart") ||
+    store.includes("liverpool") ||
+    store.includes("aliexpress") ||
+    store.includes("otra")
+  ) {
+    return "manual_safe_store";
+  }
+
+  if (store.includes("mercado") || store.includes("mercadolibre") || store.includes("eneba")) {
+    return "manual_preserved_auto_store";
+  }
+
+  return "manual_preserved";
+}
+
+
 function buildPriceStatus(product) {
   const source = String(product.raw_price_source || "stored_price");
   const error = String(product.raw_price_error || "").trim();
   const store = String(product.store || "").toLowerCase();
   const checkedAt = new Date().toISOString();
+
+  const note = buildPriceHistoryNote(product);
 
   const status = {
     code: "manual_safe",
@@ -466,7 +557,41 @@ function buildPriceStatus(product) {
     source,
     error: error || null,
     checkedAt,
+    note,
   };
+
+  if (note === "manual_preserved_ml_403") {
+    return {
+      ...status,
+      code: "manual_conserved",
+      label: "ML bloqueó revisión automática",
+      tone: "warning",
+      icon: "🟡",
+      reason: "Mercado Libre rechazó la lectura automática. Se conservó el precio manual guardado.",
+    };
+  }
+
+  if (note === "manual_preserved_uri_error") {
+    return {
+      ...status,
+      code: "link_error",
+      label: "Link requiere corrección",
+      tone: "warning",
+      icon: "🟠",
+      reason: "La URL del producto generó error. Pega un link limpio de la publicación.",
+    };
+  }
+
+  if (note === "manual_preserved_auto_store") {
+    return {
+      ...status,
+      code: "manual_conserved",
+      label: "Precio manual conservado",
+      tone: "warning",
+      icon: "🟡",
+      reason: "El robot registró historial, pero conservó el precio manual porque no confirmó lectura automática.",
+    };
+  }
 
   if (source === "mercadolibre_api") {
     return {
@@ -588,6 +713,7 @@ function buildPriceHistoryRow(product, runId) {
     target_price: toNumber(product.target_price),
 
     source: product.raw_price_source || "github_actions",
+    note: buildPriceHistoryNote(product),
     checked_at: new Date().toISOString(),
     raw: {
       runId,
@@ -597,6 +723,7 @@ function buildPriceHistoryRow(product, runId) {
       priceSource: product.raw_price_source || "stored_price",
       priceError: product.raw_price_error || null,
       priceMeta: product.raw_price_meta || null,
+      statusNote: buildPriceHistoryNote(product),
       priceStatus: buildPriceStatus(product),
     },
   };
@@ -852,7 +979,7 @@ async function main() {
     });
 
     console.log(
-      `DealWatch MX OK Fase 25 Estado Visual Precio: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
+      `DealWatch MX OK Fase 26 Estado Inteligente Precio: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
     );
   } catch (error) {
     await patch("monitor_runs", `id=eq.${runId}`, {
