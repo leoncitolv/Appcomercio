@@ -512,6 +512,61 @@
     }
 
 
+    /* ===== Hero 2026 Fashion / iOS glass ===== */
+    .hero-fashion{
+      isolation:isolate;
+      min-height:226px;
+      grid-template-columns:minmax(0,1fr) 178px !important;
+      gap:22px;
+      padding:28px 28px 26px !important;
+      border-radius:34px !important;
+      background:
+        radial-gradient(circle at 88% 12%,rgba(125,211,252,.42),transparent 28%),
+        radial-gradient(circle at 72% 86%,rgba(236,72,153,.30),transparent 32%),
+        linear-gradient(135deg,#170733 0%,#42148f 38%,#2453f5 74%,#11c5df 118%) !important;
+      border:1px solid rgba(255,255,255,.22) !important;
+      box-shadow:0 28px 90px rgba(17,7,58,.58), inset 0 1px 0 rgba(255,255,255,.20) !important;
+      overflow:hidden;
+    }
+    .hero-fashion:before{
+      content:"";position:absolute;inset:1px;border-radius:33px;z-index:-1;
+      background:linear-gradient(115deg,rgba(255,255,255,.20),transparent 34%,rgba(255,255,255,.10));
+      pointer-events:none;
+    }
+    .hero-fashion:after{
+      content:"";position:absolute;right:-72px;top:-92px;width:250px;height:250px;border-radius:50%;
+      background:radial-gradient(circle,rgba(255,255,255,.25),rgba(255,255,255,.08) 48%,transparent 70%) !important;
+      filter:blur(.1px);pointer-events:none;
+    }
+    .hero-content{position:relative;z-index:2;}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;margin-bottom:8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.16);color:#f5d0fe !important;letter-spacing:.14em;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+    .hero-eyebrow i{font-style:normal;color:#67e8f9;text-shadow:0 0 18px rgba(103,232,249,.9)}
+    .hero-fashion h2{max-width:420px;font-size:clamp(2rem,6.2vw,2.75rem) !important;line-height:.94 !important;letter-spacing:-.075em !important;margin:0 0 12px !important;text-shadow:0 12px 34px rgba(0,0,0,.22)}
+    .hero-fashion p{max-width:440px;color:rgba(255,255,255,.88) !important;font-size:1.02rem;font-weight:720 !important;}
+    .hero-fashion p b{color:#fff !important;text-shadow:0 0 16px rgba(255,255,255,.38)}
+    .hero-metrics{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px;}
+    .hero-metrics span{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:999px;background:rgba(7,5,18,.22);border:1px solid rgba(255,255,255,.14);color:#e9d5ff;font-size:.76rem;font-weight:900;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+    .hero-metrics strong{color:#67e8f9;font-size:.95rem;}
+    .hero-cta{margin-top:18px !important;}
+    .hero-fashion .btn{padding:13px 18px;box-shadow:0 16px 34px rgba(0,0,0,.18)}
+    .hero-fashion .btn-light{background:linear-gradient(135deg,#ffffff,#f5d0fe) !important;color:#4c1d95 !important;}
+    .hero-fashion .btn-soft{background:rgba(255,255,255,.12) !important;color:#fff !important;border:1px solid rgba(255,255,255,.18) !important;}
+    .hero-visual{position:relative;z-index:2;width:178px;height:178px;display:grid;place-items:center;}
+    .bag-showcase{position:relative;z-index:4;width:104px;height:104px;border-radius:32px;display:grid;place-items:center;font-size:60px;background:linear-gradient(145deg,rgba(255,255,255,.28),rgba(255,255,255,.09));border:1px solid rgba(255,255,255,.22);box-shadow:0 24px 60px rgba(10,6,35,.32),inset 0 1px 0 rgba(255,255,255,.24);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transform:rotate(-7deg)}
+    .orb{position:absolute;border-radius:999px;filter:blur(.1px);opacity:.96;}
+    .orb-a{width:148px;height:148px;background:radial-gradient(circle at 28% 22%,#a5f3fc,#2563eb 56%,#581c87);box-shadow:0 0 58px rgba(59,130,246,.62);right:6px;top:8px;}
+    .orb-b{width:80px;height:80px;background:radial-gradient(circle at 30% 20%,#fbcfe8,#d946ef 58%,#6d28d9);left:8px;bottom:12px;box-shadow:0 0 42px rgba(217,70,239,.55)}
+    .deal-card{position:absolute;z-index:5;border-radius:18px;padding:9px 11px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.20);color:white;font-weight:950;font-size:.82rem;box-shadow:0 18px 42px rgba(0,0,0,.20);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+    .mini-card-a{right:0;bottom:18px;transform:rotate(8deg);background:linear-gradient(135deg,rgba(236,72,153,.86),rgba(124,58,237,.72));}
+    .mini-card-b{left:2px;top:28px;transform:rotate(-10deg);color:#0f172a;background:linear-gradient(135deg,#a7f3d0,#67e8f9);}
+    .spark{position:absolute;z-index:6;color:#fff;text-shadow:0 0 18px rgba(255,255,255,.9);font-size:20px}.spark-a{right:22px;top:16px}.spark-b{left:26px;bottom:32px;color:#f0abfc}
+    @media(max-width:470px){
+      .hero-fashion{grid-template-columns:1fr !important;min-height:auto;padding:24px 22px 120px !important;}
+      .hero-visual{position:absolute;right:12px;bottom:-4px;width:132px;height:132px;opacity:.98;}
+      .bag-showcase{width:78px;height:78px;border-radius:24px;font-size:46px}.orb-a{width:112px;height:112px}.orb-b{width:58px;height:58px}.mini-card-a{right:2px;bottom:14px}.mini-card-b{left:2px;top:18px}.hero-metrics span:last-child{display:none}
+    }
+
+
   </style>
 </head>
 <body>
@@ -519,7 +574,28 @@
     <header class="top"><div class="top-row"><div class="brand"><div class="logo">🏷️</div><div><h1>DealWatch MX</h1><p class="sub" id="topSubtitle">Ofertas para familia y amigos</p></div></div><div class="top-actions"><div class="pill" id="cloudPill">Local</div><button class="icon-btn" id="themeButton" title="Modo claro/oscuro">☀️</button></div></div></header>
 
     <section id="screen-home" class="screen active">
-      <div class="hero hero-pro"><div><span class="eyebrow">⚡ Ofertas inteligentes</span><h2>¡Bienvenido de vuelta!</h2><p>Tienes <b id="heroOffers">0</b> alertas activas y <b id="heroProducts">0</b> productos monitoreando precios.</p><div class="cta"><button class="btn btn-light" onclick="go('alerts')">Ver mis alertas ›</button><button class="btn btn-soft glass" onclick="go('add')">+ Agregar</button></div></div><div class="hero-art">🛍️<span>%</span></div></div>
+      <div class="hero hero-pro hero-fashion">
+        <div class="hero-content">
+          <span class="eyebrow hero-eyebrow"><i>✦</i> Ofertas inteligentes</span>
+          <h2>Tu radar de ofertas está listo</h2>
+          <p>Hoy tienes <b id="heroOffers">0</b> alertas activas y <b id="heroProducts">0</b> productos siguiendo precios en tiempo real.</p>
+          <div class="hero-metrics" aria-label="Resumen rápido">
+            <span><strong id="heroOffersChip">0</strong> alertas</span>
+            <span><strong id="heroProductsChip">0</strong> productos</span>
+            <span>AI price watch</span>
+          </div>
+          <div class="cta hero-cta"><button class="btn btn-light" onclick="go('alerts')">Ver alertas</button><button class="btn btn-soft glass" onclick="go('add')">+ Nuevo producto</button></div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="orb orb-a"></div>
+          <div class="orb orb-b"></div>
+          <div class="deal-card mini-card-a">−35%</div>
+          <div class="deal-card mini-card-b">HOT</div>
+          <div class="bag-showcase">🛍️</div>
+          <div class="spark spark-a">✦</div>
+          <div class="spark spark-b">✧</div>
+        </div>
+      </div>
       <section class="section"><div class="card summary"><div><b id="statOffers">0</b><span>Ofertas activas</span></div><div><b id="statProducts">0</b><span>Productos vigilados</span></div><div><b id="statCloud">OFF</b><span>Nube</span></div></div></section>
       <section class="section"><div class="section-head"><h3>Mis listas</h3><span>toca para filtrar</span></div><div class="list-grid" id="homeListCards"></div></section>
       <section class="section"><div class="section-head"><h3>Ofertas que te pueden interesar</h3><span onclick="go('alerts')">Ver todas ›</span></div><div id="homeOffers" class="product-list product-list-featured"></div></section>
@@ -1422,5 +1498,21 @@
     async function init(){ setupFormLivePreview(); products=getLocal(); priceHistory=loadHistoryLocal(); renderAll(); await ensureSupabase().catch(console.warn); if(sb){ sb.auth.onAuthStateChange(async (_event,session)=>{currentUser=session?.user||null; if(currentUser){ await bootCloud(); } else { await removeRealtimeChannel(); currentWorkspace=null; workspaces=[]; currentRole='viewer'; priceHistory=[]; realtimeState='Pendiente'; renderAll(); } }); } await bootCloud(); }
     init(); document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&currentUser){ setupRealtime().catch(console.warn); syncFromCloud(false).catch(console.warn); } }); window.addEventListener('focus',()=>{ if(currentUser){ setupRealtime().catch(console.warn); } }); window.addEventListener('online',()=>{ if(currentUser){ setupRealtime().catch(console.warn); syncFromCloud(false).catch(console.warn); } }); if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(console.warn)); }
   </script>
+
+<script>
+  // Sincroniza los chips nuevos del hero sin tocar la lógica principal de la app.
+  window.addEventListener('DOMContentLoaded', () => {
+    const pairs = [['heroOffers','heroOffersChip'], ['heroProducts','heroProductsChip']];
+    const syncHeroChips = () => pairs.forEach(([from,to]) => {
+      const a = document.getElementById(from), b = document.getElementById(to);
+      if (a && b) b.textContent = a.textContent || '0';
+    });
+    syncHeroChips();
+    pairs.forEach(([from]) => {
+      const el = document.getElementById(from);
+      if (el) new MutationObserver(syncHeroChips).observe(el, {childList:true, characterData:true, subtree:true});
+    });
+  });
+</script>
 </body>
 </html>
