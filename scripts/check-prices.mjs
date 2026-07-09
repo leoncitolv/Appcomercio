@@ -1,7 +1,6 @@
 // DealWatch MX / Appcomercio
-// Fase 26: monitor automático con GitHub Actions + Supabase REST API.
-// Revisa reglas, Telegram, historial, Eneba, Mercado Libre, AliExpress manual seguro,
-// historial robusto y estado visual inteligente del precio.
+// Fase 24: monitor automático con GitHub Actions + Supabase REST API.
+// Revisa reglas, Telegram, historial, Eneba, Mercado Libre, AliExpress/SHEIN manual seguro y estado visual del precio.
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -13,6 +12,7 @@ const FORCE_SEND_OFFERS = String(process.env.FORCE_SEND_OFFERS || "false").toLow
 const AUTO_FETCH_ENEBA = String(process.env.AUTO_FETCH_ENEBA || "true").toLowerCase() === "true";
 const AUTO_FETCH_MERCADOLIBRE = String(process.env.AUTO_FETCH_MERCADOLIBRE || "true").toLowerCase() === "true";
 const AUTO_FETCH_ALIEXPRESS = String(process.env.AUTO_FETCH_ALIEXPRESS || "false").toLowerCase() === "true";
+const AUTO_FETCH_SHEIN = String(process.env.AUTO_FETCH_SHEIN || "false").toLowerCase() === "true";
 const PRICE_HISTORY_ENABLED = String(process.env.PRICE_HISTORY_ENABLED || "true").toLowerCase() === "true";
 
 if (!SUPABASE_URL) {
@@ -77,36 +77,6 @@ function toNumber(value) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function safeDecodeURIComponent(value) {
-  const raw = String(value || "");
-  try {
-    return decodeURIComponent(raw);
-  } catch {
-    return raw;
-  }
-}
-
-function cleanUrlForFetch(value) {
-  const raw = String(value || "").trim();
-  if (!/^https?:\/\//i.test(raw)) return "";
-
-  const candidates = [
-    raw,
-    raw.replace(/%(?![0-9a-fA-F]{2})/g, "%25"),
-    encodeURI(raw),
-  ];
-
-  for (const candidate of candidates) {
-    try {
-      return new URL(candidate).toString();
-    } catch {
-      // probar siguiente candidato
-    }
-  }
-
-  return "";
-}
-
 function discountPercent(normalPrice, currentPrice) {
   const normal = toNumber(normalPrice);
   const current = toNumber(currentPrice);
@@ -165,6 +135,18 @@ function isAliExpressProduct(product) {
   );
 }
 
+
+function isSheinProduct(product) {
+  const store = String(product.store || "").toLowerCase();
+  const url = String(product.product_url || "").toLowerCase();
+
+  return (
+    store.includes("shein") ||
+    url.includes("shein.com") ||
+    url.includes("shein.com.mx")
+  );
+}
+
 function isMercadoLibreProduct(product) {
   const store = String(product.store || "").toLowerCase();
   const url = String(product.product_url || "").toLowerCase();
@@ -184,23 +166,18 @@ function normalizeMercadoLibreId(value) {
 }
 
 function extractMercadoLibreId(value) {
-  const raw = String(value || "");
-  const decoded = safeDecodeURIComponent(raw);
-  const candidates = [decoded, raw].filter(Boolean);
+  const text = decodeURIComponent(String(value || ""));
 
   const patterns = [
-    /(?:[?&#]|^)(?:wid|item_id)=((?:ML[A-Z]{1,2})-?\d{6,})/i,
-    /(?:wid|item_id)[:=]((?:ML[A-Z]{1,2})-?\d{6,})/i,
+    /[?&](?:wid|item_id)=((?:ML[A-Z]{1,2})-?\d{6,})/i,
     /\/((?:ML[A-Z]{1,2})-?\d{6,})(?:[/?#_\-]|$)/i,
     /((?:ML[A-Z]{1,2})-?\d{6,})/i,
   ];
 
-  for (const text of candidates) {
-    for (const pattern of patterns) {
-      const match = text.match(pattern);
-      const id = match ? normalizeMercadoLibreId(match[1]) : "";
-      if (id) return id;
-    }
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    const id = match ? normalizeMercadoLibreId(match[1]) : "";
+    if (id) return id;
   }
 
   return "";
@@ -280,10 +257,9 @@ function findFirstPrice(html) {
 }
 
 async function fetchEnebaPrice(productUrl) {
-  const safeUrl = cleanUrlForFetch(productUrl);
-  if (!safeUrl) return null;
+  if (!productUrl || !String(productUrl).startsWith("http")) return null;
 
-  const res = await fetch(safeUrl, {
+  const res = await fetch(productUrl, {
     headers: {
       "User-Agent": "Mozilla/5.0 (compatible; DealWatchMX/1.0; +https://github.com/leoncitolv/Appcomercio)",
       "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -301,12 +277,7 @@ async function fetchEnebaPrice(productUrl) {
 }
 
 async function fetchUrlForMercadoLibreId(productUrl) {
-  const safeUrl = cleanUrlForFetch(productUrl);
-  if (!safeUrl) {
-    throw new Error("URL Mercado Libre inválida o mal formada");
-  }
-
-  const res = await fetch(safeUrl, {
+  const res = await fetch(productUrl, {
     redirect: "follow",
     headers: {
       "User-Agent": "Mozilla/5.0 (compatible; DealWatchMX/1.0; +https://github.com/leoncitolv/Appcomercio)",
@@ -319,7 +290,7 @@ async function fetchUrlForMercadoLibreId(productUrl) {
     throw new Error(`Mercado Libre HTTP ${res.status}`);
   }
 
-  const finalUrl = res.url || safeUrl;
+  const finalUrl = res.url || productUrl;
   let id = extractMercadoLibreId(finalUrl);
   let html = "";
 
@@ -332,16 +303,15 @@ async function fetchUrlForMercadoLibreId(productUrl) {
 }
 
 async function fetchMercadoLibrePrice(productUrl) {
-  const safeUrl = cleanUrlForFetch(productUrl);
-  if (!safeUrl) return null;
+  if (!productUrl || !String(productUrl).startsWith("http")) return null;
 
   let id = extractMercadoLibreId(productUrl);
   let fallbackHtml = "";
-  let finalUrl = safeUrl;
+  let finalUrl = productUrl;
   let apiError = "";
 
   if (!id) {
-    const resolved = await fetchUrlForMercadoLibreId(safeUrl);
+    const resolved = await fetchUrlForMercadoLibreId(productUrl);
     id = resolved.id;
     fallbackHtml = resolved.html || "";
     finalUrl = resolved.finalUrl || productUrl;
@@ -384,7 +354,7 @@ async function fetchMercadoLibrePrice(productUrl) {
 
   if (!fallbackHtml) {
     try {
-      const resolved = await fetchUrlForMercadoLibreId(safeUrl);
+      const resolved = await fetchUrlForMercadoLibreId(productUrl);
       fallbackHtml = resolved.html || "";
       finalUrl = resolved.finalUrl || productUrl;
       if (!id && resolved.id) id = resolved.id;
@@ -397,23 +367,17 @@ async function fetchMercadoLibrePrice(productUrl) {
   }
 
   const fallbackPrice = findFirstPrice(fallbackHtml);
-  if (fallbackPrice > 0) {
-    return {
-      price: fallbackPrice,
-      source: "mercadolibre_html_fallback",
-      itemId: id || null,
-      title: null,
-      currency: "MXN",
-      finalUrl,
-      apiError: apiError || null,
-    };
-  }
-
-  if (apiError) {
-    throw new Error(`${apiError}; fallback HTML sin precio usable`);
-  }
-
-  return null;
+  return fallbackPrice > 0
+    ? {
+        price: fallbackPrice,
+        source: "mercadolibre_html_fallback",
+        itemId: id || null,
+        title: null,
+        currency: "MXN",
+        finalUrl,
+        apiError: apiError || null,
+      }
+    : null;
 }
 
 async function applyFetchedPrice(product, fetchedPrice, source, label, extraRaw = {}) {
@@ -462,7 +426,7 @@ async function enrichProductPrice(product) {
             itemId: fetched.itemId || null,
             title: fetched.title || null,
             currency: fetched.currency || null,
-            finalUrl: fetched.finalUrl || cleanUrlForFetch(product.product_url) || product.product_url || null,
+            finalUrl: fetched.finalUrl || product.product_url || null,
           }
         );
       }
@@ -486,6 +450,18 @@ async function enrichProductPrice(product) {
     return enriched;
   }
 
+
+  if (isSheinProduct(product)) {
+    enriched.raw_price_source = "shein_manual_safe";
+
+    if (AUTO_FETCH_SHEIN) {
+      enriched.raw_price_error = "SHEIN automático pendiente de API oficial/afiliado. Usando precio guardado manualmente.";
+      console.warn(`SHEIN automático aún no implementado para ${product.name || product.id}; se usa precio guardado.`);
+    }
+
+    return enriched;
+  }
+
   if (AUTO_FETCH_ENEBA && isEnebaProduct(product)) {
     try {
       const fetchedPrice = await fetchEnebaPrice(product.product_url);
@@ -500,53 +476,11 @@ async function enrichProductPrice(product) {
 }
 
 
-function buildPriceHistoryNote(product) {
-  const source = String(product.raw_price_source || "stored_price").toLowerCase();
-  const error = String(product.raw_price_error || "").trim();
-  const store = String(product.store || "").toLowerCase();
-
-  if (["mercadolibre_api", "mercadolibre_html_fallback", "eneba_auto_fetch"].includes(source)) {
-    return "auto_ok";
-  }
-
-  if (error && /uri malformed|url mercado libre inválida|mal formada/i.test(error)) {
-    return "manual_preserved_uri_error";
-  }
-
-  if (error && /mercado libre api 403|api 403|http 403|bloque/i.test(error)) {
-    return "manual_preserved_ml_403";
-  }
-
-  if (error && /sospechoso|suspicious/i.test(error)) {
-    return "manual_preserved_eneba_suspicious";
-  }
-
-  if (
-    source === "aliexpress_manual_safe" ||
-    store.includes("amazon") ||
-    store.includes("walmart") ||
-    store.includes("liverpool") ||
-    store.includes("aliexpress") ||
-    store.includes("otra")
-  ) {
-    return "manual_safe_store";
-  }
-
-  if (store.includes("mercado") || store.includes("mercadolibre") || store.includes("eneba")) {
-    return "manual_preserved_auto_store";
-  }
-
-  return "manual_preserved";
-}
-
-
 function buildPriceStatus(product) {
   const source = String(product.raw_price_source || "stored_price");
   const error = String(product.raw_price_error || "").trim();
   const store = String(product.store || "").toLowerCase();
   const checkedAt = new Date().toISOString();
-
-  const note = buildPriceHistoryNote(product);
 
   const status = {
     code: "manual_safe",
@@ -557,41 +491,7 @@ function buildPriceStatus(product) {
     source,
     error: error || null,
     checkedAt,
-    note,
   };
-
-  if (note === "manual_preserved_ml_403") {
-    return {
-      ...status,
-      code: "manual_conserved",
-      label: "ML bloqueó revisión automática",
-      tone: "warning",
-      icon: "🟡",
-      reason: "Mercado Libre rechazó la lectura automática. Se conservó el precio manual guardado.",
-    };
-  }
-
-  if (note === "manual_preserved_uri_error") {
-    return {
-      ...status,
-      code: "link_error",
-      label: "Link requiere corrección",
-      tone: "warning",
-      icon: "🟠",
-      reason: "La URL del producto generó error. Pega un link limpio de la publicación.",
-    };
-  }
-
-  if (note === "manual_preserved_auto_store") {
-    return {
-      ...status,
-      code: "manual_conserved",
-      label: "Precio manual conservado",
-      tone: "warning",
-      icon: "🟡",
-      reason: "El robot registró historial, pero conservó el precio manual porque no confirmó lectura automática.",
-    };
-  }
 
   if (source === "mercadolibre_api") {
     return {
@@ -634,6 +534,18 @@ function buildPriceStatus(product) {
       tone: "info",
       icon: "🔵",
       reason: error || "AliExpress está en modo manual seguro para evitar bloqueos o precios falsos.",
+    };
+  }
+
+
+  if (source === "shein_manual_safe") {
+    return {
+      ...status,
+      code: "manual_safe",
+      label: "Precio manual seguro",
+      tone: "info",
+      icon: "⚫",
+      reason: error || "SHEIN está en modo manual seguro para evitar bloqueos, variantes de talla/color o precios falsos.",
     };
   }
 
@@ -713,7 +625,6 @@ function buildPriceHistoryRow(product, runId) {
     target_price: toNumber(product.target_price),
 
     source: product.raw_price_source || "github_actions",
-    note: buildPriceHistoryNote(product),
     checked_at: new Date().toISOString(),
     raw: {
       runId,
@@ -723,7 +634,6 @@ function buildPriceHistoryRow(product, runId) {
       priceSource: product.raw_price_source || "stored_price",
       priceError: product.raw_price_error || null,
       priceMeta: product.raw_price_meta || null,
-      statusNote: buildPriceHistoryNote(product),
       priceStatus: buildPriceStatus(product),
     },
   };
@@ -794,6 +704,11 @@ function buildTelegramOfferMessage(alertEvent) {
   const target = formatMoney(alertEvent.target_price);
   const discount = toNumber(alertEvent.discount_percent);
   const productUrl = alertEvent.raw?.productUrl || "";
+  const store = escapeTelegramHtml(alertEvent.raw?.store || alertEvent.store || "Tienda");
+  const source = escapeTelegramHtml(alertEvent.raw?.priceSource || "stored_price");
+  const sourceLabel = source.includes("manual") || source === "stored_price"
+    ? "Precio guardado/manual seguro"
+    : "Precio leído por robot";
   const linkLine = productUrl && String(productUrl).startsWith("http")
     ? `\n\n🔗 <a href="${escapeTelegramHtml(productUrl)}">Abrir producto</a>`
     : "";
@@ -804,9 +719,11 @@ function buildTelegramOfferMessage(alertEvent) {
     `<b>${title}</b>`,
     message,
     "",
+    `🏬 Tienda: <b>${store}</b>`,
     `💰 Precio actual: <b>${escapeTelegramHtml(current)}</b>`,
     `🎯 Precio objetivo: <b>${escapeTelegramHtml(target)}</b>`,
     `🏷️ Descuento: <b>${escapeTelegramHtml(discount)}%</b>`,
+    `🤖 Fuente: <b>${sourceLabel}</b>`,
     linkLine,
   ].join("\n");
 }
@@ -915,6 +832,7 @@ async function main() {
             checkedBy: "github_actions",
             forceSendOffers: FORCE_SEND_OFFERS,
             productUrl: product.product_url || null,
+            store: product.store || "Tienda",
             priceSource: product.raw_price_source || "stored_price",
             priceError: product.raw_price_error || null,
             priceStatus: buildPriceStatus(product),
@@ -979,7 +897,7 @@ async function main() {
     });
 
     console.log(
-      `DealWatch MX OK Fase 26 Estado Inteligente Precio: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
+      `DealWatch MX OK Fase 27 SHEIN + Telegram: ${results.length} productos revisados, ${offerCount} oferta(s), ${alertEvents.length} alerta(s) para notificar, ${telegramSent} Telegram, ${historyInserted} historial. Force=${FORCE_SEND_OFFERS}`
     );
   } catch (error) {
     await patch("monitor_runs", `id=eq.${runId}`, {
