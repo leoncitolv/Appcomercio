@@ -718,7 +718,7 @@
         <div class="price-grid"><div class="price-box"><label>Precio actual</label><input id="currentPrice" type="number" min="0" step="1" placeholder="$ 0"></div><div class="price-box"><label>Precio objetivo</label><input id="targetPrice" type="number" min="0" step="1" placeholder="$ 0"></div></div>
         <div class="field"><label>Lista</label><select id="dealList"></select></div>
         <div class="toggle-row"><div><b>Activar alertas</b><div class="hint">Te avisamos cuando baje de precio.</div></div><button type="button" class="switch on" id="alertSwitch" onclick="toggleFormAlert()"><i></i></button></div>
-        <details><summary>Opciones avanzadas</summary><div class="form" style="margin-top:14px"><div class="field"><label>Imagen del producto</label><input id="imageUrl" placeholder="Pega URL de imagen o deja que Mercado Libre la detecte"></div><div class="price-grid"><div class="price-box"><label>Precio normal</label><input id="normalPrice" type="number" min="0" step="1" placeholder="$ 0"></div><div class="price-box"><label>Descuento mínimo %</label><input id="discount" type="number" min="0" step="1" placeholder="20"></div></div><div class="field"><label>Categoría</label><input id="category" placeholder="Ej. tecnología, despensa, regalos"></div><div class="field"><label>Notas</label><textarea id="notes" placeholder="Ej. revisar vendedor, esperar Buen Fin, cupón..."></textarea></div></div></details>
+        <details><summary>Opciones avanzadas</summary><div class="form" style="margin-top:14px"><div class="field"><label>Imagen del producto</label><input id="imageUrl" placeholder="Pega URL de imagen. SHEIN: usa img.ltwebstatic.com"></div><div class="price-grid"><div class="price-box"><label>Precio normal</label><input id="normalPrice" type="number" min="0" step="1" placeholder="$ 0"></div><div class="price-box"><label>Descuento mínimo %</label><input id="discount" type="number" min="0" step="1" placeholder="20"></div></div><div class="field"><label>Categoría</label><input id="category" placeholder="Ej. tecnología, despensa, regalos"></div><div class="field"><label>Notas</label><textarea id="notes" placeholder="Ej. revisar vendedor, esperar Buen Fin, cupón..."></textarea></div></div></details>
         <button class="btn btn-primary btn-block" type="submit">💾 Guardar producto</button><button class="btn btn-soft btn-block" type="button" onclick="resetForm()">Limpiar</button>
       </form></div>
       <section class="section"><div class="section-head"><h3>Productos guardados</h3><span>editar rápido</span></div><div id="adminList" class="product-list"></div></section>
@@ -972,7 +972,25 @@
     function isImageUrl(v){ return /^https?:\/\//i.test(String(v||'').trim()); }
     function storeClass(store){ const t=String(store||'').toLowerCase(); if(t.includes('amazon')) return 'logo-amazon'; if(t.includes('mercado')) return 'logo-ml'; if(t.includes('walmart')) return 'logo-walmart'; if(t.includes('liverpool')) return 'logo-liverpool'; if(t.includes('eneba')) return 'logo-eneba'; if(t.includes('aliexpress')) return 'logo-aliexpress'; if(t.includes('shein')) return 'logo-shein'; return 'logo-other'; }
     function storeBadge(store){ return `<span class="store-logo ${storeClass(store)}" aria-hidden="true"></span>`; }
-    function productImageHtml(p){ const src=p.imageUrl||p.icon; if(isImageUrl(src)) return `<img src="${esc(src)}" alt="${esc(p.name)}" loading="lazy" onerror="this.parentNode.innerHTML='<span class=&quot;placeholder&quot;>${esc(iconFor(p.store,p.category,p.dealList))}</span>'">`; return `<span class="placeholder">${esc(src||iconFor(p.store,p.category,p.dealList))}</span>`; }
+    function normalizeImageUrl(src){
+      const raw=String(src||'').trim();
+      if(!raw) return '';
+      if(raw.startsWith('//')) return 'https:'+raw;
+      return raw;
+    }
+    function isSheinImageUrl(src){
+      const u=String(src||'').toLowerCase();
+      return u.includes('img.ltwebstatic.com') || u.includes('shein.com') && /\.(png|jpe?g|webp)(\?|#|$)/i.test(u);
+    }
+    function productImageHtml(p){
+      const src=normalizeImageUrl(p.imageUrl||p.icon);
+      if(isImageUrl(src)){
+        const fallback=esc(iconFor(p.store,p.category,p.dealList));
+        const policy=isSheinImageUrl(src)?' referrerpolicy="no-referrer" crossorigin="anonymous"':'';
+        return `<img src="${esc(src)}" alt="${esc(p.name)}" loading="lazy"${policy} onerror="this.removeAttribute('crossorigin');this.referrerPolicy='no-referrer';const u=this.src;if(!this.dataset.retry){this.dataset.retry='1';this.src=u+(u.includes('?')?'&':'?')+'dw_cache=' + Date.now();return;}this.parentNode.innerHTML='<span class=&quot;placeholder&quot;>${fallback}</span>'">`;
+      }
+      return `<span class="placeholder">${esc(src||iconFor(p.store,p.category,p.dealList))}</span>`;
+    }
     function savingsText(p){ const diff=Number(p.currentPrice||0)-Number(p.targetPrice||0); if(Number(p.targetPrice)>0 && diff>0) return `${money(diff)} para tu meta`; if(Number(p.normalPrice)>0 && Number(p.currentPrice)>0 && Number(p.normalPrice)>Number(p.currentPrice)) return `Ahorras ${money(Number(p.normalPrice)-Number(p.currentPrice))}`; return p.alertEnabled?'Alerta activa':'Alerta pausada'; }
     function formProductDraft(){ return normalizeProduct({id:$('productId')?.value||uuid(),name:$('name')?.value.trim()||'Producto nuevo',store:$('store')?.value||'Otra tienda',product_url:$('url')?.value.trim()||'',current_price:$('currentPrice')?.value||0,target_price:$('targetPrice')?.value||0,normal_price:$('normalPrice')?.value||0,min_discount_percent:$('discount')?.value||0,deal_list:$('dealList')?.value||configuredLists()[0]||'Compras personales',category:$('category')?.value||listName($('dealList')?.value||''),alerts_enabled:formAlerts,icon:$('imageUrl')?.value.trim()||''}); }
     function renderFormPreview(){ const box=$('formPreview'); if(!box) return; const p=formProductDraft(); const save=Number(p.currentPrice)>0 && Number(p.targetPrice)>0?`Te avisaremos al llegar a ${money(p.targetPrice)}.`:'Pega un precio objetivo para calcular tu meta.'; box.innerHTML=`<div class="preview-head"><span>✦ Vista previa del producto</span><span class="badge blue">${isImageUrl(p.imageUrl)?'Imagen lista':'Logo de tienda'}</span></div><div class="preview-body"><div class="thumb">${productImageHtml(p)}</div><div><div class="preview-name">${esc(p.name)}</div><div class="store-line">${storeBadge(p.store)} ${esc(p.store)}</div><div class="badges"><span class="badge green">${p.alertEnabled?'Alerta activa':'Sin alerta'}</span><span class="badge blue">${esc(p.dealList)}</span></div><div class="preview-price"><div><small>Precio actual</small><b>${money(p.currentPrice)}</b></div><div><small>Objetivo</small><b class="goal">${money(p.targetPrice)}</b></div></div><div class="preview-save">${esc(save)}</div></div></div>`; }
