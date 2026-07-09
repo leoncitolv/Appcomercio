@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#050b16" />
+  <meta name="theme-color" content="#0a0620" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="DealWatch MX" />
-  <title>DealWatch MX | Fase 26</title>
+  <title>DealWatch MX | Fase 25</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -344,6 +344,174 @@
     @media(max-width:470px){.price-status-card{grid-template-columns:1fr}.price-status-card small{text-align:left}}
 
 
+    /* ===== Rediseño visual iOS · Morado/Azul ===== */
+    :root{
+      --bg:#f7f6ff;
+      --surface:rgba(255,255,255,.76);
+      --surface2:rgba(246,244,255,.72);
+      --text:#141126;
+      --muted:#716a8b;
+      --line:rgba(108,92,231,.16);
+      --primary:#6d5dfc;
+      --primary2:#24a8ff;
+      --purple:#9b5cff;
+      --cyan:#35d7ff;
+      --pink:#e879f9;
+      --green:#20c997;
+      --red:#ff5c7c;
+      --orange:#fbbf24;
+      --shadow:0 18px 50px rgba(53,35,140,.14);
+      --radius:30px;
+    }
+    [data-theme="dark"]{
+      --bg:#08051a;
+      --surface:rgba(20,16,43,.74);
+      --surface2:rgba(33,25,68,.62);
+      --text:#fbfaff;
+      --muted:#b9b2d6;
+      --line:rgba(216,180,254,.18);
+      --primary:#8b5cf6;
+      --primary2:#38bdf8;
+      --purple:#a855f7;
+      --cyan:#22d3ee;
+      --pink:#f0abfc;
+      --green:#5dffae;
+      --red:#ff7aa2;
+      --shadow:0 24px 70px rgba(0,0,0,.48);
+    }
+    html{background:var(--bg);}
+    body{
+      background:
+        radial-gradient(circle at 8% 2%,rgba(139,92,246,.32),transparent 30%),
+        radial-gradient(circle at 94% 12%,rgba(34,211,238,.26),transparent 28%),
+        radial-gradient(circle at 40% 100%,rgba(232,121,249,.16),transparent 34%),
+        linear-gradient(180deg,#fbfaff 0%,var(--bg) 44%,#f1efff 100%) !important;
+      color:var(--text);
+    }
+    [data-theme="dark"] body{
+      background:
+        radial-gradient(circle at 12% -4%,rgba(139,92,246,.48),transparent 30%),
+        radial-gradient(circle at 96% 6%,rgba(34,211,238,.30),transparent 30%),
+        radial-gradient(circle at 50% 106%,rgba(76,29,149,.40),transparent 38%),
+        linear-gradient(180deg,#08051a 0%,#0d0630 48%,#050313 100%) !important;
+    }
+    .app{max-width:650px;}
+    .top{
+      margin:-16px -16px 14px;
+      padding:calc(14px + env(safe-area-inset-top)) 16px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(180deg,rgba(255,255,255,.74),rgba(255,255,255,.40)) !important;
+      backdrop-filter:blur(30px) saturate(1.6);
+      -webkit-backdrop-filter:blur(30px) saturate(1.6);
+    }
+    [data-theme="dark"] .top{background:linear-gradient(180deg,rgba(8,5,26,.88),rgba(8,5,26,.46)) !important;}
+    .logo{
+      width:52px;height:52px;border-radius:18px;
+      background:linear-gradient(145deg,#38bdf8 0%,#7c3aed 55%,#c026d3 100%) !important;
+      box-shadow:0 16px 34px rgba(124,58,237,.34), inset 0 1px 0 rgba(255,255,255,.35) !important;
+    }
+    h1,.section-head h3,.prod-title,.status-title,.compare-title{letter-spacing:-.045em;}
+    .sub,.meta,.hint,.target,.status-meta{color:var(--muted) !important;}
+    .pill,.icon-btn,.card,.product-card,.preview-card,.compare-card,.status-row,.toggle-row,.price-box,details,.field input,.field select,.field textarea,.simple-input{
+      border:1px solid var(--line) !important;
+      background:var(--surface) !important;
+      box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.10) !important;
+      backdrop-filter:blur(22px) saturate(1.35);
+      -webkit-backdrop-filter:blur(22px) saturate(1.35);
+    }
+    .card,.product-card,.preview-card,.compare-card{border-radius:32px !important;}
+    .hero,.hero-pro,.compare-hero{
+      border:1px solid rgba(255,255,255,.18) !important;
+      background:
+        radial-gradient(circle at 84% 2%,rgba(56,189,248,.42),transparent 34%),
+        radial-gradient(circle at 12% 18%,rgba(232,121,249,.34),transparent 30%),
+        linear-gradient(135deg,#25105a 0%,#5b21b6 46%,#2563eb 100%) !important;
+      box-shadow:0 28px 70px rgba(76,29,149,.34), inset 0 1px 0 rgba(255,255,255,.24) !important;
+      border-radius:34px !important;
+    }
+    .hero:after{background:rgba(255,255,255,.17) !important;filter:blur(.2px);}
+    .hero .eyebrow,.preview-head,.store-line,.compare-hero p,.compare-stat span{color:#e9d5ff !important;}
+    .btn,.tab,.mini,.badge,.pill,.nav button{transition:transform .16s ease, box-shadow .16s ease, background .16s ease;}
+    .btn:active,.tab:active,.mini:active,.nav button:active,.icon-btn:active{transform:scale(.96);}
+    .btn-primary,.tab.active,.switch.on{
+      background:linear-gradient(135deg,#8b5cf6,#2563eb) !important;
+      color:#fff !important;
+      box-shadow:0 16px 32px rgba(91,33,182,.28) !important;
+    }
+    .btn-light{
+      background:rgba(255,255,255,.88) !important;
+      color:#5b21b6 !important;
+      box-shadow:0 12px 26px rgba(255,255,255,.12) !important;
+    }
+    .btn-soft,.mini,.tab,.nav button{
+      background:rgba(255,255,255,.08) !important;
+      border:1px solid rgba(216,180,254,.14) !important;
+      color:var(--text) !important;
+    }
+    .field input:focus,.field select:focus,.field textarea:focus,.simple-input:focus{
+      border-color:rgba(139,92,246,.86) !important;
+      box-shadow:0 0 0 4px rgba(139,92,246,.18), var(--shadow) !important;
+    }
+    .summary{gap:10px;background:transparent !important;box-shadow:none !important;border:0 !important;}
+    .summary>div{
+      border-radius:24px;background:var(--surface) !important;border:1px solid var(--line);box-shadow:var(--shadow);
+    }
+    .list-card{border-radius:26px !important;border:1px solid rgba(255,255,255,.14) !important;box-shadow:var(--shadow) !important;}
+    .familia{background:linear-gradient(145deg,rgba(56,189,248,.22),rgba(139,92,246,.12)) !important;color:var(--text) !important;}
+    .gaming{background:linear-gradient(145deg,rgba(139,92,246,.26),rgba(232,121,249,.12)) !important;color:var(--text) !important;}
+    .personal{background:linear-gradient(145deg,rgba(37,99,235,.22),rgba(34,211,238,.10)) !important;color:var(--text) !important;}
+    .thumb,.status-ico{
+      background:linear-gradient(145deg,rgba(139,92,246,.22),rgba(34,211,238,.12)) !important;
+      border:1px solid rgba(216,180,254,.16) !important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+    }
+    .price-now,.price-line strong{color:var(--text) !important;}
+    .badge.blue,.mini.primary{background:rgba(139,92,246,.18) !important;color:#e9d5ff !important;border-color:rgba(216,180,254,.20) !important;}
+    .badge.green,.mini.green{background:rgba(32,201,151,.14) !important;color:#8ff7b0 !important;border-color:rgba(93,255,174,.20) !important;}
+    .badge.orange{background:rgba(56,189,248,.14) !important;color:#bae6fd !important;border-color:rgba(56,189,248,.20) !important;}
+    .badge.gray{background:rgba(255,255,255,.07) !important;color:var(--muted) !important;}
+    .nav{
+      width:min(calc(100% - 22px),600px) !important;
+      padding:9px !important;
+      border-radius:32px !important;
+      background:rgba(15,9,40,.72) !important;
+      border:1px solid rgba(216,180,254,.18) !important;
+      box-shadow:0 -18px 50px rgba(5,3,20,.44), inset 0 1px 0 rgba(255,255,255,.10) !important;
+      backdrop-filter:blur(32px) saturate(1.6);
+      -webkit-backdrop-filter:blur(32px) saturate(1.6);
+    }
+    .nav button{color:#bdb4dc !important;border-radius:22px !important;}
+    .nav button.active{
+      background:linear-gradient(145deg,rgba(139,92,246,.88),rgba(37,99,235,.66)) !important;
+      color:#fff !important;
+      box-shadow:0 0 32px rgba(139,92,246,.46) !important;
+    }
+    .nav button:nth-child(3) .ico{
+      background:linear-gradient(145deg,#38bdf8,#8b5cf6 55%,#d946ef) !important;
+      box-shadow:0 0 38px rgba(139,92,246,.58) !important;
+    }
+    .price-status-card,.compare-winner,.history-options,.compare-options{
+      background:rgba(139,92,246,.10) !important;
+      border-color:rgba(216,180,254,.18) !important;
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+    .toast{
+      background:rgba(15,9,40,.86) !important;
+      border:1px solid rgba(216,180,254,.22) !important;
+      border-radius:22px !important;
+      box-shadow:0 20px 60px rgba(0,0,0,.48) !important;
+      backdrop-filter:blur(24px) saturate(1.45);
+      -webkit-backdrop-filter:blur(24px) saturate(1.45);
+    }
+    @media(max-width:470px){
+      .app{padding:14px;}
+      .top{margin:-14px -14px 12px;border-radius:0 0 28px 28px;}
+      .hero,.hero-pro{border-radius:32px !important;}
+      .card,.product-card,.preview-card,.compare-card{border-radius:28px !important;}
+    }
+
+
   </style>
 </head>
 <body>
@@ -432,14 +600,13 @@
     const money=n=>Number(n||0).toLocaleString("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});
     const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
     const uuid=()=>crypto.randomUUID?crypto.randomUUID():"dw_"+Date.now()+"_"+Math.random().toString(16).slice(2);
-    function safeDecodeText(value){ const raw=String(value||''); try{return decodeURIComponent(raw);}catch{return raw;} }
     function toast(msg){ alert(msg); }
     function isUuid(v){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(v||""));}
     async function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
     async function ensureSupabase(){ if(sb) return sb; if(!window.supabase){ try{await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js");}catch(e){ await loadScript("https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"); } } if(!window.supabase) throw new Error("No cargó Supabase. Revisa internet o recarga la app."); sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}); return sb; }
     async function getSession(){ const client=await ensureSupabase(); const {data}=await client.auth.getSession(); currentUser=data.session?.user||null; return data.session||null; }
     function go(name){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $("screen-"+name).classList.add('active'); document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===name)); scrollTo({top:0,behavior:'smooth'}); if(name==='products')renderProducts(); if(name==='compare')renderCompare(); if(name==='alerts')renderAlerts(); if(name==='cloud')renderCloud(); }
-    function setTheme(t){document.documentElement.dataset.theme=t==='dark'?'dark':'';$('themeButton').textContent=t==='dark'?'🌙':'☀️';localStorage.setItem(THEME_KEY,t);} $('themeButton').onclick=()=>setTheme((localStorage.getItem(THEME_KEY)||'light')==='dark'?'light':'dark'); setTheme(localStorage.getItem(THEME_KEY)||'light');
+    function setTheme(t){document.documentElement.dataset.theme=t==='dark'?'dark':'';$('themeButton').textContent=t==='dark'?'🌙':'☀️';localStorage.setItem(THEME_KEY,t);} $('themeButton').onclick=()=>setTheme((localStorage.getItem(THEME_KEY)||'light')==='dark'?'light':'dark'); setTheme(localStorage.getItem(THEME_KEY)||'dark');
 
     function cleanLists(list){
       const seen=new Set();
@@ -613,32 +780,20 @@
     function formProductDraft(){ return normalizeProduct({id:$('productId')?.value||uuid(),name:$('name')?.value.trim()||'Producto nuevo',store:$('store')?.value||'Otra tienda',product_url:$('url')?.value.trim()||'',current_price:$('currentPrice')?.value||0,target_price:$('targetPrice')?.value||0,normal_price:$('normalPrice')?.value||0,min_discount_percent:$('discount')?.value||0,deal_list:$('dealList')?.value||configuredLists()[0]||'Compras personales',category:$('category')?.value||listName($('dealList')?.value||''),alerts_enabled:formAlerts,icon:$('imageUrl')?.value.trim()||''}); }
     function renderFormPreview(){ const box=$('formPreview'); if(!box) return; const p=formProductDraft(); const save=Number(p.currentPrice)>0 && Number(p.targetPrice)>0?`Te avisaremos al llegar a ${money(p.targetPrice)}.`:'Pega un precio objetivo para calcular tu meta.'; box.innerHTML=`<div class="preview-head"><span>✦ Vista previa del producto</span><span class="badge blue">${isImageUrl(p.imageUrl)?'Imagen lista':'Logo de tienda'}</span></div><div class="preview-body"><div class="thumb">${productImageHtml(p)}</div><div><div class="preview-name">${esc(p.name)}</div><div class="store-line">${storeBadge(p.store)} ${esc(p.store)}</div><div class="badges"><span class="badge green">${p.alertEnabled?'Alerta activa':'Sin alerta'}</span><span class="badge blue">${esc(p.dealList)}</span></div><div class="preview-price"><div><small>Precio actual</small><b>${money(p.currentPrice)}</b></div><div><small>Objetivo</small><b class="goal">${money(p.targetPrice)}</b></div></div><div class="preview-save">${esc(save)}</div></div></div>`; }
     function detectStoreFromUrl(){ const input=$('url'); if(!input) return; const u=input.value.trim(); const lower=u.toLowerCase(); if(lower.includes('mercadolibre.com')||lower.includes('articulo.mercadolibre')) $('store').value='Mercado Libre'; else if(lower.includes('amazon.')) $('store').value='Amazon México'; else if(lower.includes('walmart.com')) $('store').value='Walmart'; else if(lower.includes('liverpool.com')) $('store').value='Liverpool'; else if(lower.includes('eneba.com')) $('store').value='Eneba'; else if(lower.includes('aliexpress.')) $('store').value='AliExpress'; renderFormPreview(); detectMercadoLibreData(u).catch(console.warn); }
-    function extractMlId(url){ const raw=String(url||''); const candidates=[safeDecodeText(raw),raw].filter(Boolean); for(const s of candidates){ const wid=s.match(/[?&#]wid=(MLM-?\d+)/i)||s.match(/wid[:=](MLM-?\d+)/i); if(wid) return wid[1].replace('-','').toUpperCase(); const item=s.match(/[?&#]item_id=(MLM-?\d+)/i)||s.match(/item_id[:=](MLM-?\d+)/i); if(item) return item[1].replace('-','').toUpperCase(); const direct=s.match(/(MLM-?\d{6,})/i); if(direct) return direct[1].replace('-','').toUpperCase(); } return ''; }
+    function extractMlId(url){ const s=decodeURIComponent(String(url||'')); const wid=s.match(/[?&]wid=(MLM\d+)/i); if(wid) return wid[1].toUpperCase(); const item=s.match(/item_id[:=](MLM\d+)/i); if(item) return item[1].toUpperCase(); const direct=s.match(/(MLM-?\d{6,})/i); return direct?direct[1].replace('-','').toUpperCase():''; }
     async function detectMercadoLibreData(url){ const id=extractMlId(url); if(!id) return; const res=await fetch(`https://api.mercadolibre.com/items/${id}`); if(!res.ok) return; const data=await res.json(); if(!$('name').value.trim() && data.title) $('name').value=data.title; if(!Number($('currentPrice').value||0) && data.price) $('currentPrice').value=Math.round(Number(data.price)); const pic=data.secure_thumbnail||data.thumbnail||(Array.isArray(data.pictures)&&data.pictures[0]&&(data.pictures[0].secure_url||data.pictures[0].url)); if(pic && !$('imageUrl').value.trim()) $('imageUrl').value=pic; renderFormPreview(); }
 
-    function historyTextKey(value){ return String(value||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' '); }
-    function historyUrlKey(value){ return String(value||'').trim().toLowerCase().replace(/#.*$/,'').replace(/[?&](utm_[^=&]+|matt_tool|sid|share|ua|action|origin)=[^&]*/g,'').replace(/[?&]$/,''); }
-    function historyMatchesProduct(h,p){
-      if(!h||!p) return false;
-      if(String(h.productId||'') && String(h.productId||'')===String(p.id||'')) return true;
-      const hUrl=historyUrlKey(h.productUrl), pUrl=historyUrlKey(p.url||p.productUrl);
-      if(hUrl && pUrl && hUrl===pUrl) return true;
-      const hName=historyTextKey(h.productName||h.name), pName=historyTextKey(p.name);
-      const hStore=historyTextKey(h.store), pStore=historyTextKey(p.store);
-      return Boolean(hName && pName && hName===pName && hStore && pStore && hStore===pStore);
-    }
-    function latestHistoryForProduct(productOrId){
-      if(!productOrId) return null;
-      const rows=(priceHistory||[]).filter(h=>{
-        if(typeof productOrId==='object') return historyMatchesProduct(h,productOrId);
-        return String(h.productId||'')===String(productOrId||'');
-      });
-      return rows.sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0))[0]||null;
+    function latestHistoryForProduct(productId){
+      const id=String(productId||'');
+      if(!id) return null;
+      return (priceHistory||[])
+        .filter(h=>String(h.productId||'')===id)
+        .sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0))[0]||null;
     }
     function isAutomaticStore(store){ const t=String(store||'').toLowerCase(); return t.includes('mercado')||t.includes('mercadolibre')||t.includes('eneba'); }
     function isManualSafeStore(store){ const t=String(store||'').toLowerCase(); return t.includes('aliexpress')||t.includes('amazon')||t.includes('walmart')||t.includes('liverpool')||t.includes('otra'); }
     function priceStatusFromProduct(p){
-      const latest=latestHistoryForProduct(p);
+      const latest=latestHistoryForProduct(p.id);
       const raw=latest?.raw||{};
       const saved=raw.priceStatus||null;
       if(saved && typeof saved==='object'){
@@ -650,35 +805,22 @@
           reason:saved.reason||saved.error||'Estado registrado por el robot.',
           checkedAt:saved.checkedAt||latest?.checkedAt||raw.checkedAt||null,
           source:saved.source||raw.priceSource||latest?.source||'stored_price',
-          error:saved.error||raw.priceError||null,
-          note:saved.note||latest?.note||raw.statusNote||null
+          error:saved.error||raw.priceError||null
         };
       }
-      const note=String(latest?.note||raw.statusNote||raw.note||'').trim();
       const source=String(raw.priceSource||latest?.source||'stored_price');
       const error=String(raw.priceError||'').trim();
       const store=String(p.store||'');
       const lowerStore=store.toLowerCase();
       const checkedAt=latest?.checkedAt||null;
-
-      if(note==='auto_ok') return {code:'auto_updated',label:'Precio automático revisado',tone:'success',icon:'✅',reason:'Lectura automática guardada por el robot.',checkedAt,source,error:null,note};
-      if(note==='manual_preserved_ml_403') return {code:'manual_conserved',label:'ML bloqueó revisión automática',tone:'warning',icon:'🟡',reason:'Mercado Libre rechazó la lectura automática. Se conservó el precio manual guardado.',checkedAt,source,error,note};
-      if(note==='manual_preserved_uri_error') return {code:'link_error',label:'Link requiere corrección',tone:'warning',icon:'🟠',reason:'La URL del producto generó error. Pega un link limpio de la publicación.',checkedAt,source,error,note};
-      if(note==='manual_preserved_eneba_suspicious') return {code:'suspicious_ignored',label:'Precio sospechoso ignorado',tone:'warning',icon:'🟠',reason:'El robot detectó un precio raro y conservó el precio manual.',checkedAt,source,error,note};
-      if(note==='manual_safe_store') return {code:'manual_safe',label:'Precio manual seguro',tone:'info',icon:'🔵',reason:'Tienda en modo manual seguro. Actualiza el precio cuando lo revises.',checkedAt,source,error:null,note};
-      if(note==='manual_preserved_auto_store') return {code:'manual_conserved',label:'Precio manual conservado',tone:'warning',icon:'🟡',reason:'El robot registró historial, pero conservó el precio manual porque no confirmó lectura automática.',checkedAt,source,error,note};
-      if(note==='manual_preserved') return {code:'manual_conserved',label:'Precio manual conservado',tone:'info',icon:'🔵',reason:'Se conservó el precio guardado y se registró en historial.',checkedAt,source,error,note};
-
-      if(source==='mercadolibre_api') return {code:'auto_updated',label:'Precio automático revisado',tone:'success',icon:'✅',reason:'Actualizado desde Mercado Libre API.',checkedAt,source,error:null};
-      if(source==='mercadolibre_html_fallback') return {code:'auto_updated_fallback',label:'Precio automático revisado',tone:'success',icon:'✅',reason:'Actualizado desde fallback HTML de Mercado Libre.',checkedAt,source,error:null};
-      if(source==='eneba_auto_fetch') return {code:'auto_updated',label:'Precio automático revisado',tone:'success',icon:'✅',reason:'Actualizado desde lectura automática de Eneba.',checkedAt,source,error:null};
+      if(source==='mercadolibre_api') return {code:'auto_updated',label:'Precio automático actualizado',tone:'success',icon:'✅',reason:'Actualizado desde Mercado Libre API.',checkedAt,source,error:null};
+      if(source==='mercadolibre_html_fallback') return {code:'auto_updated_fallback',label:'Precio automático actualizado',tone:'success',icon:'✅',reason:'Actualizado desde fallback HTML de Mercado Libre.',checkedAt,source,error:null};
+      if(source==='eneba_auto_fetch') return {code:'auto_updated',label:'Precio automático actualizado',tone:'success',icon:'✅',reason:'Actualizado desde lectura automática de Eneba.',checkedAt,source,error:null};
       if(source==='aliexpress_manual_safe') return {code:'manual_safe',label:'Precio manual seguro',tone:'info',icon:'🔵',reason:'AliExpress está en modo manual seguro para evitar bloqueos o precios falsos.',checkedAt,source,error:null};
       if(error && /sospechoso|suspicious/i.test(error)) return {code:'suspicious_ignored',label:'Precio sospechoso ignorado',tone:'warning',icon:'🟠',reason:error,checkedAt,source,error};
-      if(error && /uri malformed|mal formada/i.test(error)) return {code:'link_error',label:'Link requiere corrección',tone:'warning',icon:'🟠',reason:'La URL del producto generó error. Pega un link limpio de la publicación.',checkedAt,source,error};
-      if(error && (lowerStore.includes('mercado')||lowerStore.includes('mercadolibre'))) return {code:'manual_conserved',label:'ML bloqueó revisión automática',tone:'warning',icon:'🟡',reason:'Mercado Libre bloqueó la lectura o el producto no está disponible. Se conservó el precio manual guardado.',checkedAt,source,error};
+      if(error && (lowerStore.includes('mercado')||lowerStore.includes('mercadolibre'))) return {code:'manual_conserved',label:'Precio manual conservado',tone:'warning',icon:'🟡',reason:'Mercado Libre bloqueó la lectura o el producto no está disponible. Se conservó el precio manual guardado.',checkedAt,source,error};
       if(error) return {code:'manual_conserved',label:'Precio manual conservado',tone:'warning',icon:'🟡',reason:error,checkedAt,source,error};
       if(!latest && isAutomaticStore(store)) return {code:'auto_pending',label:'Precio automático pendiente',tone:'neutral',icon:'⚪',reason:'Aún no hay una lectura automática registrada en el historial.',checkedAt:null,source,error:null};
-      if(latest && isAutomaticStore(store)) return {code:'manual_conserved',label:'Precio manual conservado',tone:'warning',icon:'🟡',reason:'Hay historial, pero el robot conservó el precio manual porque no confirmó lectura automática.',checkedAt,source,error:null};
       if(isManualSafeStore(store)) return {code:'manual_safe',label:'Precio manual seguro',tone:'info',icon:'🔵',reason:'Tienda en modo manual seguro. Actualiza el precio cuando lo revises.',checkedAt,source,error:null};
       return {code:'manual_safe',label:'Precio manual seguro',tone:'info',icon:'🔵',reason:'Se conserva el precio guardado manualmente.',checkedAt,source,error:null};
     }
@@ -804,13 +946,10 @@
         productName:row.product_name||row.productName||row.name||'Producto',
         store:row.store||'Tienda',
         productUrl:row.product_url||row.productUrl||'',
-        price:Number(row.price??row.current_price??row.new_price??0),
-        oldPrice:Number(row.old_price??row.oldPrice??0),
-        newPrice:Number(row.new_price??row.newPrice??row.price??0),
+        price:Number(row.price??row.current_price??0),
         normalPrice:Number(row.normal_price??row.normalPrice??0),
         targetPrice:Number(row.target_price??row.targetPrice??0),
         source:row.source||row.raw?.priceSource||'historial',
-        note:row.note||row.raw?.statusNote||row.raw?.priceStatus?.note||'',
         checkedAt:row.checked_at||row.checkedAt||row.created_at||new Date().toISOString(),
         raw:row.raw||{}
       };
@@ -829,9 +968,9 @@
       return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
     }
     function historyForItems(items){
-      const list=Array.isArray(items)?items:[];
+      const ids=new Set((items||[]).map(p=>String(p.id||'')));
       return priceHistory
-        .filter(h=>Number(h.price||0)>0 && list.some(p=>historyMatchesProduct(h,p)))
+        .filter(h=>ids.has(String(h.productId||'')) && Number(h.price||0)>0)
         .sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0));
     }
     function historyStatsForGroup(g){
@@ -861,7 +1000,7 @@
     }
     function historyStoreRows(g){
       const itemRows=(g.items||[]).map(p=>{
-        const rows=priceHistory.filter(h=>historyMatchesProduct(h,p) && Number(h.price||0)>0).sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0));
+        const rows=priceHistory.filter(h=>String(h.productId||'')===String(p.id||'') && Number(h.price||0)>0).sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0));
         const current={productId:p.id,productName:p.name,store:p.store,price:Number(p.currentPrice||0),checkedAt:'actual',source:'precio_actual'};
         const all=[...rows,current].filter(h=>Number(h.price||0)>0);
         const low=all.reduce((m,h)=>!m||Number(h.price)<Number(m.price)?h:m,null);
@@ -1241,7 +1380,7 @@
       try{
         if(!currentWorkspace){ priceHistory=loadHistoryLocal(); return; }
         const client=await ensureSupabase();
-        const res=await q(client.from('price_history').select('id,workspace_id,product_id,product_name,store,product_url,price,old_price,new_price,normal_price,target_price,source,note,checked_at,raw').eq('workspace_id',currentWorkspace.id).order('checked_at',{ascending:false}).limit(2500),'cargar historial de precios');
+        const res=await q(client.from('price_history').select('id,workspace_id,product_id,product_name,store,product_url,price,normal_price,target_price,source,checked_at,raw').eq('workspace_id',currentWorkspace.id).order('checked_at',{ascending:false}).limit(2500),'cargar historial de precios');
         if(res.error) throw res.error;
         saveHistoryLocal(res.data||[]);
       }catch(e){
