@@ -567,6 +567,107 @@
     }
 
 
+    /* ===== Fase 26 · SHEIN + notificaciones fashion ===== */
+    .logo-shein{background:#050505;color:#fff}
+    .logo-shein:after{content:"S";font-size:1.02rem;letter-spacing:-.06em}
+    .notif-hero{
+      position:relative;overflow:hidden;margin-bottom:14px;padding:18px;
+      display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;
+      background:
+        radial-gradient(circle at 96% 4%,rgba(34,211,238,.30),transparent 34%),
+        radial-gradient(circle at 12% 92%,rgba(236,72,153,.18),transparent 32%),
+        linear-gradient(135deg,rgba(24,12,58,.96),rgba(74,25,154,.88) 52%,rgba(15,23,42,.92)) !important;
+      border:1px solid rgba(216,180,254,.22) !important;
+      box-shadow:0 22px 60px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.14) !important;
+      border-radius:32px !important;
+    }
+    .notif-hero:after{content:"";position:absolute;right:-54px;top:-70px;width:178px;height:178px;border-radius:999px;background:radial-gradient(circle,rgba(255,255,255,.22),transparent 66%);pointer-events:none}
+    .notif-kicker{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);color:#e9d5ff;font-size:.72rem;font-weight:950;text-transform:uppercase;letter-spacing:.12em}
+    .notif-hero h3{margin:10px 0 6px;font-size:1.55rem;line-height:1;letter-spacing:-.07em;color:#fff}
+    .notif-hero p{margin:0;color:rgba(255,255,255,.82);font-weight:780;line-height:1.42;font-size:.92rem}
+    .notif-bell{width:74px;height:74px;border-radius:24px;display:grid;place-items:center;font-size:38px;background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.07));border:1px solid rgba(255,255,255,.16);box-shadow:0 0 42px rgba(168,85,247,.38);position:relative;z-index:1}
+    .notif-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .notif-actions .btn{padding:11px 14px;font-size:.88rem}
+    .notif-live{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 16px}
+    .notif-stat{border-radius:22px;padding:12px;background:rgba(255,255,255,.07);border:1px solid rgba(216,180,254,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+    .notif-stat b{display:block;color:#fff;font-size:1.18rem;letter-spacing:-.05em}
+    .notif-stat span{display:block;color:#c4b5fd;font-size:.70rem;font-weight:900;margin-top:2px}
+    .notification-list{display:grid;gap:10px}
+    .notification-card{
+      position:relative;overflow:hidden;display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;
+      padding:13px;border-radius:24px;background:linear-gradient(145deg,rgba(24,16,52,.88),rgba(11,10,28,.84)) !important;
+      border:1px solid rgba(216,180,254,.16) !important;box-shadow:0 16px 44px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.08) !important;
+    }
+    .notification-card:before{content:"";position:absolute;left:-38px;top:-48px;width:112px;height:112px;border-radius:999px;background:radial-gradient(circle,rgba(34,211,238,.18),transparent 70%);pointer-events:none}
+    .notif-icon{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;font-size:24px;background:linear-gradient(145deg,rgba(139,92,246,.28),rgba(34,211,238,.12));border:1px solid rgba(255,255,255,.12);position:relative;z-index:1}
+    .notif-title{font-weight:950;color:#fff;line-height:1.12;letter-spacing:-.035em;position:relative;z-index:1}
+    .notif-meta{margin-top:4px;color:#b9a9e6;font-size:.76rem;font-weight:800;position:relative;z-index:1}
+    .notif-price{font-weight:950;color:#67e8f9;text-align:right;white-space:nowrap;position:relative;z-index:1}
+    .notif-tag{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 8px;border-radius:999px;background:rgba(236,72,153,.14);border:1px solid rgba(236,72,153,.20);color:#f9a8d4;font-size:.68rem;font-weight:950}
+    .notif-permission-ok{color:#5dffae!important}
+    .notif-permission-warn{color:#fde68a!important}
+    @media(max-width:470px){
+      .top{margin:-14px -14px 8px!important;padding:10px 12px 8px!important;border-radius:0 0 22px 22px!important}
+      .top .logo{width:38px!important;height:38px!important;border-radius:13px!important}
+      .top .logo svg{width:21px!important;height:21px!important}
+      .top h1{font-size:1rem!important;line-height:1.05!important}
+      .top .sub{max-width:130px!important;font-size:.72rem!important}
+      .top .pill{padding:7px 10px!important;font-size:.68rem!important}
+      .top .icon-btn{width:38px!important;height:38px!important}
+      .hero-fashion{padding:18px 16px 98px!important}
+      .hero-fashion h2{font-size:1.52rem!important;line-height:1!important}
+      .hero-fashion p{font-size:.90rem!important;line-height:1.36!important}
+      .hero-visual{width:112px!important;height:112px!important;right:8px!important}
+      .notif-hero{grid-template-columns:1fr 58px;padding:16px;border-radius:28px!important}
+      .notif-bell{width:58px;height:58px;border-radius:20px;font-size:30px}
+      .notif-hero h3{font-size:1.30rem}
+      .notif-live{grid-template-columns:1fr}
+      .notification-card{grid-template-columns:46px 1fr;padding:12px}
+      .notif-icon{width:46px;height:46px;border-radius:16px}
+      .notif-price{text-align:left;grid-column:2}
+    }
+
+
+    /* ===== Fase 27 · Home ultra compacta móvil ===== */
+    @media(max-width:470px){
+      .section{margin-top:14px!important}
+      .section-head{margin-bottom:10px!important}
+      .section-head h3,.screen-title h3{font-size:1.08rem!important;line-height:1.05!important}
+      .screen-title p,.section-head span{font-size:.74rem!important}
+
+      .hero-fashion{padding:14px 14px 74px!important;border-radius:26px!important;gap:8px!important}
+      .hero-eyebrow{margin-bottom:6px!important;padding:6px 10px!important;font-size:.64rem!important;letter-spacing:.12em!important}
+      .hero-fashion h2{max-width:250px!important;font-size:1.26rem!important;line-height:.98!important;letter-spacing:-.06em!important;margin:0 0 8px!important}
+      .hero-fashion p{max-width:250px!important;font-size:.82rem!important;line-height:1.28!important;margin:0!important}
+      .hero-metrics{gap:6px!important;margin-top:10px!important}
+      .hero-metrics span{padding:6px 9px!important;font-size:.66rem!important;border-radius:999px!important}
+      .hero-metrics strong{font-size:.82rem!important}
+      .hero-cta{margin-top:10px!important;gap:8px!important}
+      .hero-fashion .btn{padding:10px 12px!important;font-size:.82rem!important;border-radius:18px!important;box-shadow:0 10px 22px rgba(0,0,0,.16)!important}
+      .hero-visual{width:88px!important;height:88px!important;right:4px!important;bottom:6px!important}
+      .bag-showcase{width:58px!important;height:58px!important;border-radius:18px!important;font-size:34px!important}
+      .orb-a{width:82px!important;height:82px!important;right:2px!important;top:6px!important}
+      .orb-b{width:40px!important;height:40px!important;left:6px!important;bottom:8px!important}
+      .deal-card{padding:6px 8px!important;border-radius:14px!important;font-size:.68rem!important}
+      .mini-card-a{right:-2px!important;bottom:10px!important}
+      .mini-card-b{left:-2px!important;top:10px!important}
+      .spark{font-size:14px!important}.spark-a{right:12px!important;top:8px!important}.spark-b{left:14px!important;bottom:18px!important}
+
+      .summary{border-radius:22px!important}
+      .summary>div{padding:12px 6px!important}
+      .summary b{font-size:1.28rem!important}
+      .summary span{font-size:.66rem!important;line-height:1.15!important}
+
+      .list-grid{gap:8px!important}
+      .list-card{min-height:88px!important;padding:12px!important;border-radius:20px!important;font-size:.92rem!important}
+      .list-card .emoji{font-size:22px!important;margin-bottom:6px!important}
+      .list-card small{margin-top:6px!important;font-size:.70rem!important}
+
+      .nav{width:min(calc(100% - 16px),590px)!important;padding:6px!important;border-radius:24px!important;gap:3px!important;bottom:calc(8px + var(--safe))!important}
+      .nav button{padding:7px 1px!important;font-size:.50rem!important;border-radius:16px!important}
+      .nav .ico{font-size:16px!important;margin-bottom:1px!important}
+    }
+
   </style>
 </head>
 <body>
@@ -608,11 +709,11 @@
     </section>
 
     <section id="screen-add" class="screen">
-      <div class="section-head screen-title"><div><h3 id="formTitle">Agregar producto</h3><p class="hint">Monitorea precios y recibe alertas al mejor precio.</p></div><span>simple y rápido</span></div>
+      <div class="section-head screen-title"><div><h3 id="formTitle">Agregar producto</h3><p class="hint">Monitorea precios en Mercado Libre, Amazon, SHEIN y más; recibe alertas al mejor precio.</p></div><span>simple y rápido</span></div>
       <div id="formPreview" class="preview-card"></div>
       <div class="card form-card"><form id="productForm" class="form"><input type="hidden" id="productId">
         <div class="field"><label>Nombre del producto</label><input id="name" required placeholder="Ej. iPhone 15 128GB"></div>
-        <div class="field"><label>Tienda</label><select id="store"><option>Mercado Libre</option><option>Amazon México</option><option>Walmart</option><option>Liverpool</option><option>Eneba</option><option>AliExpress</option><option>Otra tienda</option></select></div>
+        <div class="field"><label>Tienda</label><select id="store"><option>Mercado Libre</option><option>Amazon México</option><option>Walmart</option><option>Liverpool</option><option>Eneba</option><option>AliExpress</option><option>SHEIN</option><option>Otra tienda</option></select></div>
         <div class="field"><label>Link del producto</label><input id="url" placeholder="Pega aquí la URL del producto"></div>
         <div class="price-grid"><div class="price-box"><label>Precio actual</label><input id="currentPrice" type="number" min="0" step="1" placeholder="$ 0"></div><div class="price-box"><label>Precio objetivo</label><input id="targetPrice" type="number" min="0" step="1" placeholder="$ 0"></div></div>
         <div class="field"><label>Lista</label><select id="dealList"></select></div>
@@ -623,7 +724,27 @@
       <section class="section"><div class="section-head"><h3>Productos guardados</h3><span>editar rápido</span></div><div id="adminList" class="product-list"></div></section>
     </section>
 
-    <section id="screen-alerts" class="screen"><div class="section-head"><h3>Alertas</h3><span id="alertCount">0</span></div><div class="card status-list" id="alertEvents"></div><section class="section"><div class="section-head"><h3>Ofertas activas</h3><span>por precio</span></div><div id="activeAlerts" class="product-list"></div></section></section>
+    <section id="screen-alerts" class="screen">
+      <div class="notif-hero">
+        <div>
+          <span class="notif-kicker">🔔 Centro de avisos</span>
+          <h3>Notificaciones inteligentes</h3>
+          <p>Te avisamos cuando un producto llegue a tu precio objetivo o aparezca una oferta real.</p>
+          <div class="notif-actions">
+            <button class="btn btn-light" onclick="requestNotifications()">Activar notificaciones</button>
+            <button class="btn btn-soft glass" onclick="testNotification()">Probar aviso</button>
+          </div>
+        </div>
+        <div class="notif-bell" aria-hidden="true">🔔</div>
+      </div>
+      <div class="notif-live">
+        <div class="notif-stat"><b id="alertCount">0</b><span>ofertas activas</span></div>
+        <div class="notif-stat"><b id="notificationPermission">OFF</b><span>permiso del navegador</span></div>
+        <div class="notif-stat"><b id="alertEventCount">0</b><span>eventos recientes</span></div>
+      </div>
+      <section class="section"><div class="section-head"><h3>Últimos avisos</h3><span>robot de precios</span></div><div class="notification-list" id="alertEvents"></div></section>
+      <section class="section"><div class="section-head"><h3>Ofertas activas</h3><span>por precio</span></div><div id="activeAlerts" class="product-list"></div></section>
+    </section>
 
     <section id="screen-compare" class="screen">
       <div class="section-head screen-title"><div><h3>Top precios</h3><p class="hint">Comparador Pro por nombre igual: encuentra la tienda más barata, el ahorro posible y las opciones disponibles.</p></div><span id="compareCount">0 grupos</span></div>
@@ -645,7 +766,7 @@
           </select>
         </div>
         <div class="compare-mini-tabs" id="compareQuickFilters"></div>
-        <p class="hint" style="margin:10px 0 0">Tip: usa nombres idénticos, por ejemplo <b>Control Xbox Elite Series 2</b>, en Eneba, Amazon, Mercado Libre y AliExpress.</p>
+        <p class="hint" style="margin:10px 0 0">Tip: usa nombres idénticos, por ejemplo <b>Control Xbox Elite Series 2</b>, en Eneba, Amazon, Mercado Libre, AliExpress y SHEIN.</p>
       </div>
       <div id="compareList" class="compare-list"></div>
     </section>
@@ -849,13 +970,13 @@
     function isOffer(p){ if(!p.alertEnabled) return false; const byTarget=Number(p.targetPrice)>0 && Number(p.currentPrice)<=Number(p.targetPrice); const discount=Number(p.normalPrice)>0?Math.round((1-(Number(p.currentPrice)/Number(p.normalPrice)))*100):0; return byTarget || (Number(p.minDiscount)>0 && discount>=Number(p.minDiscount)); }
     function discountText(p){ const discount=Number(p.normalPrice)>0?Math.round((1-(Number(p.currentPrice)/Number(p.normalPrice)))*100):0; if(discount>0) return `-${discount}%`; if(Number(p.targetPrice)>0 && Number(p.currentPrice)>Number(p.targetPrice)) return `Faltan ${money(Number(p.currentPrice)-Number(p.targetPrice))}`; return 'Vigilando'; }
     function isImageUrl(v){ return /^https?:\/\//i.test(String(v||'').trim()); }
-    function storeClass(store){ const t=String(store||'').toLowerCase(); if(t.includes('amazon')) return 'logo-amazon'; if(t.includes('mercado')) return 'logo-ml'; if(t.includes('walmart')) return 'logo-walmart'; if(t.includes('liverpool')) return 'logo-liverpool'; if(t.includes('eneba')) return 'logo-eneba'; if(t.includes('aliexpress')) return 'logo-aliexpress'; return 'logo-other'; }
+    function storeClass(store){ const t=String(store||'').toLowerCase(); if(t.includes('amazon')) return 'logo-amazon'; if(t.includes('mercado')) return 'logo-ml'; if(t.includes('walmart')) return 'logo-walmart'; if(t.includes('liverpool')) return 'logo-liverpool'; if(t.includes('eneba')) return 'logo-eneba'; if(t.includes('aliexpress')) return 'logo-aliexpress'; if(t.includes('shein')) return 'logo-shein'; return 'logo-other'; }
     function storeBadge(store){ return `<span class="store-logo ${storeClass(store)}" aria-hidden="true"></span>`; }
     function productImageHtml(p){ const src=p.imageUrl||p.icon; if(isImageUrl(src)) return `<img src="${esc(src)}" alt="${esc(p.name)}" loading="lazy" onerror="this.parentNode.innerHTML='<span class=&quot;placeholder&quot;>${esc(iconFor(p.store,p.category,p.dealList))}</span>'">`; return `<span class="placeholder">${esc(src||iconFor(p.store,p.category,p.dealList))}</span>`; }
     function savingsText(p){ const diff=Number(p.currentPrice||0)-Number(p.targetPrice||0); if(Number(p.targetPrice)>0 && diff>0) return `${money(diff)} para tu meta`; if(Number(p.normalPrice)>0 && Number(p.currentPrice)>0 && Number(p.normalPrice)>Number(p.currentPrice)) return `Ahorras ${money(Number(p.normalPrice)-Number(p.currentPrice))}`; return p.alertEnabled?'Alerta activa':'Alerta pausada'; }
     function formProductDraft(){ return normalizeProduct({id:$('productId')?.value||uuid(),name:$('name')?.value.trim()||'Producto nuevo',store:$('store')?.value||'Otra tienda',product_url:$('url')?.value.trim()||'',current_price:$('currentPrice')?.value||0,target_price:$('targetPrice')?.value||0,normal_price:$('normalPrice')?.value||0,min_discount_percent:$('discount')?.value||0,deal_list:$('dealList')?.value||configuredLists()[0]||'Compras personales',category:$('category')?.value||listName($('dealList')?.value||''),alerts_enabled:formAlerts,icon:$('imageUrl')?.value.trim()||''}); }
     function renderFormPreview(){ const box=$('formPreview'); if(!box) return; const p=formProductDraft(); const save=Number(p.currentPrice)>0 && Number(p.targetPrice)>0?`Te avisaremos al llegar a ${money(p.targetPrice)}.`:'Pega un precio objetivo para calcular tu meta.'; box.innerHTML=`<div class="preview-head"><span>✦ Vista previa del producto</span><span class="badge blue">${isImageUrl(p.imageUrl)?'Imagen lista':'Logo de tienda'}</span></div><div class="preview-body"><div class="thumb">${productImageHtml(p)}</div><div><div class="preview-name">${esc(p.name)}</div><div class="store-line">${storeBadge(p.store)} ${esc(p.store)}</div><div class="badges"><span class="badge green">${p.alertEnabled?'Alerta activa':'Sin alerta'}</span><span class="badge blue">${esc(p.dealList)}</span></div><div class="preview-price"><div><small>Precio actual</small><b>${money(p.currentPrice)}</b></div><div><small>Objetivo</small><b class="goal">${money(p.targetPrice)}</b></div></div><div class="preview-save">${esc(save)}</div></div></div>`; }
-    function detectStoreFromUrl(){ const input=$('url'); if(!input) return; const u=input.value.trim(); const lower=u.toLowerCase(); if(lower.includes('mercadolibre.com')||lower.includes('articulo.mercadolibre')) $('store').value='Mercado Libre'; else if(lower.includes('amazon.')) $('store').value='Amazon México'; else if(lower.includes('walmart.com')) $('store').value='Walmart'; else if(lower.includes('liverpool.com')) $('store').value='Liverpool'; else if(lower.includes('eneba.com')) $('store').value='Eneba'; else if(lower.includes('aliexpress.')) $('store').value='AliExpress'; renderFormPreview(); detectMercadoLibreData(u).catch(console.warn); }
+    function detectStoreFromUrl(){ const input=$('url'); if(!input) return; const u=input.value.trim(); const lower=u.toLowerCase(); if(lower.includes('mercadolibre.com')||lower.includes('articulo.mercadolibre')) $('store').value='Mercado Libre'; else if(lower.includes('amazon.')) $('store').value='Amazon México'; else if(lower.includes('walmart.com')) $('store').value='Walmart'; else if(lower.includes('liverpool.com')) $('store').value='Liverpool'; else if(lower.includes('eneba.com')) $('store').value='Eneba'; else if(lower.includes('aliexpress.')) $('store').value='AliExpress'; else if(lower.includes('shein.')) $('store').value='SHEIN'; renderFormPreview(); detectMercadoLibreData(u).catch(console.warn); }
     function extractMlId(url){ const s=decodeURIComponent(String(url||'')); const wid=s.match(/[?&]wid=(MLM\d+)/i); if(wid) return wid[1].toUpperCase(); const item=s.match(/item_id[:=](MLM\d+)/i); if(item) return item[1].toUpperCase(); const direct=s.match(/(MLM-?\d{6,})/i); return direct?direct[1].replace('-','').toUpperCase():''; }
     async function detectMercadoLibreData(url){ const id=extractMlId(url); if(!id) return; const res=await fetch(`https://api.mercadolibre.com/items/${id}`); if(!res.ok) return; const data=await res.json(); if(!$('name').value.trim() && data.title) $('name').value=data.title; if(!Number($('currentPrice').value||0) && data.price) $('currentPrice').value=Math.round(Number(data.price)); const pic=data.secure_thumbnail||data.thumbnail||(Array.isArray(data.pictures)&&data.pictures[0]&&(data.pictures[0].secure_url||data.pictures[0].url)); if(pic && !$('imageUrl').value.trim()) $('imageUrl').value=pic; renderFormPreview(); }
 
@@ -867,7 +988,7 @@
         .sort((a,b)=>new Date(b.checkedAt||0)-new Date(a.checkedAt||0))[0]||null;
     }
     function isAutomaticStore(store){ const t=String(store||'').toLowerCase(); return t.includes('mercado')||t.includes('mercadolibre')||t.includes('eneba'); }
-    function isManualSafeStore(store){ const t=String(store||'').toLowerCase(); return t.includes('aliexpress')||t.includes('amazon')||t.includes('walmart')||t.includes('liverpool')||t.includes('otra'); }
+    function isManualSafeStore(store){ const t=String(store||'').toLowerCase(); return t.includes('aliexpress')||t.includes('shein')||t.includes('amazon')||t.includes('walmart')||t.includes('liverpool')||t.includes('otra'); }
     function priceStatusFromProduct(p){
       const latest=latestHistoryForProduct(p.id);
       const raw=latest?.raw||{};
@@ -1131,7 +1252,80 @@
     function quickList(g){activeList=g;go('products');}
     function filtered(){ const q=($('searchInput')?.value||'').trim().toLowerCase(); return products.filter(p=>(!activeList||p.dealList.startsWith(activeList)) && (!q||[p.name,p.store,p.dealList,p.category,p.notes].join(' ').toLowerCase().includes(q))); }
     function renderProducts(){ if(!$('productList'))return; renderListTabs(); const list=filtered(); $('productCount').textContent=`${list.length} de ${products.length}`; $('productList').innerHTML=list.map(p=>productRow(p,{actions:true})).join('')||`<div class="empty card"><b>No encontré productos</b>Agrega uno o cambia el filtro.</div>`; $('adminList').innerHTML=products.slice(0,8).map(p=>productRow(p,{actions:true})).join('')||`<div class="empty card"><b>Aún no hay productos</b>Agrega tu primer producto en segundos.</div>`; }
-    function renderAlerts(){ const active=products.filter(isOffer); $('alertCount').textContent=active.length+' activas'; $('activeAlerts').innerHTML=active.map(p=>productRow(p,{actions:true})).join('')||`<div class="empty card"><b>Sin alertas por ahora</b>Todo sigue vigilándose.</div>`; $('alertEvents').innerHTML=(alertEvents||[]).slice(0,6).map(e=>`<div class="status-row"><div class="status-ico">🔥</div><div><div class="status-title">${esc(e.title||e.product_name||'Oferta detectada')}</div><div class="status-meta">${esc(e.deal_list||e.raw?.dealList||'Lista general')} · ${new Date(e.created_at||Date.now()).toLocaleString('es-MX')}</div></div><div class="check">›</div></div>`).join('')||`<div class="empty"><b>Sin eventos recientes</b>Cuando el robot encuentre una oferta aparecerá aquí.</div>`; }
+    function notificationPermissionLabel(){
+      if(!('Notification' in window)) return 'NO';
+      if(Notification.permission==='granted') return 'ON';
+      if(Notification.permission==='denied') return 'OFF';
+      return 'Pedir';
+    }
+    function updateNotificationPermissionUI(){
+      const el=$('notificationPermission');
+      if(!el) return;
+      const label=notificationPermissionLabel();
+      el.textContent=label;
+      el.classList.toggle('notif-permission-ok',label==='ON');
+      el.classList.toggle('notif-permission-warn',label==='Pedir');
+    }
+    async function requestNotifications(){
+      if(!('Notification' in window)){
+        toast('Tu navegador no permite notificaciones locales.');
+        updateNotificationPermissionUI();
+        return;
+      }
+      const result=await Notification.requestPermission();
+      updateNotificationPermissionUI();
+      toast(result==='granted'?'Notificaciones activadas ✅':'Permiso de notificaciones no activado.');
+    }
+    function sendLocalNotification(title, body, url){
+      if(!('Notification' in window) || Notification.permission!=='granted') return false;
+      const n=new Notification(title,{body,icon:'icons/icon-192.png',badge:'icons/icon-192.png',tag:'dealwatch-offer'});
+      n.onclick=()=>{ window.focus(); if(url) window.open(url,'_blank'); };
+      return true;
+    }
+    function testNotification(){
+      if(!('Notification' in window)){
+        toast('Tu navegador no permite notificaciones locales.');
+        return;
+      }
+      if(Notification.permission!=='granted'){
+        requestNotifications().then(()=>{ if(Notification.permission==='granted') sendLocalNotification('DealWatch MX','Prueba lista: así se verá una alerta de oferta.'); });
+        return;
+      }
+      sendLocalNotification('DealWatch MX','Prueba lista: así se verá una alerta de oferta.');
+    }
+    function notifyActiveOffers(active){
+      if(!active?.length || !('Notification' in window) || Notification.permission!=='granted') return;
+      const key='dealwatch_notified_offers_v1';
+      let sent=[];
+      try{ sent=JSON.parse(localStorage.getItem(key)||'[]'); }catch{ sent=[]; }
+      const sentSet=new Set(sent);
+      const fresh=[];
+      active.slice(0,8).forEach(p=>{
+        const id=`${p.id}:${Number(p.currentPrice||0)}:${Number(p.targetPrice||0)}`;
+        if(sentSet.has(id)) return;
+        sendLocalNotification(`Oferta detectada: ${p.name}`, `${p.store||'Tienda'} · ${money(p.currentPrice)} objetivo ${money(p.targetPrice)}`, p.url);
+        sentSet.add(id);
+        fresh.push(id);
+      });
+      if(fresh.length) localStorage.setItem(key,JSON.stringify([...sentSet].slice(-80)));
+    }
+    function notificationEventCard(e){
+      const title=e.title||e.product_name||'Oferta detectada';
+      const list=e.deal_list||e.raw?.dealList||'Lista general';
+      const price=Number(e.current_price||e.raw?.currentPrice||0);
+      const target=Number(e.target_price||e.raw?.targetPrice||0);
+      const dt=new Date(e.created_at||Date.now()).toLocaleString('es-MX');
+      return `<article class="notification-card"><div class="notif-icon">${storeBadge(e.store||e.raw?.store||'')}🔥</div><div><div class="notif-title">${esc(title)}</div><div class="notif-meta">${esc(list)} · ${dt}</div><span class="notif-tag">precio vigilado</span></div><div class="notif-price">${price?money(price):'Oferta'}${target?`<br><small>Meta ${money(target)}</small>`:''}</div></article>`;
+    }
+    function renderAlerts(){
+      const active=products.filter(isOffer);
+      if($('alertCount')) $('alertCount').textContent=String(active.length);
+      if($('alertEventCount')) $('alertEventCount').textContent=String((alertEvents||[]).length);
+      updateNotificationPermissionUI();
+      $('activeAlerts').innerHTML=active.map(p=>productRow(p,{actions:true})).join('')||`<div class="empty card"><b>Sin alertas por ahora</b>Todo sigue vigilándose.</div>`;
+      $('alertEvents').innerHTML=(alertEvents||[]).slice(0,8).map(notificationEventCard).join('')||`<div class="empty card"><b>Sin eventos recientes</b>Cuando el robot encuentre una oferta aparecerá aquí.</div>`;
+      notifyActiveOffers(active);
+    }
     function renderCloud(){ const logged=!!currentUser; $('loginCard').classList.toggle('hide',logged); $('sessionCard').classList.toggle('hide',!logged); $('cloudStatusText').textContent=logged?'Sesión activa':'Sin sesión'; $('sessionEmail').textContent=logged?currentUser.email:'Sin sesión'; $('roleLabel').textContent=currentWorkspace?`${currentWorkspace.name} · ${currentRole}`:'sin equipo'; $('workspaceSelect').innerHTML=workspaces.map(w=>`<option value="${w.id}" ${currentWorkspace&&w.id===currentWorkspace.id?'selected':''}>${esc(w.name)}</option>`).join('')||`<option>Sin equipo</option>`; updateRealtimeStatus(realtimeState,false); }
     function clearFilters(){activeList='';$('searchInput').value='';renderProducts();}
     function toggleFormAlert(){formAlerts=!formAlerts;$('alertSwitch').classList.toggle('on',formAlerts);renderFormPreview();}
