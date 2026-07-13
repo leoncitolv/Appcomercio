@@ -1,4 +1,4 @@
-const CACHE_NAME = "dealwatch-mx-pwa-v27-ultra-neon";
+const CACHE_NAME = "dealwatch-mx-pwa-v29-ultra-compact-nav";
 
 self.addEventListener("install", event => {
   self.skipWaiting();
